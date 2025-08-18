@@ -9,6 +9,7 @@ export interface Newsletter {
   id: string;
   title: string;
   blocks: ContentBlock[];
+  lastUpdated: string;
 }
 
 export interface FlaggedIssue {

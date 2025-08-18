@@ -5,12 +5,17 @@ import { AppHeader } from './app-header';
 import { Editor } from './editor';
 import { IssuesSidebar } from './issues-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/lib/types';
-import { mockNewsletter, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
+import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
 import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
-export function AppLayout() {
+interface AppLayoutProps {
+  newsletterId: string;
+}
+
+export function AppLayout({ newsletterId }: AppLayoutProps) {
   const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('Draft');
   const [flaggedKeywords, setFlaggedKeywords] = useState<string[]>([]);
@@ -24,11 +29,14 @@ export function AppLayout() {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Simulate fetching data
-    setNewsletter(mockNewsletter);
-    setHistory([mockNewsletter.blocks]);
-    setHistoryIndex(0);
-  }, []);
+    // Simulate fetching data for a specific newsletter
+    const foundNewsletter = mockNewsletters.find(n => n.id === newsletterId);
+    if (foundNewsletter) {
+      setNewsletter(foundNewsletter);
+      setHistory([foundNewsletter.blocks]);
+      setHistoryIndex(0);
+    }
+  }, [newsletterId]);
   
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
@@ -113,8 +121,12 @@ export function AppLayout() {
 
   if (!newsletter) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p>Loading newsletter...</p>
+        <Link href="/">
+            <Button variant="outline">Back to Home</Button>
+        </Link>
       </div>
     );
   }

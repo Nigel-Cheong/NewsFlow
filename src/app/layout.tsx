@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'NewsGenius POC',
+  title: 'NewsGenius',
   description: 'AI-Powered Newsletter Creation Tool',
 };
 
