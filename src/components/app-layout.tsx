@@ -10,6 +10,7 @@ import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from './ui/button';
 
 interface AppLayoutProps {
   newsletterId: string;
