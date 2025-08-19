@@ -3,9 +3,9 @@
 /**
  * @fileOverview A simple chat flow that uses Gemini to respond to user prompts and edit newsletter content.
  *
- * - runChat - A function that takes a user's prompt and returns a response from Gemini.
- * - ChatInput - The input type for the runChat function.
- * - ChatOutput - The return type for the runChat function.
+ * - chatFlow - A function that takes a user's prompt and returns a response from Gemini.
+ * - ChatInput - The input type for the chatFlow function.
+ * - ChatOutput - The return type for the chatFlow function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -24,10 +24,6 @@ const ChatOutputSchema = z.object({
   blocks: z.array(ContentBlockSchema).describe('The updated content blocks of the newsletter.'),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
-
-export async function runChat(input: ChatInput): Promise<ChatOutput> {
-  return chatFlow(input);
-}
 
 const editorPrompt = ai.definePrompt({
     name: 'editorPrompt',
@@ -52,7 +48,7 @@ Your task is to understand the user's request and return the modified block stru
 });
 
 
-const chatFlow = ai.defineFlow(
+export const chatFlow = ai.defineFlow(
   {
     name: 'chatFlow',
     inputSchema: ChatInputSchema,
