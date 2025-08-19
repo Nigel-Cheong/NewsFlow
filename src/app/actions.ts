@@ -61,10 +61,37 @@ export async function runSuggestLayout(content: ContentBlock[]) {
 
 export async function runChat(input: ChatInput) {
     try {
-        const result = await chatFlow(input);
-        return result;
+        const {stream, response} = await chatFlow(input);
+        
+        const reader = stream.getReader();
+        const textDecoder = new TextDecoder();
+        
+        const readableStream = new ReadableStream({
+            async start(controller) {
+                while(true) {
+                    const { done, value } = await reader.read();
+                    if(done) {
+                        break;
+                    }
+                    controller.enqueue(textDecoder.decode(value));
+                }
+                controller.close();
+            }
+        });
+        
+        return new Response(readableStream, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8'
+            }
+        });
+
     } catch (error) {
         console.error('Error in chat:', error);
-        return { response: 'Sorry, I encountered an error.', blocks: input.blocks };
+        return new Response(JSON.stringify({ response: 'Sorry, I encountered an error.', blocks: input.blocks }), {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     }
 }

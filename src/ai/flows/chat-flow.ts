@@ -53,12 +53,24 @@ export const chatFlow = ai.defineFlow(
     name: 'chatFlow',
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
+    stream: true,
   },
   async (input) => {
-    const {output} = await editorPrompt(input);
-    if (!output) {
-      return { response: "Sorry, I couldn't process that request.", blocks: input.blocks };
+    const {stream, response} = editorPrompt.generateStream(input);
+
+    const result = {
+        stream: (async function* () {
+            for await (const chunk of stream) {
+                yield {
+                    response: chunk.output?.response || '',
+                }
+            }
+        })(),
+        response: (async () => {
+            const final = await response
+            return final.output || { response: "Sorry, I couldn't process that request.", blocks: input.blocks }
+        })()
     }
-    return output;
+    return result
   }
 );
