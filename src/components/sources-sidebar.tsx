@@ -74,12 +74,12 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col overflow-y-auto p-2 pt-0">
                           <Tabs defaultValue="add" className="w-full flex-1 flex flex-col">
-                            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
-                              <TabsTrigger value="add" className="sm:col-span-1"><List className="mr-1 h-4 w-4"/>Sources</TabsTrigger>
-                              <TabsTrigger value="file" className="sm:col-span-1"><Upload className="mr-1 h-4 w-4"/> File</TabsTrigger>
-                              <TabsTrigger value="link" className="sm:col-span-1"><Link className="mr-1 h-4 w-4"/> Link</TabsTrigger>
-                              <TabsTrigger value="text" className="sm:col-span-1"><FileText className="mr-1 h-4 w-4"/> Text</TabsTrigger>
-                              <TabsTrigger value="gdrive" className="sm:col-span-1"><Bot className="mr-1 h-4 w-4"/> Drive</TabsTrigger>
+                            <TabsList className="grid w-full grid-cols-3">
+                              <TabsTrigger value="add" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
+                              <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/> File</TabsTrigger>
+                              <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/> Link</TabsTrigger>
+                              <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/> Text</TabsTrigger>
+                              <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/> Drive</TabsTrigger>
                             </TabsList>
                             <TabsContent value="add" className="mt-4 flex-1">
                                 <ScrollArea className="h-full">
@@ -187,3 +187,5 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
     </aside>
   );
 }
+
+    
