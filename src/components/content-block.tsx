@@ -7,12 +7,13 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Label } from './ui/label';
+import { Separator } from './ui/separator';
 
 interface ContentBlockProps {
   block: ContentBlock;
@@ -49,6 +50,18 @@ export function ContentBlockView({
   const handleInputChange = (field: keyof ContentBlock, value: string) => {
     setEditState(prevState => ({...prevState, [field]: value}));
   }
+
+  const handleFileChange = (field: 'imageUrl' | 'videoUrl') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      handleInputChange(field, reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
 
   const highlightText = (text: string) => {
     if (!flaggedKeywords.length || !text) return text;
@@ -87,6 +100,15 @@ export function ContentBlockView({
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
                   <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
                 </div>
+                <div className='flex items-center gap-2'>
+                    <Separator className='flex-1'/>
+                    <span className='text-xs text-muted-foreground'>OR</span>
+                    <Separator className='flex-1'/>
+                </div>
+                <div>
+                    <Label htmlFor={`imageUpload-${block.id}`}>Upload Image</Label>
+                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} />
+                </div>
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Text</Label>
                   <Textarea id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-base min-h-[120px]" />
@@ -100,6 +122,15 @@ export function ContentBlockView({
                 <div>
                   <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
                   <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
+                </div>
+                <div className='flex items-center gap-2'>
+                    <Separator className='flex-1'/>
+                    <span className='text-xs text-muted-foreground'>OR</span>
+                    <Separator className='flex-1'/>
+                </div>
+                <div>
+                    <Label htmlFor={`videoUpload-${block.id}`}>Upload Video</Label>
+                    <Input id={`videoUpload-${block.id}`} type="file" accept="video/*" onChange={handleFileChange('videoUrl')} />
                 </div>
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Text</Label>
@@ -347,3 +378,4 @@ export function ContentBlockView({
     </Card>
   );
 }
+
