@@ -120,13 +120,6 @@ export function ContentBlockView({
 
   const renderContent = () => {
     if (isEditing) {
-       const titleEditField = (
-          <div className="mb-4">
-            <Label htmlFor={`block-title-${block.id}`}>Block Title (for internal reference)</Label>
-            <Input id={`block-title-${block.id}`} value={editState.title} onChange={(e) => handleInputChange('title', e.target.value)} />
-          </div>
-       );
-
       const commonEditFields = (
         <>
            <div className="flex justify-end gap-2 mt-4">
@@ -144,7 +137,6 @@ export function ContentBlockView({
         case 'header':
           return (
              <div className="flex flex-col gap-4">
-                {titleEditField}
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Title</Label>
                   <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
@@ -169,21 +161,9 @@ export function ContentBlockView({
                 {commonEditFields}
              </div>
           )
-        case 'section-title':
-          return (
-            <div className="flex flex-col gap-2">
-                {titleEditField}
-                <div>
-                    <Label htmlFor={`content-${block.id}`}>Section Title</Label>
-                    <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-2xl font-bold border-none shadow-none focus-visible:ring-0 p-0" />
-                </div>
-                {commonEditFields}
-            </div>
-          )
         case 'image-with-text':
           return (
              <div className="flex flex-col gap-4">
-                {titleEditField}
                 <div>
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
                   <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
@@ -207,7 +187,6 @@ export function ContentBlockView({
         case 'video-with-text':
           return (
              <div className="flex flex-col gap-4">
-                {titleEditField}
                 <div>
                   <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
                   <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
@@ -231,7 +210,6 @@ export function ContentBlockView({
         case 'link-with-text':
           return (
              <div className="flex flex-col gap-4">
-                {titleEditField}
                 <div>
                   <Label htmlFor={`linkUrl-${block.id}`}>Link URL</Label>
                   <Input id={`linkUrl-${block.id}`} value={editState.linkUrl} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
@@ -246,7 +224,6 @@ export function ContentBlockView({
         case 'event':
           return (
             <div className="flex flex-col gap-4">
-              {titleEditField}
               <div>
                 <Label htmlFor={`content-${block.id}`}>Event Title</Label>
                 <Input
@@ -285,7 +262,6 @@ export function ContentBlockView({
         case 'table':
           return (
             <div className="flex flex-col gap-4">
-                {titleEditField}
                 <div>
                     <Label htmlFor={`content-${block.id}`}>Table Title</Label>
                     <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
@@ -320,7 +296,6 @@ export function ContentBlockView({
         default:
            return (
             <div className="flex flex-col gap-2">
-              {titleEditField}
               <Textarea
                 value={editState.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
@@ -333,9 +308,6 @@ export function ContentBlockView({
     }
 
     const contentWithHighlights = highlightText(block.content);
-    
-    const Wrapper = block.type === 'section-title' ? 'div' : Card;
-    const isSectionTitle = block.type === 'section-title';
 
     const renderBlock = () => {
         switch (block.type) {
@@ -358,8 +330,6 @@ export function ContentBlockView({
                 </div>
             </div>
             )
-        case 'section-title':
-            return <h2 className="text-2xl font-bold text-foreground">{contentWithHighlights}</h2>;
         case 'video-with-text':
             return (
             <div>
@@ -502,7 +472,7 @@ export function ContentBlockView({
     };
     
     return (
-        <Wrapper className="relative group/block" style={isSectionTitle ? { background: 'none', border: 'none', boxShadow: 'none'} : {}}>
+        <Card className="relative group/block">
             <CardContent className="p-4">
                 {renderBlock()}
             </CardContent>
@@ -535,6 +505,6 @@ export function ContentBlockView({
                     {renderContent()}
                 </div>
             )}
-        </Wrapper>
+        </Card>
     );
 }
