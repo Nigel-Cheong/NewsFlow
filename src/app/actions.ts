@@ -1,10 +1,12 @@
+
 'use server';
 
 import { confidentialityCheck } from '@/ai/flows/confidentiality-check';
 import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import type { ContentBlock } from '@/lib/types';
-import { StreamingTextResponse, streamText } from 'genkit/next';
+import { ai } from '@/ai/genkit';
+import { geminiPro } from '@genkit-ai/googleai';
 
 export async function runConfidentialityCheck(
   content: ContentBlock[],
@@ -62,11 +64,23 @@ export async function runSuggestLayout(content: ContentBlock[]) {
 
 export async function runChat(prompt: string) {
   try {
-    const stream = await streamText({
+    const { stream } = ai.generateStream({
+      model: geminiPro,
       prompt: `You are a helpful assistant. The user's prompt is: ${prompt}`,
-      model: 'googleai/gemini-2.0-flash',
     });
-    return new StreamingTextResponse(stream);
+
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(chunk.text);
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(readableStream, {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
   } catch (error) {
     console.error('Error in chat:', error);
     return new Response('An error occurred.', { status: 500 });
