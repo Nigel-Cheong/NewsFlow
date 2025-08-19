@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppHeader } from './app-header';
 import { Editor } from './editor';
 import { SourcesSidebar } from './sources-sidebar';
+import { ChatSidebar } from './chat-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/lib/types';
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
 import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
@@ -12,6 +13,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface AppLayoutProps {
   newsletterId: string;
@@ -219,17 +225,28 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         isSuggestingLayout={isSuggestingLayout}
       />
       <div className="flex flex-1 overflow-hidden">
-        <SourcesSidebar
-            issues={flaggedIssues}
-            isConfidential={isConfidential}
-        />
-        <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
-          <Editor
-            blocks={newsletter.blocks}
-            setBlocks={(newBlocks) => updateBlocks(newBlocks)}
-            flaggedKeywords={flaggedKeywords}
-          />
-        </main>
+        <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize={20} minSize={15}>
+                <SourcesSidebar
+                    issues={flaggedIssues}
+                    isConfidential={isConfidential}
+                />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={55} minSize={30}>
+                <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out h-full">
+                  <Editor
+                    blocks={newsletter.blocks}
+                    setBlocks={(newBlocks) => updateBlocks(newBlocks)}
+                    flaggedKeywords={flaggedKeywords}
+                  />
+                </main>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+             <ResizablePanel defaultSize={25} minSize={15}>
+                <ChatSidebar />
+            </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );

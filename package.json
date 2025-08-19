@@ -54,7 +54,8 @@
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "marked": "^13.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -63,6 +64,7 @@
     "genkit-cli": "^1.14.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/marked": "^6.0.0"
   }
 }
