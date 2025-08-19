@@ -32,12 +32,19 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Simulate fetching data for a specific newsletter
-    const foundNewsletter = mockNewsletters.find(n => n.id === newsletterId);
-    if (foundNewsletter) {
-      setNewsletter(foundNewsletter);
-      // Initialize blocks with a default colspan of 1 if not present
-      const initialBlocks = foundNewsletter.blocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
+    // Load from localStorage first, then fallback to mock data
+    const savedNewsletterJSON = localStorage.getItem(newsletterId);
+    let initialNewsletter: Newsletter | undefined;
+
+    if (savedNewsletterJSON) {
+      initialNewsletter = JSON.parse(savedNewsletterJSON);
+    } else {
+      initialNewsletter = mockNewsletters.find(n => n.id === newsletterId);
+    }
+
+    if (initialNewsletter) {
+      setNewsletter(initialNewsletter);
+      const initialBlocks = initialNewsletter.blocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
       setHistory([initialBlocks]);
       setHistoryIndex(0);
     }
@@ -142,12 +149,37 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   }
 
   const handleSave = () => {
-    // Here you would typically send the newsletter data to your backend
-    console.log("Saving newsletter:", newsletter);
-    toast({
-        title: "Changes Saved!",
-        description: "Your newsletter has been successfully saved.",
-    });
+    if (!newsletter) {
+      toast({
+        title: "Save Failed",
+        description: "No newsletter data to save.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const updatedNewsletter = {
+        ...newsletter,
+        lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+      };
+      
+      localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
+      
+      setNewsletter(updatedNewsletter);
+
+      toast({
+          title: "Changes Saved!",
+          description: "Your newsletter has been successfully saved to your browser.",
+      });
+    } catch (error) {
+      console.error("Failed to save to localStorage:", error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save changes. Your browser might not support localStorage or it's full.",
+        variant: "destructive"
+      });
+    }
   }
 
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
