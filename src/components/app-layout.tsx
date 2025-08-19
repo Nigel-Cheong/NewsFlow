@@ -232,7 +232,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                     isConfidential={isConfidential}
                 />
             </ResizablePanel>
-            <ResizableHandle withHandle />
+            <ResizableHandle />
             <ResizablePanel defaultSize={55} minSize={30}>
                 <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out h-full">
                   <Editor
