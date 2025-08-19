@@ -54,6 +54,12 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
     };
 
     switch (type) {
+        case 'header':
+            newBlock.content = 'Newsletter Title';
+            newBlock.subtitle = 'A catchy subtitle for your newsletter';
+            newBlock.imageUrl = 'https://placehold.co/1200x400';
+            newBlock.colspan = 2;
+            break;
         case 'image-with-text':
             newBlock.imageUrl = 'https://placehold.co/600x400';
             break;
@@ -136,6 +142,9 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => handleAddBlock('header')}>
+              Header
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleAddBlock('text')}>
               Text
             </DropdownMenuItem>

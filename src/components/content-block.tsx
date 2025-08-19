@@ -134,6 +134,33 @@ export function ContentBlockView({
       );
       
       switch (block.type) {
+        case 'header':
+          return (
+             <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor={`title-${block.id}`}>Title</Label>
+                  <Input id={`title-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor={`subtitle-${block.id}`}>Subtitle</Label>
+                  <Input id={`subtitle-${block.id}`} value={editState.subtitle} onChange={(e) => handleInputChange('subtitle', e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
+                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
+                </div>
+                <div className='flex items-center gap-2'>
+                    <Separator className='flex-1'/>
+                    <span className='text-xs text-muted-foreground'>OR</span>
+                    <Separator className='flex-1'/>
+                </div>
+                <div>
+                    <Label htmlFor={`imageUpload-${block.id}`}>Upload Image</Label>
+                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} />
+                </div>
+                {commonEditFields}
+             </div>
+          )
         case 'image-with-text':
           return (
              <div className="flex flex-col gap-4">
@@ -283,6 +310,25 @@ export function ContentBlockView({
     const contentWithHighlights = highlightText(block.content);
 
     switch (block.type) {
+      case 'header':
+        return (
+          <div className="relative text-white">
+            {block.imageUrl && (
+              <Image
+                src={block.imageUrl}
+                alt="Header image"
+                width={1200}
+                height={400}
+                className="w-full h-auto max-h-96 object-cover rounded-md"
+                data-ai-hint="abstract background"
+              />
+            )}
+            <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
+              <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
+              {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
+            </div>
+          </div>
+        )
       case 'video-with-text':
         return (
            <div>

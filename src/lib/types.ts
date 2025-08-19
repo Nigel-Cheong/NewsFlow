@@ -11,8 +11,10 @@ export interface ContentBlock {
     | 'form'
     | 'announcement'
     | 'footer'
-    | 'link-with-text';
+    | 'link-with-text'
+    | 'header';
   content: string;
+  subtitle?: string;
   imageUrl?: string;
   videoUrl?: string;
   linkUrl?: string;
