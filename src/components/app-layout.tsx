@@ -177,10 +177,12 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <div className="flex">
-          <div className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-96' : 'w-0'}`}>
-            <IssuesSidebar issues={flaggedIssues} isConfidential={isConfidential} isOpen={isSidebarOpen}/>
-          </div>
+        <div className="flex shrink-0">
+            {isSidebarOpen && (
+                <div className="transition-all duration-300 ease-in-out w-96">
+                    <IssuesSidebar issues={flaggedIssues} isConfidential={isConfidential} isOpen={isSidebarOpen}/>
+                </div>
+            )}
           <Button
             variant="ghost"
             size="icon"

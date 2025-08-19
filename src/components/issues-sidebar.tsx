@@ -13,8 +13,8 @@ interface IssuesSidebarProps {
 
 export function IssuesSidebar({ issues, isConfidential, isOpen }: IssuesSidebarProps) {
   return (
-    <aside className="w-full md:w-96 shrink-0 border-l bg-card h-full">
-      <Card className="h-full rounded-none border-0 border-l overflow-hidden">
+    <aside className="w-full h-full border-l bg-card">
+      <Card className="h-full rounded-none border-0 overflow-y-auto">
         <div className={`transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
