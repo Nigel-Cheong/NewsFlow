@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,24 +6,30 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { FlaggedIssue } from '@/lib/types';
 import { AlertTriangle, Info } from 'lucide-react';
 
-interface IssuesSidebarProps {
+interface PromptingSidebarProps {
   issues: FlaggedIssue[];
   isConfidential: boolean;
-  isOpen: boolean;
 }
 
-export function IssuesSidebar({ issues, isConfidential, isOpen }: IssuesSidebarProps) {
+export function PromptingSidebar({ issues, isConfidential }: PromptingSidebarProps) {
   return (
-    <aside className="w-full h-full border-l bg-card">
+    <aside className="w-96 h-full border-l bg-card p-4">
       <Card className="h-full rounded-none border-0 overflow-y-auto">
-        <div className={`transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="text-destructive" />
-              Confidentiality Issues
+              Gemini Prompting
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>This is the prompting view</AlertTitle>
+                <AlertDescription>
+                    You can interact with Gemini here.
+                </AlertDescription>
+            </Alert>
+            
             {isConfidential && (
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
@@ -33,7 +40,7 @@ export function IssuesSidebar({ issues, isConfidential, isOpen }: IssuesSidebarP
               </Alert>
             )}
 
-            {issues.length > 0 ? (
+            {issues.length > 0 && (
               <div className="space-y-2">
                 {issues.map((issue, index) => (
                   <Alert key={index}>
@@ -45,17 +52,8 @@ export function IssuesSidebar({ issues, isConfidential, isOpen }: IssuesSidebarP
                   </Alert>
                 ))}
               </div>
-            ) : (
-               <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>No Issues Found</AlertTitle>
-                  <AlertDescription>
-                      The content has been scanned and no sensitive keywords were detected.
-                  </AlertDescription>
-               </Alert>
             )}
           </CardContent>
-        </div>
       </Card>
     </aside>
   );

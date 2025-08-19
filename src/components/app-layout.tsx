@@ -4,12 +4,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppHeader } from './app-header';
 import { Editor } from './editor';
-import { IssuesSidebar } from './issues-sidebar';
+import { PromptingSidebar } from './prompting-sidebar';
+import { SourcesSidebar } from './sources-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/lib/types';
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
 import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from './ui/button';
 
@@ -23,7 +24,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const [flaggedKeywords, setFlaggedKeywords] = useState<string[]>([]);
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSuggestingLayout, setIsSuggestingLayout] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   const [history, setHistory] = useState<ContentBlock[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -220,6 +220,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         isSuggestingLayout={isSuggestingLayout}
       />
       <div className="flex flex-1 overflow-hidden">
+        <SourcesSidebar />
         <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
           <Editor
             blocks={newsletter.blocks}
@@ -227,34 +228,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <div className="flex shrink-0">
-          {isSidebarOpen ? (
-            <div className="transition-all duration-300 ease-in-out w-96">
-              <IssuesSidebar
-                issues={flaggedIssues}
-                isConfidential={isConfidential}
-                isOpen={isSidebarOpen}
-              />
-            </div>
-          ) : null}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="h-10 w-10 shrink-0 self-start mt-2"
-            >
-              {isSidebarOpen ? <PanelRightClose /> : <PanelRightOpen />}
-              <span className="sr-only">Toggle Sidebar</span>
-            </Button>
-            {isConfidential && !isSidebarOpen && (
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
-              </span>
-            )}
-          </div>
-        </div>
+        <PromptingSidebar
+          issues={flaggedIssues}
+          isConfidential={isConfidential}
+        />
       </div>
     </div>
   );
