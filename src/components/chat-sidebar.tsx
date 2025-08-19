@@ -42,6 +42,10 @@ export function ChatSidebar() {
         body: JSON.stringify({ prompt: input }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       if (!response.body) {
         throw new Error('No response body');
       }
