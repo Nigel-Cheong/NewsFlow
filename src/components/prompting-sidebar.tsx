@@ -7,11 +7,9 @@ import type { FlaggedIssue } from '@/lib/types';
 import { AlertTriangle, Info } from 'lucide-react';
 
 interface PromptingSidebarProps {
-  issues: FlaggedIssue[];
-  isConfidential: boolean;
 }
 
-export function PromptingSidebar({ issues, isConfidential }: PromptingSidebarProps) {
+export function PromptingSidebar({}: PromptingSidebarProps) {
   return (
     <aside className="w-96 h-full border-l bg-card p-4">
       <Card className="h-full rounded-none border-0 overflow-y-auto">
@@ -29,30 +27,6 @@ export function PromptingSidebar({ issues, isConfidential }: PromptingSidebarPro
                     You can interact with Gemini here.
                 </AlertDescription>
             </Alert>
-            
-            {isConfidential && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Confidential Content Detected!</AlertTitle>
-                <AlertDescription>
-                  This document contains sensitive information. Please review the flagged issues.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {issues.length > 0 && (
-              <div className="space-y-2">
-                {issues.map((issue, index) => (
-                  <Alert key={index}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
-                    <AlertDescription>
-                      Found in block {issue.blockId.split('-')[1]}.
-                    </AlertDescription>
-                  </Alert>
-                ))}
-              </div>
-            )}
           </CardContent>
       </Card>
     </aside>

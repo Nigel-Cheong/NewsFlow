@@ -220,7 +220,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         isSuggestingLayout={isSuggestingLayout}
       />
       <div className="flex flex-1 overflow-hidden">
-        <SourcesSidebar />
+        <SourcesSidebar
+            issues={flaggedIssues}
+            isConfidential={isConfidential}
+        />
         <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
           <Editor
             blocks={newsletter.blocks}
@@ -228,10 +231,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <PromptingSidebar
-          issues={flaggedIssues}
-          isConfidential={isConfidential}
-        />
+        <PromptingSidebar />
       </div>
     </div>
   );
