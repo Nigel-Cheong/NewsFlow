@@ -7,7 +7,7 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
@@ -47,7 +47,7 @@ export function ContentBlockView({
     setIsEditing(false);
   };
   
-  const handleInputChange = (field: keyof ContentBlock, value: string) => {
+  const handleInputChange = (field: keyof ContentBlock, value: any) => {
     setEditState(prevState => ({...prevState, [field]: value}));
   }
 
@@ -61,6 +61,42 @@ export function ContentBlockView({
     };
     reader.readAsDataURL(file);
   };
+
+  const handleTableChange = (rowIndex: number, colIndex: number, value: string) => {
+    const newTableData = [...(editState.tableData || [])];
+    newTableData[rowIndex][colIndex] = value;
+    handleInputChange('tableData', newTableData);
+  }
+
+  const handleAddRow = () => {
+    const newTableData = [...(editState.tableData || [])];
+    const numCols = newTableData[0]?.length || 1;
+    newTableData.push(Array(numCols).fill(''));
+    handleInputChange('tableData', newTableData);
+  }
+
+  const handleRemoveRow = () => {
+    const newTableData = [...(editState.tableData || [])];
+    if (newTableData.length > 1) {
+      newTableData.pop();
+      handleInputChange('tableData', newTableData);
+    }
+  }
+
+  const handleAddCol = () => {
+    const newTableData = (editState.tableData || []).map(row => [...row, '']);
+    handleInputChange('tableData', newTableData);
+  }
+
+  const handleRemoveCol = () => {
+    if ((editState.tableData?.[0]?.length ?? 0) <= 1) return;
+    const newTableData = (editState.tableData || []).map(row => {
+      const newRow = [...row];
+      newRow.pop();
+      return newRow;
+    });
+    handleInputChange('tableData', newTableData);
+  }
 
 
   const highlightText = (text: string) => {
@@ -192,6 +228,34 @@ export function ContentBlockView({
             </div>
           )
         case 'table':
+          return (
+            <div className="flex flex-col gap-4">
+                <div>
+                    <Label htmlFor={`title-${block.id}`}>Table Title</Label>
+                    <Input id={`title-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
+                </div>
+                <Table>
+                    <TableBody>
+                        {editState.tableData?.map((row, rowIndex) => (
+                            <TableRow key={rowIndex}>
+                                {row.map((cell, colIndex) => (
+                                    <TableCell key={colIndex}>
+                                        <Input value={cell} onChange={(e) => handleTableChange(rowIndex, colIndex, e.target.value)} />
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleAddRow}><PlusCircle /> Add Row</Button>
+                    <Button variant="outline" size="sm" onClick={handleRemoveRow} disabled={(editState.tableData?.length ?? 0) <= 1}><MinusCircle /> Remove Row</Button>
+                    <Button variant="outline" size="sm" onClick={handleAddCol}><PlusCircle /> Add Column</Button>
+                    <Button variant="outline" size="sm" onClick={handleRemoveCol} disabled={(editState.tableData?.[0]?.length ?? 0) <= 1}><MinusCircle /> Remove Column</Button>
+                </div>
+                {commonEditFields}
+            </div>
+          )
         case 'carousel':
         case 'footer':
         case 'text':
@@ -257,25 +321,26 @@ export function ContentBlockView({
           <div>
              <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Header 1</TableHead>
-                  <TableHead>Header 2</TableHead>
-                  <TableHead>Header 3</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Row 1, Cell 1</TableCell>
-                  <TableCell>Row 1, Cell 2</TableCell>
-                  <TableCell>Row 1, Cell 3</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>Row 2, Cell 1</TableCell>
-                  <TableCell>Row 2, Cell 2</TableCell>
-                  <TableCell>Row 2, Cell 3</TableCell>
-                </TableRow>
-              </TableBody>
+              {block.tableData && block.tableData.length > 0 && (
+                <>
+                  <TableHeader>
+                    <TableRow>
+                      {block.tableData[0].map((header, index) => (
+                        <TableHead key={index}>{header}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {block.tableData.slice(1).map((row, rowIndex) => (
+                      <TableRow key={rowIndex}>
+                        {row.map((cell, cellIndex) => (
+                          <TableCell key={cellIndex}>{cell}</TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </>
+              )}
             </Table>
           </div>
         );
@@ -378,4 +443,3 @@ export function ContentBlockView({
     </Card>
   );
 }
-

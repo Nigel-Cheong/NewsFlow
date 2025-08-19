@@ -21,6 +21,8 @@ export interface ContentBlock {
   eventDate?: string;
   eventTime?: string;
   eventLocation?: string;
+  // Table-specific properties
+  tableData?: string[][];
 }
 
 export interface Newsletter {
