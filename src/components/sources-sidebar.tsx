@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookText, AlertTriangle, GripVertical, Upload, Link, FileText, Bot, List } from 'lucide-react';
+import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List } from 'lucide-react';
 import type { FlaggedIssue } from '@/lib/types';
 import {
   ResizableHandle,
@@ -74,12 +74,12 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col overflow-y-auto p-2 pt-0">
                           <Tabs defaultValue="add" className="w-full flex-1 flex flex-col">
-                            <TabsList className="grid w-full grid-cols-3">
+                            <TabsList className="grid grid-flow-row grid-cols-3">
                               <TabsTrigger value="add" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
-                              <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/> File</TabsTrigger>
-                              <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/> Link</TabsTrigger>
-                              <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/> Text</TabsTrigger>
-                              <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/> Drive</TabsTrigger>
+                              <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
+                              <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
+                              <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
+                              <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
                             <TabsContent value="add" className="mt-4 flex-1">
                                 <ScrollArea className="h-full">
@@ -187,5 +187,3 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
     </aside>
   );
 }
-
-    
