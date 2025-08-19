@@ -1,8 +1,7 @@
-
 import { runChat } from '@/app/actions';
 import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
-    const { prompt, blocks } = await req.json();
-    return await runChat({ prompt, blocks});
+    const { prompt } = await req.json();
+    return await runChat({ prompt });
 };

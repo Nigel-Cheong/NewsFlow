@@ -87,7 +87,7 @@ export async function runChat(input: ChatInput) {
 
     } catch (error) {
         console.error('Error in chat:', error);
-        return new Response(JSON.stringify({ response: 'Sorry, I encountered an error.', blocks: input.blocks }), {
+        return new Response(JSON.stringify({ response: 'Sorry, I encountered an error.' }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json'

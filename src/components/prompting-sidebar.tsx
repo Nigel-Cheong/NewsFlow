@@ -49,7 +49,10 @@ export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarPro
     try {
       const response = await fetch('/api/chat', {
           method: 'POST',
-          body: JSON.stringify({ prompt: input, blocks })
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prompt: input })
       });
       
       if (!response.body) {
@@ -59,7 +62,6 @@ export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarPro
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let streamedText = '';
-      let finalBlocks : ContentBlock[] | undefined = undefined;
 
       while(true) {
           const { done, value } = await reader.read();
@@ -67,39 +69,21 @@ export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarPro
 
           const chunk = decoder.decode(value, { stream: true });
           try {
-              const jsonChunk: { response?: string, blocks?: ContentBlock[] } = JSON.parse(chunk);
+              // Non-streaming JSON response comes back as a single chunk
+              const jsonChunk: ChatOutput = JSON.parse(chunk);
               if (jsonChunk.response) {
                 streamedText += jsonChunk.response;
-                setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1].text = streamedText;
-                    return newMessages;
-                });
-              }
-               if(jsonChunk.blocks){
-                 finalBlocks = jsonChunk.blocks;
               }
           } catch (e) {
-             //The final chunk from the stream is the full ChatOutput object.
-              try {
-                const finalOutput : ChatOutput = JSON.parse(chunk)
-                finalBlocks = finalOutput.blocks;
-                streamedText = finalOutput.response;
-                 setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1].text = streamedText;
-                    return newMessages;
-                });
-              } catch (e) {
-                console.error("Could not parse final JSON chunk", chunk);
-              }
+             // Streaming response comes here
+             streamedText += chunk;
           }
+          setMessages(prev => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1].text = streamedText;
+              return newMessages;
+          });
       }
-      
-      if (finalBlocks) {
-          onBlocksUpdate(finalBlocks);
-      }
-
     } catch (error) {
       const errorMessage: Message = { role: 'model', text: 'Sorry, something went wrong.' };
       setMessages(prev => {
@@ -112,12 +96,6 @@ export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarPro
       setIsLoading(false);
     }
   };
-  
-  // Need to add an API route handler for this.
-  const tempRunChatAsApi = async (input: {prompt: string, blocks: ContentBlock[]}) => {
-      const response = await runChat(input);
-      return response;
-  }
 
   return (
     <aside className="w-96 h-full border-l bg-card p-4">
@@ -158,7 +136,7 @@ export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarPro
           </ScrollArea>
           <div className="relative">
             <Textarea
-              placeholder="Ask Gemini to edit the newsletter..."
+              placeholder="Ask Gemini anything..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
