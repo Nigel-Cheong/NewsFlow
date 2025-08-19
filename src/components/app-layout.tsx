@@ -49,7 +49,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
 
     if (initialNewsletter) {
       setNewsletter(initialNewsletter);
-      const initialBlocks = initialNewsletter.blocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
+      const initialBlocks = initialNewsletter.blocks.map(b => ({ ...b, colspan: b.colspan || 1, title: b.title || 'Untitled Block' }));
       setHistory([initialBlocks]);
       setHistoryIndex(0);
     }
@@ -58,14 +58,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
     
-    // Ensure all blocks have a colspan
-    const blocksWithColspan = newBlocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
+    // Ensure all blocks have a colspan and title
+    const blocksWithDefaults = newBlocks.map(b => ({ ...b, colspan: b.colspan || 1, title: b.title || 'Untitled Block' }));
     
-    setNewsletter({ ...newsletter, blocks: blocksWithColspan });
+    setNewsletter({ ...newsletter, blocks: blocksWithDefaults });
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push(blocksWithColspan);
+      newHistory.push(blocksWithDefaults);
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
     }
@@ -75,7 +75,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      // The history already contains blocks with colspans
+      // The history already contains blocks with defaults
       setNewsletter(prev => prev ? { ...prev, blocks: history[newIndex] } : null);
     }
   };
@@ -84,7 +84,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-       // The history already contains blocks with colspans
+       // The history already contains blocks with defaults
       setNewsletter(prev => prev ? { ...prev, blocks: history[newIndex] } : null);
     }
   };
@@ -120,6 +120,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         const newBlocks = result.layout.map((block, index) => ({
           ...block,
           id: `block-${Date.now()}-${index}`,
+          title: block.title || 'Untitled Block',
         }));
         updateBlocks(newBlocks);
         toast({
@@ -190,7 +191,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
     flaggedKeywords
       .filter(kw => new RegExp(`\\b${kw}\\b`, 'i').test(block.content))
-      .map(kw => ({ keyword: kw, blockId: block.id }))
+      .map(kw => ({ keyword: kw, blockId: block.id, blockTitle: block.title }))
   )
   .filter((issue, index, self) => 
     index === self.findIndex(t => (

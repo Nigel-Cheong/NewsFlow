@@ -1,3 +1,4 @@
+
 import type { Newsletter } from './types';
 
 export const mockNewsletters: Newsletter[] = [
@@ -8,12 +9,14 @@ export const mockNewsletters: Newsletter[] = [
     blocks: [
       {
         id: 'block-1-1',
+        title: 'Introduction',
         type: 'text',
         content:
           "Welcome to the Q3 company update. This quarter has been pivotal for our growth. We've onboarded new talent and expanded our market reach significantly. The Project Alpha is proceeding on schedule, and we expect a beta launch next month.",
       },
       {
         id: 'block-1-2',
+        title: 'Team Offsite',
         type: 'image-with-text',
         content:
           "Our team came together for a successful offsite event. The event was focused on brainstorming for our next big project, codenamed 'Project Phoenix'. It's still confidential, so please don't share details externally.",
@@ -21,6 +24,7 @@ export const mockNewsletters: Newsletter[] = [
       },
       {
         id: 'block-1-3',
+        title: 'Q3 Key Takeaways',
         type: 'text',
         content:
           "Key takeaways from Q3:\n- Successful launch of our new feature.\n- Exceeded our sales target by 15%.\n- Key financial data shows strong performance, but this is proprietary information.",
@@ -34,6 +38,7 @@ export const mockNewsletters: Newsletter[] = [
     blocks: [
         {
             id: 'block-2-1',
+            title: 'Launch Announcement',
             type: 'text',
             content: "We are thrilled to announce the launch of our new product, 'InnovateX'. This product will revolutionize the market with its cutting-edge features and user-friendly design."
         }
@@ -46,6 +51,7 @@ export const mockNewsletters: Newsletter[] = [
     blocks: [
         {
             id: 'block-3-1',
+            title: 'Engineering Progress',
             type: 'text',
             content: "This month's engineering report highlights our progress on the core platform. We've closed over 50 tickets and improved performance by 10%."
         }

@@ -120,6 +120,13 @@ export function ContentBlockView({
 
   const renderContent = () => {
     if (isEditing) {
+       const titleEditField = (
+          <div className="mb-4">
+            <Label htmlFor={`block-title-${block.id}`}>Block Title (for internal reference)</Label>
+            <Input id={`block-title-${block.id}`} value={editState.title} onChange={(e) => handleInputChange('title', e.target.value)} />
+          </div>
+       );
+
       const commonEditFields = (
         <>
            <div className="flex justify-end gap-2 mt-4">
@@ -137,9 +144,10 @@ export function ContentBlockView({
         case 'header':
           return (
              <div className="flex flex-col gap-4">
+                {titleEditField}
                 <div>
-                  <Label htmlFor={`title-${block.id}`}>Title</Label>
-                  <Input id={`title-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
+                  <Label htmlFor={`content-${block.id}`}>Title</Label>
+                  <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor={`subtitle-${block.id}`}>Subtitle</Label>
@@ -161,9 +169,21 @@ export function ContentBlockView({
                 {commonEditFields}
              </div>
           )
+        case 'section-title':
+          return (
+            <div className="flex flex-col gap-2">
+                {titleEditField}
+                <div>
+                    <Label htmlFor={`content-${block.id}`}>Section Title</Label>
+                    <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-2xl font-bold border-none shadow-none focus-visible:ring-0 p-0" />
+                </div>
+                {commonEditFields}
+            </div>
+          )
         case 'image-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {titleEditField}
                 <div>
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
                   <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
@@ -187,6 +207,7 @@ export function ContentBlockView({
         case 'video-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {titleEditField}
                 <div>
                   <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
                   <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
@@ -210,6 +231,7 @@ export function ContentBlockView({
         case 'link-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {titleEditField}
                 <div>
                   <Label htmlFor={`linkUrl-${block.id}`}>Link URL</Label>
                   <Input id={`linkUrl-${block.id}`} value={editState.linkUrl} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
@@ -224,10 +246,11 @@ export function ContentBlockView({
         case 'event':
           return (
             <div className="flex flex-col gap-4">
+              {titleEditField}
               <div>
-                <Label htmlFor={`title-${block.id}`}>Event Title</Label>
+                <Label htmlFor={`content-${block.id}`}>Event Title</Label>
                 <Input
-                  id={`title-${block.id}`}
+                  id={`content-${block.id}`}
                   value={editState.content}
                   onChange={(e) => handleInputChange('content', e.target.value)}
                 />
@@ -262,9 +285,10 @@ export function ContentBlockView({
         case 'table':
           return (
             <div className="flex flex-col gap-4">
+                {titleEditField}
                 <div>
-                    <Label htmlFor={`title-${block.id}`}>Table Title</Label>
-                    <Input id={`title-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
+                    <Label htmlFor={`content-${block.id}`}>Table Title</Label>
+                    <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
                 </div>
                 <div className="overflow-x-auto">
                   <Table>
@@ -296,6 +320,7 @@ export function ContentBlockView({
         default:
            return (
             <div className="flex flex-col gap-2">
+              {titleEditField}
               <Textarea
                 value={editState.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
@@ -308,197 +333,208 @@ export function ContentBlockView({
     }
 
     const contentWithHighlights = highlightText(block.content);
+    
+    const Wrapper = block.type === 'section-title' ? 'div' : Card;
+    const isSectionTitle = block.type === 'section-title';
 
-    switch (block.type) {
-      case 'header':
-        return (
-          <div className="relative text-white">
-            {block.imageUrl && (
-              <Image
-                src={block.imageUrl}
-                alt="Header image"
-                width={1200}
-                height={400}
-                className="w-full h-auto max-h-96 object-cover rounded-md"
-                data-ai-hint="abstract background"
-              />
-            )}
-            <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
-              <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
-              {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
-            </div>
-          </div>
-        )
-      case 'video-with-text':
-        return (
-           <div>
-            {block.videoUrl && (
-              <video
-                src={block.videoUrl}
-                controls
-                className="rounded-md w-full aspect-video"
-              />
-            )}
-            <p className="text-muted-foreground text-sm mt-2">{contentWithHighlights}</p>
-          </div>
-        );
-      case 'image-with-text':
-        return (
-          <div className="flex gap-4 items-start">
-            {block.imageUrl && (
-              <div className="w-1/3 shrink-0">
+    const renderBlock = () => {
+        switch (block.type) {
+        case 'header':
+            return (
+            <div className="relative text-white">
+                {block.imageUrl && (
                 <Image
-                  src={block.imageUrl}
-                  alt="Newsletter image"
-                  width={200}
-                  height={133}
-                  className="rounded-md object-cover aspect-[3/2]"
-                  data-ai-hint="teamwork collaboration"
+                    src={block.imageUrl}
+                    alt="Header image"
+                    width={1200}
+                    height={400}
+                    className="w-full h-auto max-h-96 object-cover rounded-md"
+                    data-ai-hint="abstract background"
                 />
-              </div>
-            )}
-            <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
-          </div>
-        );
-      case 'link-with-text':
-        return (
-          <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
-            <Link className="h-4 w-4" />
-            <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
-          </a>
-        );
-      case 'spacer':
-        return <div className="h-16 w-full" />;
-      case 'table':
-        return (
-          <div>
-             <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
-             <div className="overflow-x-auto">
-                <Table>
-                {block.tableData && block.tableData.length > 0 && (
-                  <>
-                    <TableHeader>
-                      <TableRow>
-                        {block.tableData[0].map((header, index) => (
-                          <TableHead key={index}>{header}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {block.tableData.slice(1).map((row, rowIndex) => (
-                        <TableRow key={rowIndex}>
-                          {row.map((cell, cellIndex) => (
-                            <TableCell key={cellIndex}>{cell}</TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </>
                 )}
-              </Table>
-             </div>
-          </div>
-        );
-      case 'carousel':
-        return (
-          <Carousel className="w-full">
-            <CarouselContent>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <CarouselItem key={index}>
-                  <Card>
-                    <CardContent className="flex aspect-video items-center justify-center p-6 relative">
-                       <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        )
-      case 'event':
-        return (
-          <Card className="bg-muted/30">
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{block.eventDate || 'Date not set'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>{block.eventTime || 'Time not set'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{block.eventLocation || 'Location not set'}</span>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      case 'form':
-        return (
-          <div className="space-y-4">
-             <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-             <div className="flex flex-col gap-2">
-                <Input placeholder="Enter your name" />
-                <Input type="email" placeholder="Enter your email" />
-                <Button>Submit</Button>
-             </div>
-          </div>
-        )
-      case 'announcement':
-        return (
-            <Alert>
-              <AlertTitle className="font-bold">Announcement!</AlertTitle>
-              <AlertDescription>
-                {contentWithHighlights}
-              </AlertDescription>
-            </Alert>
-        )
-      case 'footer':
-         return (
-            <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
-              <p>{contentWithHighlights}</p>
-              <p>© 2023 Newsflow. All rights reserved.</p>
+                <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
+                <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
+                {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
+                </div>
             </div>
-         )
-      case 'text':
-      default:
-        return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
-    }
-  };
-
-  return (
-    <Card className="relative group/block">
-      <CardContent className="p-4">
-        {renderContent()}
-      </CardContent>
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
-          {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
-          <span className="sr-only">Toggle Width</span>
-        </Button>
-        {!isEditing && !['spacer'].includes(block.type) && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4" />
-                <span className="sr-only">Edit</span>
-            </Button>
-        )}
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'up')} disabled={isFirst}>
-          <ArrowUp className="h-4 w-4" />
-          <span className="sr-only">Move Up</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'down')} disabled={isLast}>
-          <ArrowDown className="h-4 w-4" />
-          <span className="sr-only">Move Down</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(block.id)}>
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
-        </Button>
-      </div>
-    </Card>
-  );
+            )
+        case 'section-title':
+            return <h2 className="text-2xl font-bold text-foreground">{contentWithHighlights}</h2>;
+        case 'video-with-text':
+            return (
+            <div>
+                {block.videoUrl && (
+                <video
+                    src={block.videoUrl}
+                    controls
+                    className="rounded-md w-full aspect-video"
+                />
+                )}
+                <p className="text-muted-foreground text-sm mt-2">{contentWithHighlights}</p>
+            </div>
+            );
+        case 'image-with-text':
+            return (
+            <div className="flex gap-4 items-start">
+                {block.imageUrl && (
+                <div className="w-1/3 shrink-0">
+                    <Image
+                    src={block.imageUrl}
+                    alt="Newsletter image"
+                    width={200}
+                    height={133}
+                    className="rounded-md object-cover aspect-[3/2]"
+                    data-ai-hint="teamwork collaboration"
+                    />
+                </div>
+                )}
+                <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
+            </div>
+            );
+        case 'link-with-text':
+            return (
+            <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                <Link className="h-4 w-4" />
+                <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
+            </a>
+            );
+        case 'spacer':
+            return <div className="h-16 w-full" />;
+        case 'table':
+            return (
+            <div>
+                <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
+                <div className="overflow-x-auto">
+                    <Table>
+                    {block.tableData && block.tableData.length > 0 && (
+                    <>
+                        <TableHeader>
+                        <TableRow>
+                            {block.tableData[0].map((header, index) => (
+                            <TableHead key={index}>{header}</TableHead>
+                            ))}
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {block.tableData.slice(1).map((row, rowIndex) => (
+                            <TableRow key={rowIndex}>
+                            {row.map((cell, cellIndex) => (
+                                <TableCell key={cellIndex}>{cell}</TableCell>
+                            ))}
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </>
+                    )}
+                </Table>
+                </div>
+            </div>
+            );
+        case 'carousel':
+            return (
+            <Carousel className="w-full">
+                <CarouselContent>
+                {Array.from({ length: 3 }).map((_, index) => (
+                    <CarouselItem key={index}>
+                    <Card>
+                        <CardContent className="flex aspect-video items-center justify-center p-6 relative">
+                        <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
+                        </CardContent>
+                    </Card>
+                    </CarouselItem>
+                ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+            )
+        case 'event':
+            return (
+            <Card className="bg-muted/30">
+                <CardContent className="p-4 space-y-2">
+                <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{block.eventDate || 'Date not set'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{block.eventTime || 'Time not set'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{block.eventLocation || 'Location not set'}</span>
+                </div>
+                </CardContent>
+            </Card>
+            );
+        case 'form':
+            return (
+            <div className="space-y-4">
+                <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+                <div className="flex flex-col gap-2">
+                    <Input placeholder="Enter your name" />
+                    <Input type="email" placeholder="Enter your email" />
+                    <Button>Submit</Button>
+                </div>
+            </div>
+            )
+        case 'announcement':
+            return (
+                <Alert>
+                <AlertTitle className="font-bold">Announcement!</AlertTitle>
+                <AlertDescription>
+                    {contentWithHighlights}
+                </AlertDescription>
+                </Alert>
+            )
+        case 'footer':
+            return (
+                <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
+                <p>{contentWithHighlights}</p>
+                <p>© 2023 Newsflow. All rights reserved.</p>
+                </div>
+            )
+        case 'text':
+        default:
+            return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
+        }
+    };
+    
+    return (
+        <Wrapper className="relative group/block" style={isSectionTitle ? { background: 'none', border: 'none', boxShadow: 'none'} : {}}>
+            <CardContent className="p-4">
+                {renderBlock()}
+            </CardContent>
+             <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
+                {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
+                <span className="sr-only">Toggle Width</span>
+                </Button>
+                {!isEditing && !['spacer'].includes(block.type) && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
+                        <Edit className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                    </Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'up')} disabled={isFirst}>
+                <ArrowUp className="h-4 w-4" />
+                <span className="sr-only">Move Up</span>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'down')} disabled={isLast}>
+                <ArrowDown className="h-4 w-4" />
+                <span className="sr-only">Move Down</span>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(block.id)}>
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+                </Button>
+            </div>
+             {isEditing && (
+                <div className='p-4 pt-0'>
+                    {renderContent()}
+                </div>
+            )}
+        </Wrapper>
+    );
 }

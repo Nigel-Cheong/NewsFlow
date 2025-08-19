@@ -74,7 +74,7 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col overflow-y-auto p-2 pt-0">
                           <Tabs defaultValue="add" className="w-full flex-1 flex flex-col">
-                            <TabsList className="grid grid-flow-row grid-cols-3">
+                            <TabsList className="grid grid-flow-row grid-cols-3 sm:grid-cols-5">
                               <TabsTrigger value="add" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
                               <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
                               <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
@@ -163,6 +163,9 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                                       <Alert key={index}>
                                           <AlertTriangle className="h-4 w-4" />
                                           <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
+                                          <AlertDescription>
+                                            Found in block: "{issue.blockTitle}"
+                                          </AlertDescription>
                                       </Alert>
                                       ))}
                                   </div>

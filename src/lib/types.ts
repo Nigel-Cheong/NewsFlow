@@ -1,7 +1,9 @@
+
 import { z } from 'zod';
 
 export const ContentBlockSchema = z.object({
   id: z.string(),
+  title: z.string(),
   type: z.enum([
     'text',
     'image-with-text',
@@ -14,7 +16,8 @@ export const ContentBlockSchema = z.object({
     'announcement',
     'footer',
     'link-with-text',
-    'header'
+    'header',
+    'section-title'
   ]),
   content: z.string(),
   subtitle: z.string().optional(),
@@ -41,6 +44,7 @@ export interface Newsletter {
 export interface FlaggedIssue {
   keyword: string;
   blockId: string;
+  blockTitle: string;
 }
 
 export type ApprovalStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
