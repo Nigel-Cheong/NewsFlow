@@ -16,6 +16,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import { ScrollArea } from './ui/scroll-area';
 
 interface SourcesSidebarProps {
   issues: FlaggedIssue[];
@@ -48,18 +49,18 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
   }
 
   return (
-    <aside className="w-96 h-full border-r p-0">
+    <aside className="h-full border-r">
         <ResizablePanelGroup direction="vertical" className="h-full">
             <ResizablePanel defaultSize={50} minSize={25}>
-                <div className="flex h-full items-start justify-center p-4">
-                     <Card className="w-full h-full rounded-none border-0 overflow-y-auto">
+                <div className="flex flex-col h-full p-4">
+                     <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
                         <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BookText />
                             Sources
                         </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="flex-1 overflow-y-auto">
                           <Tabs defaultValue="file" className="w-full">
                             <TabsList className="grid w-full grid-cols-4">
                               <TabsTrigger value="file"><Upload className="mr-1 h-4 w-4"/> File</TabsTrigger>
@@ -104,15 +105,15 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={50} minSize={25}>
-                 <div className="flex h-full items-start justify-center p-4">
-                     <Card className="w-full h-full rounded-none border-0 overflow-y-auto">
+                 <div className="flex flex-col h-full p-4">
+                     <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
                         <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <AlertTriangle className="text-destructive" />
                             Issues
                         </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="flex-1 space-y-4 overflow-y-auto">
                         {isConfidential && (
                             <Alert variant="destructive">
                                 <AlertTriangle className="h-4 w-4" />
