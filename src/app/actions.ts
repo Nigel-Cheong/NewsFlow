@@ -6,7 +6,7 @@ import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import type { ContentBlock } from '@/lib/types';
 import { ai } from '@/ai/genkit';
-import { geminiPro } from '@genkit-ai/googleai';
+import { googleAI } from '@genkit-ai/googleai';
 
 export async function runConfidentialityCheck(
   content: ContentBlock[],
@@ -64,8 +64,8 @@ export async function runSuggestLayout(content: ContentBlock[]) {
 
 export async function runChat(prompt: string) {
   try {
-    const { stream } = ai.generateStream({
-      model: geminiPro,
+    const { stream } = await ai.generateStream({
+      model: 'gemini-pro',
       prompt: `You are a helpful assistant. The user's prompt is: ${prompt}`,
     });
 
