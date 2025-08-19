@@ -35,7 +35,9 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     const foundNewsletter = mockNewsletters.find(n => n.id === newsletterId);
     if (foundNewsletter) {
       setNewsletter(foundNewsletter);
-      setHistory([foundNewsletter.blocks]);
+      // Initialize blocks with a default colspan of 1 if not present
+      const initialBlocks = foundNewsletter.blocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
+      setHistory([initialBlocks]);
       setHistoryIndex(0);
     }
   }, [newsletterId]);
@@ -43,11 +45,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
     
-    setNewsletter({ ...newsletter, blocks: newBlocks });
+    // Ensure all blocks have a colspan
+    const blocksWithColspan = newBlocks.map(b => ({ ...b, colspan: b.colspan || 1 }));
+    
+    setNewsletter({ ...newsletter, blocks: blocksWithColspan });
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push(newBlocks);
+      newHistory.push(blocksWithColspan);
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
     }
@@ -57,7 +62,8 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+      // The history already contains blocks with colspans
+      setNewsletter(prev => prev ? { ...prev, blocks: history[newIndex] } : null);
     }
   };
   
@@ -65,7 +71,8 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+       // The history already contains blocks with colspans
+      setNewsletter(prev => prev ? { ...prev, blocks: history[newIndex] } : null);
     }
   };
 
@@ -97,7 +104,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     try {
       const result = await runSuggestLayout(newsletter.blocks);
       if (result.layout && result.layout.length > 0) {
-        const newBlocks = result.layout.flat().map((block, index) => ({
+        const newBlocks = result.layout.map((block, index) => ({
           ...block,
           id: `block-${Date.now()}-${index}`,
         }));

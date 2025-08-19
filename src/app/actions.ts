@@ -25,6 +25,7 @@ export async function runSuggestLayout(content: ContentBlock[]) {
 
   try {
     const result = await suggestLayout({ content: newsletterContent });
+    // The new structure is already a flat array of blocks with colspans.
     return result;
   } catch (error) {
     console.error('Error in layout suggestion:', error);

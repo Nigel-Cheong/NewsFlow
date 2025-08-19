@@ -3,6 +3,7 @@ export interface ContentBlock {
   type: 'text' | 'image-with-text' | 'bullet-points';
   content: string;
   imageUrl?: string;
+  colspan?: 1 | 2;
 }
 
 export interface Newsletter {

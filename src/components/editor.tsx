@@ -48,6 +48,7 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
       id: `block-${Date.now()}`,
       type,
       content: `New ${type.replace('-', ' ')} block...`,
+      colspan: 2, // Default to full-width
     };
     if (type === 'image-with-text') {
       newBlock.imageUrl = 'https://placehold.co/600x400';
@@ -61,7 +62,7 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
         {blocks.map((block, index) => (
           <div
             key={block.id}
-            className="md:col-span-1"
+            className={block.colspan === 2 ? 'md:col-span-2' : 'md:col-span-1'}
           >
             <ContentBlockView
               block={block}
