@@ -21,7 +21,7 @@ export const mockNewsletters: Newsletter[] = [
       },
       {
         id: 'block-1-3',
-        type: 'bullet-points',
+        type: 'text',
         content:
           "Key takeaways from Q3:\n- Successful launch of our new feature.\n- Exceeded our sales target by 15%.\n- Key financial data shows strong performance, but this is proprietary information.",
       },

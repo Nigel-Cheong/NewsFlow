@@ -1,6 +1,16 @@
 export interface ContentBlock {
   id: string;
-  type: 'text' | 'image-with-text' | 'video';
+  type:
+    | 'text'
+    | 'image-with-text'
+    | 'video-with-text'
+    | 'spacer'
+    | 'table'
+    | 'carousel'
+    | 'event'
+    | 'form'
+    | 'announcement'
+    | 'footer';
   content: string;
   imageUrl?: string;
   videoUrl?: string;

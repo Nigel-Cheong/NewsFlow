@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,11 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock } from 'lucide-react';
+import { Input } from './ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 interface ContentBlockProps {
   block: ContentBlock;
@@ -78,7 +83,7 @@ export function ContentBlockView({
     const contentWithHighlights = highlightText(block.content);
 
     switch (block.type) {
-      case 'video':
+      case 'video-with-text':
         return (
            <div>
             {block.videoUrl && (
@@ -109,6 +114,100 @@ export function ContentBlockView({
             <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
           </div>
         );
+      case 'spacer':
+        return <div className="h-16 w-full" />;
+      case 'table':
+        return (
+          <div>
+             <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
+             <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Header 1</TableHead>
+                  <TableHead>Header 2</TableHead>
+                  <TableHead>Header 3</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Row 1, Cell 1</TableCell>
+                  <TableCell>Row 1, Cell 2</TableCell>
+                  <TableCell>Row 1, Cell 3</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell>Row 2, Cell 1</TableCell>
+                  <TableCell>Row 2, Cell 2</TableCell>
+                  <TableCell>Row 2, Cell 3</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        );
+      case 'carousel':
+        return (
+          <Carousel className="w-full">
+            <CarouselContent>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <CarouselItem key={index}>
+                  <Card>
+                    <CardContent className="flex aspect-video items-center justify-center p-6 relative">
+                       <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        )
+      case 'event':
+        return (
+          <Card className="bg-muted/30">
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>October 26, 2023</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>10:00 AM - 4:00 PM</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>Virtual Event</span>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'form':
+        return (
+          <div className="space-y-4">
+             <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+             <div className="flex flex-col gap-2">
+                <Input placeholder="Enter your name" />
+                <Input type="email" placeholder="Enter your email" />
+                <Button>Submit</Button>
+             </div>
+          </div>
+        )
+      case 'announcement':
+        return (
+            <Alert>
+              <AlertTitle className="font-bold">Announcement!</AlertTitle>
+              <AlertDescription>
+                {contentWithHighlights}
+              </AlertDescription>
+            </Alert>
+        )
+      case 'footer':
+         return (
+            <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
+              <p>{contentWithHighlights}</p>
+              <p>© 2023 NewsGenius. All rights reserved.</p>
+            </div>
+         )
       case 'text':
       default:
         return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
@@ -121,7 +220,7 @@ export function ContentBlockView({
         {renderContent()}
       </CardContent>
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
-        {!isEditing && (
+        {!isEditing && !['spacer', 'carousel', 'footer'].includes(block.type) && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Edit</span>

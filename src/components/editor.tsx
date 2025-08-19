@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ContentBlockView } from './content-block';
@@ -9,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
 
 interface EditorProps {
@@ -47,17 +49,48 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
     const newBlock: ContentBlock = {
       id: `block-${Date.now()}`,
       type,
-      content: `New ${type.replace('-', ' ')} block...`,
+      content: `New ${type.replace(/-/g, ' ')} block...`,
       colspan: 2, // Default to full-width
     };
-    if (type === 'image-with-text') {
-      newBlock.imageUrl = 'https://placehold.co/600x400';
+
+    switch (type) {
+        case 'image-with-text':
+            newBlock.imageUrl = 'https://placehold.co/600x400';
+            break;
+        case 'video-with-text':
+            newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
+            newBlock.content = 'A short video with text.'
+            break;
+        case 'spacer':
+            newBlock.content = '';
+            newBlock.colspan = 2;
+            break;
+        case 'table':
+            newBlock.content = 'Data Table';
+            newBlock.colspan = 2;
+            break;
+        case 'carousel':
+            newBlock.content = '';
+            newBlock.colspan = 2;
+            break;
+        case 'event':
+            newBlock.content = 'Company Offsite';
+            newBlock.colspan = 1;
+            break;
+        case 'form':
+            newBlock.content = 'Sign up for our newsletter';
+            newBlock.colspan = 1;
+            break;
+        case 'announcement':
+            newBlock.content = 'A new feature is launching next week!';
+            newBlock.colspan = 2;
+            break;
+         case 'footer':
+            newBlock.content = 'Contact us at contact@newsgenius.com';
+            newBlock.colspan = 2;
+            break;
     }
-    if (type === 'video') {
-      // Using a placeholder video
-      newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
-      newBlock.content = 'A short video.'
-    }
+
     setBlocks([...blocks, newBlock]);
   };
 
@@ -93,11 +126,34 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             <DropdownMenuItem onSelect={() => handleAddBlock('text')}>
               Text
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => handleAddBlock('video')}>
-              Video
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('image-with-text')}>
+             <DropdownMenuItem onSelect={() => handleAddBlock('image-with-text')}>
               Image with Text
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAddBlock('video-with-text')}>
+              Video with Text
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => handleAddBlock('announcement')}>
+              Announcement
+            </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => handleAddBlock('event')}>
+              Event
+            </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => handleAddBlock('table')}>
+              Table
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAddBlock('carousel')}>
+              Carousel
+            </DropdownMenuItem>
+             <DropdownMenuSeparator />
+             <DropdownMenuItem onSelect={() => handleAddBlock('form')}>
+              Form
+            </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => handleAddBlock('spacer')}>
+              Spacer
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAddBlock('footer')}>
+              Footer
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
