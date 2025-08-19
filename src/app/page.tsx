@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { NewNewsletterDialog } from '@/components/new-newsletter-dialog';
 import { mockNewsletters as defaultNewsletters } from '@/lib/mock-data';
 import type { Newsletter } from '@/lib/types';
 import { Newspaper, PlusCircle, Trash2 } from 'lucide-react';
@@ -24,6 +25,7 @@ export default function Home() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newsletterToDelete, setNewsletterToDelete] = useState<string | null>(null);
+  const [isNewNewsletterDialogOpen, setIsNewNewsletterDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,23 +56,25 @@ export default function Home() {
     setNewsletters(loadedNewsletters);
   }, []);
 
-  const handleNewNewsletter = () => {
+  const handleNewNewsletter = (title: string, sources: any[]) => {
     const newId = `newsletter-${Date.now()}`;
     const newNewsletter: Newsletter = {
       id: newId,
-      title: 'Untitled Newsletter',
+      title: title || 'Untitled Newsletter',
       lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
       blocks: [
         {
           id: `block-${Date.now()}`,
           type: 'header',
-          content: 'Your New Newsletter',
+          content: title || 'Your New Newsletter',
           subtitle: 'A great start!',
           colspan: 2,
           imageUrl: 'https://placehold.co/1200x400'
         }
       ]
     };
+
+    // TODO: Process sources and add them as content blocks
 
     localStorage.setItem(newId, JSON.stringify(newNewsletter));
     
@@ -101,7 +105,7 @@ export default function Home() {
             <Newspaper className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">Newsflow</h1>
           </div>
-          <Button onClick={handleNewNewsletter}>
+          <Button onClick={() => setIsNewNewsletterDialogOpen(true)}>
             <PlusCircle />
             New Newsletter
           </Button>
@@ -137,6 +141,11 @@ export default function Home() {
           </div>
         </main>
       </div>
+      <NewNewsletterDialog 
+        isOpen={isNewNewsletterDialogOpen}
+        onOpenChange={setIsNewNewsletterDialogOpen}
+        onCreate={handleNewNewsletter}
+      />
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
