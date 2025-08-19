@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppHeader } from './app-header';
 import { Editor } from './editor';
-import { PromptingSidebar } from './prompting-sidebar';
 import { SourcesSidebar } from './sources-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/lib/types';
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
@@ -231,10 +230,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <PromptingSidebar 
-            blocks={newsletter.blocks}
-            onBlocksUpdate={updateBlocks}
-        />
       </div>
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { confidentialityCheck } from '@/ai/flows/confidentiality-check';
 import { suggestLayout } from '@/ai/flows/layout-auto-selection';
-import { chatFlow, type ChatInput } from '@/ai/flows/chat-flow';
 import type { ContentBlock } from '@/lib/types';
 
 export async function runConfidentialityCheck(
@@ -57,41 +56,4 @@ export async function runSuggestLayout(content: ContentBlock[]) {
     console.error('Error in layout suggestion:', error);
     return { layout: [] };
   }
-}
-
-export async function runChat(input: ChatInput) {
-    try {
-        const {stream, response} = await chatFlow(input);
-        
-        const reader = stream.getReader();
-        const textDecoder = new TextDecoder();
-        
-        const readableStream = new ReadableStream({
-            async start(controller) {
-                while(true) {
-                    const { done, value } = await reader.read();
-                    if(done) {
-                        break;
-                    }
-                    controller.enqueue(textDecoder.decode(value));
-                }
-                controller.close();
-            }
-        });
-        
-        return new Response(readableStream, {
-            headers: {
-                'Content-Type': 'text/plain; charset=utf-8'
-            }
-        });
-
-    } catch (error) {
-        console.error('Error in chat:', error);
-        return new Response(JSON.stringify({ response: 'Sorry, I encountered an error.' }), {
-            status: 500,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    }
 }
