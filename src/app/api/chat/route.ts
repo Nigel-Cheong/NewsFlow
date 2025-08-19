@@ -1,9 +1,8 @@
 
 import { runChat } from '@/app/actions';
-import { nextJS } from '@genkit-ai/next';
+import { NextRequest, NextResponse } from 'next/server';
 
-export const POST = nextJS(async (req) => {
+export async function POST(req: NextRequest) {
     const { prompt, blocks } = await req.json();
     return await runChat({ prompt, blocks});
-});
-
+};
