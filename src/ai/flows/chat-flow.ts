@@ -59,7 +59,7 @@ const chatFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async (input) => {
-    const { output } = await editorPrompt(input);
+    const output = await editorPrompt(input);
     if (!output) {
       return { response: "Sorry, I couldn't process that request.", blocks: input.blocks };
     }
