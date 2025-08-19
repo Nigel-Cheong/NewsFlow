@@ -7,7 +7,7 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
@@ -97,6 +97,11 @@ export function ContentBlockView({
     });
     handleInputChange('tableData', newTableData);
   }
+
+  const handleToggleColspan = () => {
+    const newColspan = block.colspan === 1 ? 2 : 1;
+    onUpdate(block.id, { colspan: newColspan });
+  };
 
 
   const highlightText = (text: string) => {
@@ -425,6 +430,10 @@ export function ContentBlockView({
         {renderContent()}
       </CardContent>
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
+          {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
+          <span className="sr-only">Toggle Width</span>
+        </Button>
         {!isEditing && !['spacer'].includes(block.type) && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4" />
@@ -447,5 +456,3 @@ export function ContentBlockView({
     </Card>
   );
 }
-
-    
