@@ -231,7 +231,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <PromptingSidebar />
+        <PromptingSidebar 
+            blocks={newsletter.blocks}
+            onBlocksUpdate={updateBlocks}
+        />
       </div>
     </div>
   );

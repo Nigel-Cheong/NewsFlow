@@ -9,13 +9,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Send, Sparkles, User, Loader2 } from 'lucide-react';
 import { runChat } from '@/app/actions';
+import type { ContentBlock } from '@/lib/types';
 
 interface Message {
   role: 'user' | 'model';
   text: string;
 }
 
-export function PromptingSidebar() {
+interface PromptingSidebarProps {
+  blocks: ContentBlock[];
+  onBlocksUpdate: (blocks: ContentBlock[]) => void;
+}
+
+export function PromptingSidebar({ blocks, onBlocksUpdate }: PromptingSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,9 +46,12 @@ export function PromptingSidebar() {
     setIsLoading(true);
 
     try {
-      const result = await runChat(input);
+      const result = await runChat({ prompt: input, blocks });
       const modelMessage: Message = { role: 'model', text: result.response };
       setMessages(prev => [...prev, modelMessage]);
+      if (result.blocks) {
+        onBlocksUpdate(result.blocks);
+      }
     } catch (error) {
       const errorMessage: Message = { role: 'model', text: 'Sorry, something went wrong.' };
       setMessages(prev => [...prev, errorMessage]);
@@ -101,7 +110,7 @@ export function PromptingSidebar() {
           </ScrollArea>
           <div className="relative">
             <Textarea
-              placeholder="Ask Gemini anything..."
+              placeholder="Ask Gemini to edit the newsletter..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {

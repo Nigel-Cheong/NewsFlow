@@ -2,7 +2,7 @@
 
 import { confidentialityCheck } from '@/ai/flows/confidentiality-check';
 import { suggestLayout } from '@/ai/flows/layout-auto-selection';
-import { runChat as runChatFlow } from '@/ai/flows/chat-flow';
+import { runChat as runChatFlow, type ChatInput } from '@/ai/flows/chat-flow';
 import type { ContentBlock } from '@/lib/types';
 
 export async function runConfidentialityCheck(
@@ -59,12 +59,12 @@ export async function runSuggestLayout(content: ContentBlock[]) {
   }
 }
 
-export async function runChat(prompt: string) {
+export async function runChat(input: ChatInput) {
     try {
-        const result = await runChatFlow({ prompt });
+        const result = await runChatFlow(input);
         return result;
     } catch (error) {
         console.error('Error in chat:', error);
-        return { response: 'Sorry, I encountered an error.' };
+        return { response: 'Sorry, I encountered an error.', blocks: input.blocks };
     }
 }
