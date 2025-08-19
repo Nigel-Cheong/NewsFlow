@@ -15,6 +15,10 @@ export interface ContentBlock {
   imageUrl?: string;
   videoUrl?: string;
   colspan?: 1 | 2;
+  // Event-specific properties
+  eventDate?: string;
+  eventTime?: string;
+  eventLocation?: string;
 }
 
 export interface Newsletter {

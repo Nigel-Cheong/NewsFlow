@@ -12,11 +12,12 @@ import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Label } from './ui/label';
 
 interface ContentBlockProps {
   block: ContentBlock;
   flaggedKeywords: string[];
-  onUpdate: (id: string, newContent: string) => void;
+  onUpdate: (id: string, newContent: Partial<ContentBlock>) => void;
   onDelete: (id: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void;
   isFirst: boolean;
@@ -33,20 +34,24 @@ export function ContentBlockView({
   isLast,
 }: ContentBlockProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(block.content);
+  const [editState, setEditState] = useState(block);
 
   const handleSave = () => {
-    onUpdate(block.id, editContent);
+    onUpdate(block.id, editState);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditContent(block.content);
+    setEditState(block);
     setIsEditing(false);
   };
+  
+  const handleInputChange = (field: keyof ContentBlock, value: string) => {
+    setEditState(prevState => ({...prevState, [field]: value}));
+  }
 
   const highlightText = (text: string) => {
-    if (!flaggedKeywords.length) return text;
+    if (!flaggedKeywords.length || !text) return text;
     const regex = new RegExp(`(${flaggedKeywords.join('|')})`, 'gi');
     return text.split(regex).map((part, i) =>
       flaggedKeywords.some(kw => kw.toLowerCase() === part.toLowerCase()) ? (
@@ -61,11 +66,57 @@ export function ContentBlockView({
 
   const renderContent = () => {
     if (isEditing) {
+       if (block.type === 'event') {
+        return (
+          <div className="flex flex-col gap-4">
+            <div>
+              <Label htmlFor={`title-${block.id}`}>Event Title</Label>
+              <Input
+                id={`title-${block.id}`}
+                value={editState.content}
+                onChange={(e) => handleInputChange('content', e.target.value)}
+              />
+            </div>
+            <div>
+               <Label htmlFor={`date-${block.id}`}>Date</Label>
+               <Input
+                id={`date-${block.id}`}
+                value={editState.eventDate}
+                onChange={(e) => handleInputChange('eventDate', e.target.value)}
+              />
+            </div>
+            <div>
+               <Label htmlFor={`time-${block.id}`}>Time</Label>
+              <Input
+                id={`time-${block.id}`}
+                value={editState.eventTime}
+                onChange={(e) => handleInputChange('eventTime', e.target.value)}
+              />
+            </div>
+             <div>
+               <Label htmlFor={`location-${block.id}`}>Location</Label>
+              <Input
+                id={`location-${block.id}`}
+                value={editState.eventLocation}
+                onChange={(e) => handleInputChange('eventLocation', e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
+                <Ban /> Cancel
+              </Button>
+              <Button size="sm" onClick={handleSave}>
+                <Save /> Save
+              </Button>
+            </div>
+          </div>
+        )
+       }
       return (
         <div className="flex flex-col gap-2">
           <Textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
+            value={editState.content}
+            onChange={(e) => handleInputChange('content', e.target.value)}
             className="text-base min-h-[120px]"
           />
           <div className="flex justify-end gap-2">
@@ -168,15 +219,15 @@ export function ContentBlockView({
               <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>October 26, 2023</span>
+                <span>{block.eventDate || 'Date not set'}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>10:00 AM - 4:00 PM</span>
+                <span>{block.eventTime || 'Time not set'}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>Virtual Event</span>
+                <span>{block.eventLocation || 'Location not set'}</span>
               </div>
             </CardContent>
           </Card>

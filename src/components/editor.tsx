@@ -20,10 +20,10 @@ interface EditorProps {
 }
 
 export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
-  const handleUpdateBlock = (id: string, newContent: string) => {
+  const handleUpdateBlock = (id: string, newContent: Partial<ContentBlock>) => {
     setBlocks(
       blocks.map((block) =>
-        block.id === id ? { ...block, content: newContent } : block
+        block.id === id ? { ...block, ...newContent } : block
       )
     );
   };
@@ -76,6 +76,9 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
         case 'event':
             newBlock.content = 'Company Offsite';
             newBlock.colspan = 1;
+            newBlock.eventDate = 'October 26, 2023';
+            newBlock.eventTime = '10:00 AM - 4:00 PM';
+            newBlock.eventLocation = 'Virtual Event';
             break;
         case 'form':
             newBlock.content = 'Sign up for our newsletter';
