@@ -234,20 +234,22 @@ export function ContentBlockView({
                     <Label htmlFor={`title-${block.id}`}>Table Title</Label>
                     <Input id={`title-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
                 </div>
-                <Table>
-                    <TableBody>
-                        {editState.tableData?.map((row, rowIndex) => (
-                            <TableRow key={rowIndex}>
-                                {row.map((cell, colIndex) => (
-                                    <TableCell key={colIndex}>
-                                        <Input value={cell} onChange={(e) => handleTableChange(rowIndex, colIndex, e.target.value)} />
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                <div className="flex gap-2">
+                <div className="overflow-x-auto">
+                  <Table>
+                      <TableBody>
+                          {editState.tableData?.map((row, rowIndex) => (
+                              <TableRow key={rowIndex}>
+                                  {row.map((cell, colIndex) => (
+                                      <TableCell key={colIndex}>
+                                          <Input value={cell} onChange={(e) => handleTableChange(rowIndex, colIndex, e.target.value)} />
+                                      </TableCell>
+                                  ))}
+                              </TableRow>
+                          ))}
+                      </TableBody>
+                  </Table>
+                </div>
+                <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={handleAddRow}><PlusCircle /> Add Row</Button>
                     <Button variant="outline" size="sm" onClick={handleRemoveRow} disabled={(editState.tableData?.length ?? 0) <= 1}><MinusCircle /> Remove Row</Button>
                     <Button variant="outline" size="sm" onClick={handleAddCol}><PlusCircle /> Add Column</Button>
@@ -320,28 +322,30 @@ export function ContentBlockView({
         return (
           <div>
              <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
-             <Table>
-              {block.tableData && block.tableData.length > 0 && (
-                <>
-                  <TableHeader>
-                    <TableRow>
-                      {block.tableData[0].map((header, index) => (
-                        <TableHead key={index}>{header}</TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {block.tableData.slice(1).map((row, rowIndex) => (
-                      <TableRow key={rowIndex}>
-                        {row.map((cell, cellIndex) => (
-                          <TableCell key={cellIndex}>{cell}</TableCell>
+             <div className="overflow-x-auto">
+                <Table>
+                {block.tableData && block.tableData.length > 0 && (
+                  <>
+                    <TableHeader>
+                      <TableRow>
+                        {block.tableData[0].map((header, index) => (
+                          <TableHead key={index}>{header}</TableHead>
                         ))}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </>
-              )}
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {block.tableData.slice(1).map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          {row.map((cell, cellIndex) => (
+                            <TableCell key={cellIndex}>{cell}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </>
+                )}
+              </Table>
+             </div>
           </div>
         );
       case 'carousel':
@@ -443,3 +447,5 @@ export function ContentBlockView({
     </Card>
   );
 }
+
+    
