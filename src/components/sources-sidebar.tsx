@@ -163,6 +163,9 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                                       <Alert key={index}>
                                           <AlertTriangle className="h-4 w-4" />
                                           <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
+                                          <AlertDescription>
+                                              Found in block: "{issue.blockTitle || 'Untitled'}"
+                                          </AlertDescription>
                                       </Alert>
                                       ))}
                                   </div>

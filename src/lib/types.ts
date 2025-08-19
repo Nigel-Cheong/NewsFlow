@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const ContentBlockSchema = z.object({
   id: z.string(),
+  title: z.string().optional(),
   type: z.enum([
     'text',
     'image-with-text',
@@ -42,6 +43,7 @@ export interface Newsletter {
 export interface FlaggedIssue {
   keyword: string;
   blockId: string;
+  blockTitle?: string;
 }
 
 export type ApprovalStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';

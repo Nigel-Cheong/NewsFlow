@@ -49,12 +49,14 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
     const newBlock: ContentBlock = {
       id: `block-${Date.now()}`,
       type,
+      title: `New ${type.replace(/-/g, ' ')}`,
       content: `New ${type.replace(/-/g, ' ')} block content...`,
       colspan: 2, // Default to full-width
     };
 
     switch (type) {
         case 'header':
+            newBlock.title = 'Header';
             newBlock.content = 'Newsletter Title';
             newBlock.subtitle = 'A catchy subtitle for your newsletter';
             newBlock.imageUrl = 'https://placehold.co/1200x400';
@@ -73,10 +75,12 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             newBlock.colspan = 2;
             break;
         case 'spacer':
+            newBlock.title = 'Spacer';
             newBlock.content = '';
             newBlock.colspan = 2;
             break;
         case 'table':
+            newBlock.title = 'Data Table';
             newBlock.content = 'Data Table';
             newBlock.colspan = 2;
             newBlock.tableData = [
@@ -86,10 +90,12 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             ]
             break;
         case 'carousel':
+            newBlock.title = 'Image Carousel';
             newBlock.content = '';
             newBlock.colspan = 2;
             break;
         case 'event':
+            newBlock.title = 'Upcoming Event';
             newBlock.content = 'Company Offsite';
             newBlock.colspan = 1;
             newBlock.eventDate = 'October 26, 2023';
@@ -97,14 +103,17 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             newBlock.eventLocation = 'Virtual Event';
             break;
         case 'form':
+            newBlock.title = 'Signup Form';
             newBlock.content = 'Sign up for our newsletter';
             newBlock.colspan = 1;
             break;
         case 'announcement':
+            newBlock.title = 'Announcement';
             newBlock.content = 'A new feature is launching next week!';
             newBlock.colspan = 2;
             break;
          case 'footer':
+            newBlock.title = 'Footer';
             newBlock.content = 'Contact us at contact@newsgenius.com';
             newBlock.colspan = 2;
             break;

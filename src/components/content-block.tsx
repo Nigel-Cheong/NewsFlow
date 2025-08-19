@@ -117,6 +117,13 @@ export function ContentBlockView({
       )
     );
   };
+  
+  const commonTitleField = (
+      <div className="mb-4">
+        <Label htmlFor={`title-${block.id}`}>Block Title</Label>
+        <Input id={`title-${block.id}`} value={editState.title || ''} onChange={(e) => handleInputChange('title', e.target.value)} placeholder="e.g., Section Header" />
+      </div>
+  );
 
   const renderEditingContent = () => {
       const commonEditFields = (
@@ -136,6 +143,7 @@ export function ContentBlockView({
         case 'header':
           return (
              <div className="flex flex-col gap-4">
+                {commonTitleField}
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Title</Label>
                   <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
@@ -163,6 +171,7 @@ export function ContentBlockView({
         case 'image-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {commonTitleField}
                 <div>
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
                   <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
@@ -186,6 +195,7 @@ export function ContentBlockView({
         case 'video-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {commonTitleField}
                 <div>
                   <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
                   <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
@@ -209,6 +219,7 @@ export function ContentBlockView({
         case 'link-with-text':
           return (
              <div className="flex flex-col gap-4">
+                {commonTitleField}
                 <div>
                   <Label htmlFor={`linkUrl-${block.id}`}>Link URL</Label>
                   <Input id={`linkUrl-${block.id}`} value={editState.linkUrl} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
@@ -223,6 +234,7 @@ export function ContentBlockView({
         case 'event':
           return (
             <div className="flex flex-col gap-4">
+              {commonTitleField}
               <div>
                 <Label htmlFor={`content-${block.id}`}>Event Title</Label>
                 <Input
@@ -261,6 +273,7 @@ export function ContentBlockView({
         case 'table':
           return (
             <div className="flex flex-col gap-4">
+                {commonTitleField}
                 <div>
                     <Label htmlFor={`content-${block.id}`}>Table Title</Label>
                     <Input id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} />
@@ -295,6 +308,7 @@ export function ContentBlockView({
         default:
            return (
             <div className="flex flex-col gap-2">
+              {commonTitleField}
               <Textarea
                 value={editState.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
@@ -305,6 +319,8 @@ export function ContentBlockView({
           );
       }
   }
+  
+  const blockTitle = block.title && <h4 className="text-sm font-semibold text-foreground mb-2">{block.title}</h4>;
 
   const renderViewingContent = () => {
     const contentWithHighlights = highlightText(block.content);
@@ -332,6 +348,7 @@ export function ContentBlockView({
     case 'video-with-text':
         return (
         <div>
+            {blockTitle}
             {block.videoUrl && (
             <video
                 src={block.videoUrl}
@@ -344,34 +361,41 @@ export function ContentBlockView({
         );
     case 'image-with-text':
         return (
-        <div className="flex gap-4 items-start">
-            {block.imageUrl && (
-            <div className="w-1/3 shrink-0">
-                <Image
-                src={block.imageUrl}
-                alt="Newsletter image"
-                width={200}
-                height={133}
-                className="rounded-md object-cover aspect-[3/2]"
-                data-ai-hint="teamwork collaboration"
-                />
-            </div>
-            )}
-            <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
+        <div>
+          {blockTitle}
+          <div className="flex gap-4 items-start">
+              {block.imageUrl && (
+              <div className="w-1/3 shrink-0">
+                  <Image
+                  src={block.imageUrl}
+                  alt="Newsletter image"
+                  width={200}
+                  height={133}
+                  className="rounded-md object-cover aspect-[3/2]"
+                  data-ai-hint="teamwork collaboration"
+                  />
+              </div>
+              )}
+              <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
+          </div>
         </div>
         );
     case 'link-with-text':
         return (
-        <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
-            <Link className="h-4 w-4" />
-            <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
-        </a>
+        <div>
+          {blockTitle}
+          <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+              <Link className="h-4 w-4" />
+              <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
+          </a>
+        </div>
         );
     case 'spacer':
         return <div className="h-16 w-full" />;
     case 'table':
         return (
         <div>
+            {blockTitle}
             <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
             <div className="overflow-x-auto">
                 <Table>
@@ -401,61 +425,73 @@ export function ContentBlockView({
         );
     case 'carousel':
         return (
-        <Carousel className="w-full">
-            <CarouselContent>
-            {Array.from({ length: 3 }).map((_, index) => (
-                <CarouselItem key={index}>
-                <Card>
-                    <CardContent className="flex aspect-video items-center justify-center p-6 relative">
-                    <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
-                    </CardContent>
-                </Card>
-                </CarouselItem>
-            ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-        </Carousel>
+          <div>
+            {blockTitle}
+            <Carousel className="w-full">
+                <CarouselContent>
+                {Array.from({ length: 3 }).map((_, index) => (
+                    <CarouselItem key={index}>
+                    <Card>
+                        <CardContent className="flex aspect-video items-center justify-center p-6 relative">
+                        <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
+                        </CardContent>
+                    </Card>
+                    </CarouselItem>
+                ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+          </div>
         )
     case 'event':
         return (
-        <Card className="bg-muted/30">
-            <CardContent className="p-4 space-y-2">
-            <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{block.eventDate || 'Date not set'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>{block.eventTime || 'Time not set'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{block.eventLocation || 'Location not set'}</span>
-            </div>
-            </CardContent>
-        </Card>
+        <div>
+          {blockTitle}
+          <Card className="bg-muted/30">
+              <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>{block.eventDate || 'Date not set'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>{block.eventTime || 'Time not set'}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>{block.eventLocation || 'Location not set'}</span>
+              </div>
+              </CardContent>
+          </Card>
+        </div>
         );
     case 'form':
         return (
-        <div className="space-y-4">
-            <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-            <div className="flex flex-col gap-2">
-                <Input placeholder="Enter your name" />
-                <Input type="email" placeholder="Enter your email" />
-                <Button>Submit</Button>
-            </div>
+        <div>
+          {blockTitle}
+          <div className="space-y-4">
+              <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+              <div className="flex flex-col gap-2">
+                  <Input placeholder="Enter your name" />
+                  <Input type="email" placeholder="Enter your email" />
+                  <Button>Submit</Button>
+              </div>
+          </div>
         </div>
         )
     case 'announcement':
         return (
-            <Alert>
-            <AlertTitle className="font-bold">Announcement!</AlertTitle>
-            <AlertDescription>
-                {contentWithHighlights}
-            </AlertDescription>
-            </Alert>
+            <div>
+              {blockTitle}
+              <Alert>
+                <AlertTitle className="font-bold">Announcement!</AlertTitle>
+                <AlertDescription>
+                    {contentWithHighlights}
+                </AlertDescription>
+              </Alert>
+            </div>
         )
     case 'footer':
         return (
@@ -466,7 +502,12 @@ export function ContentBlockView({
         )
     case 'text':
     default:
-        return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
+      return (
+        <div>
+          {blockTitle}
+          <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
+        </div>
+      );
     }
   };
     

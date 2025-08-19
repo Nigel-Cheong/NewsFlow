@@ -180,7 +180,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
     flaggedKeywords
       .filter(kw => new RegExp(`\\b${kw}\\b`, 'i').test(block.content))
-      .map(kw => ({ keyword: kw, blockId: block.id }))
+      .map(kw => ({ keyword: kw, blockId: block.id, blockTitle: block.title }))
   )
   .filter((issue, index, self) => 
     index === self.findIndex(t => (
