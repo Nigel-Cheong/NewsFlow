@@ -10,10 +10,12 @@ export interface ContentBlock {
     | 'event'
     | 'form'
     | 'announcement'
-    | 'footer';
+    | 'footer'
+    | 'link-with-text';
   content: string;
   imageUrl?: string;
   videoUrl?: string;
+  linkUrl?: string;
   colspan?: 1 | 2;
   // Event-specific properties
   eventDate?: string;

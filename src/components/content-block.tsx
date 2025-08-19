@@ -7,7 +7,7 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
@@ -108,6 +108,20 @@ export function ContentBlockView({
                 {commonEditFields}
              </div>
           )
+        case 'link-with-text':
+          return (
+             <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor={`linkUrl-${block.id}`}>Link URL</Label>
+                  <Input id={`linkUrl-${block.id}`} value={editState.linkUrl} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor={`content-${block.id}`}>Text</Label>
+                  <Textarea id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-base min-h-[120px]" />
+                </div>
+                {commonEditFields}
+             </div>
+          )
         case 'event':
           return (
             <div className="flex flex-col gap-4">
@@ -197,6 +211,13 @@ export function ContentBlockView({
             )}
             <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
           </div>
+        );
+      case 'link-with-text':
+        return (
+          <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+            <Link className="h-4 w-4" />
+            <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
+          </a>
         );
       case 'spacer':
         return <div className="h-16 w-full" />;

@@ -21,7 +21,7 @@ export type SuggestLayoutInput = z.infer<typeof SuggestLayoutInputSchema>;
 const LayoutBlockSchema = z.object({
   content: z.string().describe('The content of the block.'),
   type: z
-    .enum(['text', 'image-with-text', 'video-with-text', 'spacer', 'table', 'carousel', 'event', 'form', 'announcement', 'footer'])
+    .enum(['text', 'image-with-text', 'video-with-text', 'spacer', 'table', 'carousel', 'event', 'form', 'announcement', 'footer', 'link-with-text'])
     .describe('The type of the block.'),
   imageUrl: z.string().optional().describe('The URL of the image, if any.'),
   videoUrl: z.string().optional().describe('The URL of the video, if any.'),

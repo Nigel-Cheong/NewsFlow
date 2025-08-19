@@ -61,6 +61,11 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
             newBlock.content = 'A short video with text.'
             break;
+        case 'link-with-text':
+            newBlock.linkUrl = 'https://google.com';
+            newBlock.content = 'Click here to learn more';
+            newBlock.colspan = 2;
+            break;
         case 'spacer':
             newBlock.content = '';
             newBlock.colspan = 2;
@@ -134,6 +139,9 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleAddBlock('video-with-text')}>
               Video with Text
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAddBlock('link-with-text')}>
+              Link with Text
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => handleAddBlock('announcement')}>
