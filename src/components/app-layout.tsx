@@ -216,7 +216,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       />
       <div className="flex flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={20} minSize={15}>
+            <ResizablePanel defaultSize={20} minSize={20}>
                 <SourcesSidebar
                     issues={flaggedIssues}
                     isConfidential={isConfidential}
