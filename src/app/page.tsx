@@ -5,13 +5,25 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { mockNewsletters as defaultNewsletters } from '@/lib/mock-data';
 import type { Newsletter } from '@/lib/types';
-import { FileText, PlusCircle } from 'lucide-react';
+import { FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [newsletterToDelete, setNewsletterToDelete] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,13 +39,10 @@ export default function Home() {
         return item ? JSON.parse(item) : null;
       }).filter(Boolean) as Newsletter[];
       
-      // Create a map of stored newsletters by ID
       const storedMap = new Map(storedNewsletters.map(n => [n.id, n]));
       
-      // Merge default and stored, preferring stored
       loadedNewsletters = defaultNewsletters.map(n => storedMap.get(n.id) || n);
 
-      // Add any newsletters that are in storage but not in default mocks (i.e., new ones)
       storedNewsletters.forEach(sn => {
           if (!loadedNewsletters.some(ln => ln.id === sn.id)) {
               loadedNewsletters.push(sn);
@@ -63,46 +72,88 @@ export default function Home() {
       ]
     };
 
-    // Save the new newsletter to localStorage
     localStorage.setItem(newId, JSON.stringify(newNewsletter));
     
-    // Navigate to the new newsletter's page
     router.push(`/newsletters/${newId}`);
   };
 
+  const confirmDeleteNewsletter = (e: React.MouseEvent, newsletterId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNewsletterToDelete(newsletterId);
+    setShowDeleteConfirm(true);
+  };
+
+  const executeDelete = () => {
+    if (newsletterToDelete) {
+      localStorage.removeItem(newsletterToDelete);
+      setNewsletters(newsletters.filter(n => n.id !== newsletterToDelete));
+      setNewsletterToDelete(null);
+    }
+    setShowDeleteConfirm(false);
+  };
+
   return (
-    <div className="flex flex-col h-full bg-background text-foreground">
-      <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
-        <div className="flex items-center gap-4">
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold">NewsGenius</h1>
-        </div>
-        <Button onClick={handleNewNewsletter}>
-          <PlusCircle />
-          New Newsletter
-        </Button>
-      </header>
-      <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {newsletters.map((newsletter) => (
-            <Link href={`/newsletters/${newsletter.id}`} key={newsletter.id}>
-                <Card className="hover:shadow-lg transition-shadow h-full flex flex-col">
-                  <CardHeader>
-                    <CardTitle>{newsletter.title}</CardTitle>
-                    <CardDescription>
-                      Last updated: {newsletter.lastUpdated}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {newsletter.blocks.find(b => b.type === 'text')?.content || newsletter.blocks[0]?.content || 'No content yet.'}
-                    </p>
-                  </CardContent>
-                </Card>
-            </Link>
-          ))}
-        </div>
-      </main>
-    </div>
+    <>
+      <div className="flex flex-col h-full bg-background text-foreground">
+        <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <FileText className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold">NewsGenius</h1>
+          </div>
+          <Button onClick={handleNewNewsletter}>
+            <PlusCircle />
+            New Newsletter
+          </Button>
+        </header>
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {newsletters.map((newsletter) => (
+              <Link href={`/newsletters/${newsletter.id}`} key={newsletter.id} className="relative group">
+                  <Card className="hover:shadow-lg transition-shadow h-full flex flex-col">
+                    <CardHeader>
+                      <CardTitle>{newsletter.title}</CardTitle>
+                      <CardDescription>
+                        Last updated: {newsletter.lastUpdated}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {newsletter.blocks.find(b => b.type === 'text')?.content || newsletter.blocks[0]?.content || 'No content yet.'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => confirmDeleteNewsletter(e, newsletter.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+              </Link>
+            ))}
+          </div>
+        </main>
+      </div>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              newsletter from your browser's storage.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setNewsletterToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
