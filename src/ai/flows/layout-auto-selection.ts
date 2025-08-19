@@ -20,9 +20,10 @@ export type SuggestLayoutInput = z.infer<typeof SuggestLayoutInputSchema>;
 const LayoutBlockSchema = z.object({
   content: z.string().describe('The content of the block.'),
   type: z
-    .enum(['text', 'image-with-text', 'bullet-points'])
+    .enum(['text', 'image-with-text', 'bullet-points', 'image', 'video'])
     .describe('The type of the block.'),
   imageUrl: z.string().optional().describe('The URL of the image, if any.'),
+  videoUrl: z.string().optional().describe('The URL of the video, if any.'),
   colspan: z
     .number()
     .min(1)
@@ -55,7 +56,7 @@ const prompt = ai.definePrompt({
 Rules:
 1. The grid has 2 columns.
 2. A block can span 1 or 2 columns.
-3. Use full-width blocks for important headlines or longer text sections.
+3. Use full-width blocks for important headlines, longer text sections, images, or videos.
 4. Use side-by-side half-width blocks for shorter, related content like an image next to text, or two related text blocks.
 5. The total column span of blocks in a logical row should not exceed 2. For example, you can have two blocks with colspan=1, or one block with colspan=2. You cannot have two blocks with colspan=2 in the same row.
 

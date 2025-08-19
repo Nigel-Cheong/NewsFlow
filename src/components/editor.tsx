@@ -50,8 +50,13 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
       content: `New ${type.replace('-', ' ')} block...`,
       colspan: 2, // Default to full-width
     };
-    if (type === 'image-with-text') {
+    if (type === 'image-with-text' || type === 'image') {
       newBlock.imageUrl = 'https://placehold.co/600x400';
+    }
+    if (type === 'video') {
+      // Using a placeholder video
+      newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
+      newBlock.content = 'A short video.'
     }
     setBlocks([...blocks, newBlock]);
   };
@@ -87,6 +92,12 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={() => handleAddBlock('text')}>
               Text
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleAddBlock('image')}>
+              Image
+            </DropdownMenuItem>
+             <DropdownMenuItem onSelect={() => handleAddBlock('video')}>
+              Video
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleAddBlock('image-with-text')}>
               Image with Text

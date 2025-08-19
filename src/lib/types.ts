@@ -1,8 +1,9 @@
 export interface ContentBlock {
   id: string;
-  type: 'text' | 'image-with-text' | 'bullet-points';
+  type: 'text' | 'image-with-text' | 'bullet-points' | 'image' | 'video';
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
   colspan?: 1 | 2;
 }
 
