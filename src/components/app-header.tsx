@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ApprovalStatus } from '@/lib/types';
@@ -10,6 +11,7 @@ import {
   Check,
   X,
   Loader2,
+  Save,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -19,6 +21,7 @@ interface AppHeaderProps {
   status: ApprovalStatus;
   onStatusChange: (newStatus: ApprovalStatus) => void;
   onSuggestLayout: () => void;
+  onSave: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -31,6 +34,7 @@ export function AppHeader({
   status,
   onStatusChange,
   onSuggestLayout,
+  onSave,
   onUndo,
   onRedo,
   canUndo,
@@ -78,6 +82,10 @@ export function AppHeader({
             <LayoutTemplate />
           )}
           Suggest Layout
+        </Button>
+        <Button onClick={onSave}>
+            <Save />
+            Save
         </Button>
         {status === 'Draft' && (
           <Button onClick={() => onStatusChange('Pending Approval')}>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -140,6 +141,15 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     });
   }
 
+  const handleSave = () => {
+    // Here you would typically send the newsletter data to your backend
+    console.log("Saving newsletter:", newsletter);
+    toast({
+        title: "Changes Saved!",
+        description: "Your newsletter has been successfully saved.",
+    });
+  }
+
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
     flaggedKeywords
       .filter(kw => new RegExp(`\\b${kw}\\b`, 'i').test(block.content))
@@ -170,6 +180,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         status={approvalStatus}
         onStatusChange={handleStatusChange}
         onSuggestLayout={handleSuggestLayout}
+        onSave={handleSave}
         onUndo={handleUndo}
         onRedo={handleRedo}
         canUndo={historyIndex > 0}
