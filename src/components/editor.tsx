@@ -61,13 +61,7 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
         {blocks.map((block, index) => (
           <div
             key={block.id}
-            className={
-              block.type === 'text' &&
-              (blocks[index - 1]?.type === 'image-with-text' ||
-                blocks[index + 1]?.type === 'image-with-text')
-                ? 'md:col-span-1'
-                : 'md:col-span-2'
-            }
+            className="md:col-span-1"
           >
             <ContentBlockView
               block={block}
