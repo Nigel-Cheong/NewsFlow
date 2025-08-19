@@ -63,28 +63,12 @@ export async function runSuggestLayout(content: ContentBlock[]) {
 
 export async function runChat(prompt: string, context?: string) {
   try {
-    const { stream } = await ai.generateStream({
-        prompt: `You are a helpful assistant.
-        
-        ${context ? `The user is working on this newsletter, use it for context:\n${context}\n\n` : ''}
-        
-        The user's prompt is: ${prompt}`,
-    });
-
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of stream) {
-          controller.enqueue(chunk.text);
-        }
-        controller.close();
-      },
-    });
-
-    return new Response(readableStream, {
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    const result = await chat({ prompt, context });
+    return new Response(JSON.stringify(result), {
+        headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in chat:', error);
-    return new Response('An error occurred.', { status: 500 });
+    return new Response(JSON.stringify({ response: 'An error occurred.' }), { status: 500, headers: { 'Content-Type': 'application/json' }});
   }
 }

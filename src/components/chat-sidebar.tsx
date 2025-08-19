@@ -6,20 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, User, Send, Loader2 } from 'lucide-react';
+import { Bot, User, Send, Loader2, Wand } from 'lucide-react';
 import { marked } from 'marked';
 import type { ContentBlock } from '@/lib/types';
+import type { ChatOutput } from '@/ai/flows/chat-flow';
 
 interface Message {
   role: 'user' | 'bot';
   content: string;
+  replacement?: ChatOutput['replacement'];
 }
 
 interface ChatSidebarProps {
     newsletterContent: ContentBlock[];
+    onApplySuggestion: (blockId: string, newContent: string) => void;
 }
 
-export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
+export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +41,7 @@ export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
     setInput('');
     setIsLoading(true);
 
-    const context = newsletterContent.map(block => `Block Type: ${block.type}\nTitle: ${block.title || 'N/A'}\nContent: ${block.content}`).join('\n\n---\n\n');
+    const context = newsletterContent.map(block => `blockId: ${block.id}\nBlock Type: ${block.type}\nTitle: ${block.title || 'N/A'}\nContent: ${block.content}`).join('\n\n---\n\n');
 
     try {
       const response = await fetch('/api/chat', {
@@ -53,35 +56,23 @@ export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      if (!response.body) {
-        throw new Error('No response body');
-      }
+      const result: ChatOutput = await response.json();
+      
+      const botMessage: Message = {
+        role: 'bot',
+        content: result.response,
+        replacement: result.replacement
+      };
+      
+      setMessages((prev) => [...prev, botMessage]);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let botResponse = '';
-      setMessages((prev) => [...prev, { role: 'bot', content: '' }]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        botResponse += chunk;
-        setMessages((prev) =>
-          prev.map((msg, index) =>
-            index === prev.length - 1 ? { ...msg, content: botResponse } : msg
-          )
-        );
-      }
     } catch (error) {
       console.error('Error fetching chat response:', error);
       const errorMessage: Message = {
         role: 'bot',
         content: 'Sorry, I encountered an error. Please try again.',
       };
-      setMessages((prev) =>
-        prev.map((msg, index) => (index === prev.length - 1 ? errorMessage : msg))
-      );
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -97,9 +88,34 @@ export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
     }
   }, [messages]);
   
-  const renderMessageContent = (content: string) => {
-    const htmlContent = marked.parse(content);
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent as string }} className="prose prose-sm dark:prose-invert max-w-none" />;
+  const handleApplySuggestion = (blockId?: string, newContent?: string) => {
+    if (blockId && newContent) {
+        onApplySuggestion(blockId, newContent);
+    }
+  }
+
+  const renderMessageContent = (message: Message) => {
+    const htmlContent = marked.parse(message.content);
+    return (
+        <div>
+            <div dangerouslySetInnerHTML={{ __html: htmlContent as string }} className="prose prose-sm dark:prose-invert max-w-none" />
+            {message.replacement?.newContent && message.replacement?.blockId && (
+                <div className="mt-4">
+                    <blockquote className="border-l-4 border-primary pl-4 my-2">
+                        <p className="font-semibold">Suggested change:</p>
+                        <p className="text-sm italic">{message.replacement.newContent}</p>
+                    </blockquote>
+                    <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => handleApplySuggestion(message.replacement?.blockId, message.replacement?.newContent)}
+                    >
+                        <Wand /> Replace text with suggestion
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
   }
 
   return (
@@ -132,7 +148,7 @@ export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
                       : 'bg-muted'
                   }`}
                 >
-                  {renderMessageContent(message.content)}
+                  {renderMessageContent(message)}
                 </div>
                 {message.role === 'user' && (
                   <div className="p-2 rounded-full bg-muted/80">
@@ -141,7 +157,7 @@ export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
                 )}
               </div>
             ))}
-             {isLoading && messages[messages.length -1].role === 'user' &&(
+             {isLoading &&(
               <div className="flex items-start gap-3">
                  <div className="p-2 rounded-full bg-primary/10 text-primary">
                     <Bot size={20} />

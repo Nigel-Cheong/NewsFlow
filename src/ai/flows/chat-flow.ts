@@ -14,12 +14,16 @@ import {z} from 'genkit';
 
 const ChatInputSchema = z.object({
   prompt: z.string().describe("The user's message."),
-  context: z.string().optional().describe('The context for the chat, such as the current newsletter content.')
+  context: z.string().optional().describe('The context for the chat, such as the current newsletter content, including block IDs.')
 });
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 const ChatOutputSchema = z.object({
-  response: z.string().describe("The AI's response."),
+  response: z.string().describe("The AI's text response to the user's prompt."),
+  replacement: z.object({
+      blockId: z.string().describe("The ID of the content block to be replaced."),
+      newContent: z.string().describe("The suggested new content for the block.")
+  }).optional().describe("A suggestion to replace a specific content block. This should be populated if the user asks for a change to a specific part of the newsletter.")
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
@@ -33,12 +37,16 @@ const prompt = ai.definePrompt({
   output: {schema: ChatOutputSchema},
   prompt: `You are a helpful assistant for a newsletter editor.
 
-{{#if context}}
-The user is currently working on a newsletter with the following content. Use this as context for your answers.
+Your goal is to help the user improve their newsletter. You can answer questions or rewrite parts of the content.
+
+If the user asks for a change to a specific part of the newsletter (e.g., "make the introduction more exciting" or "rewrite the second paragraph"), you MUST identify the corresponding blockId from the context and provide the rewritten content in the 'replacement' field of the output. Your text 'response' should then be a brief confirmation, like "Here is a more enthusiastic version:" or "Sure, here's a rewrite:".
+
+If the user asks a general question that doesn't involve rewriting content, just provide a helpful answer in the 'response' field and leave the 'replacement' field empty.
+
+The user is currently working on a newsletter with the following content. Use this as context for your answers. Each block has a unique 'blockId'.
 ---
 {{{context}}}
 ---
-{{/if}}
 
 User: {{{prompt}}}
 AI:`,

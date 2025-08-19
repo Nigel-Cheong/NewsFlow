@@ -66,6 +66,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       setHistoryIndex(newHistory.length - 1);
     }
   };
+
+  const handleUpdateBlockContent = (blockId: string, newContent: string) => {
+    if (!newsletter) return;
+    const newBlocks = newsletter.blocks.map(block =>
+        block.id === blockId ? { ...block, content: newContent } : block
+    );
+    updateBlocks(newBlocks);
+  };
   
   const handleUndo = () => {
     if (historyIndex > 0) {
@@ -234,7 +242,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             </ResizablePanel>
             <ResizableHandle withHandle />
              <ResizablePanel defaultSize={25} minSize={15}>
-                <ChatSidebar newsletterContent={newsletter.blocks} />
+                <ChatSidebar 
+                  newsletterContent={newsletter.blocks} 
+                  onApplySuggestion={handleUpdateBlockContent}
+                />
             </ResizablePanel>
         </ResizablePanelGroup>
       </div>
