@@ -8,7 +8,7 @@ import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/l
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
 import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from './ui/button';
 
@@ -22,6 +22,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const [flaggedKeywords, setFlaggedKeywords] = useState<string[]>([]);
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSuggestingLayout, setIsSuggestingLayout] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   const [history, setHistory] = useState<ContentBlock[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -169,14 +170,27 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         isSuggestingLayout={isSuggestingLayout}
       />
       <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
           <Editor
             blocks={newsletter.blocks}
             setBlocks={(newBlocks) => updateBlocks(newBlocks)}
             flaggedKeywords={flaggedKeywords}
           />
         </main>
-        <IssuesSidebar issues={flaggedIssues} isConfidential={isConfidential} />
+        <div className="flex">
+          <div className={`transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-96' : 'w-0'}`}>
+            <IssuesSidebar issues={flaggedIssues} isConfidential={isConfidential} isOpen={isSidebarOpen}/>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="h-10 w-10 shrink-0 self-start mt-2"
+          >
+            {isSidebarOpen ? <PanelRightClose /> : <PanelRightOpen />}
+            <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
