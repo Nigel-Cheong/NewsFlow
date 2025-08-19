@@ -461,7 +461,7 @@ export function ContentBlockView({
          return (
             <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
               <p>{contentWithHighlights}</p>
-              <p>© 2023 NewsGenius. All rights reserved.</p>
+              <p>© 2023 Newsflow. All rights reserved.</p>
             </div>
          )
       case 'text':

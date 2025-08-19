@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'NewsGenius',
+  title: 'Newsflow',
   description: 'AI-Powered Newsletter Creation Tool',
 };
 
