@@ -19,14 +19,39 @@ export async function runConfidentialityCheck(
 }
 
 export async function runSuggestLayout(content: ContentBlock[]) {
-  const newsletterContent = content
+  const headerBlock = content.find((block) => block.type === 'header');
+  const footerBlock = content.find((block) => block.type === 'footer');
+
+  const bodyContent = content.filter(
+    (block) => block.type !== 'header' && block.type !== 'footer'
+  );
+
+  const newsletterContent = bodyContent
     .map((block) => `Type: ${block.type}, Content: ${block.content}`)
     .join('\n\n');
 
   try {
+    // If there's no body content, just return the header and/or footer.
+    if (bodyContent.length === 0) {
+      const layout = [];
+      if (headerBlock) layout.push(headerBlock);
+      if (footerBlock) layout.push(footerBlock);
+      return { layout };
+    }
+
     const result = await suggestLayout({ content: newsletterContent });
-    // The new structure is already a flat array of blocks with colspans.
-    return result;
+    
+    let finalLayout = result.layout || [];
+
+    if (headerBlock) {
+      finalLayout = [headerBlock, ...finalLayout];
+    }
+    if (footerBlock) {
+      finalLayout = [...finalLayout, footerBlock];
+    }
+    
+    return { layout: finalLayout };
+
   } catch (error) {
     console.error('Error in layout suggestion:', error);
     return { layout: [] };
