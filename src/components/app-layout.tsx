@@ -178,20 +178,32 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
           />
         </main>
         <div className="flex shrink-0">
-            {isSidebarOpen && (
-                <div className="transition-all duration-300 ease-in-out w-96">
-                    <IssuesSidebar issues={flaggedIssues} isConfidential={isConfidential} isOpen={isSidebarOpen}/>
-                </div>
+          {isSidebarOpen ? (
+            <div className="transition-all duration-300 ease-in-out w-96">
+              <IssuesSidebar
+                issues={flaggedIssues}
+                isConfidential={isConfidential}
+                isOpen={isSidebarOpen}
+              />
+            </div>
+          ) : null}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="h-10 w-10 shrink-0 self-start mt-2"
+            >
+              {isSidebarOpen ? <PanelRightClose /> : <PanelRightOpen />}
+              <span className="sr-only">Toggle Sidebar</span>
+            </Button>
+            {isConfidential && !isSidebarOpen && (
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+              </span>
             )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="h-10 w-10 shrink-0 self-start mt-2"
-          >
-            {isSidebarOpen ? <PanelRightClose /> : <PanelRightOpen />}
-            <span className="sr-only">Toggle Sidebar</span>
-          </Button>
+          </div>
         </div>
       </div>
     </div>
