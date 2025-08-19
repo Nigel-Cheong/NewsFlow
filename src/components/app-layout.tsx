@@ -93,12 +93,35 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const handleSuggestLayout = async () => {
     if (!newsletter?.blocks) return;
     setIsSuggestingLayout(true);
-    const result = await runSuggestLayout(newsletter.blocks);
-    toast({
-      title: 'Layout Suggestion',
-      description: `AI suggests using a "${result.layoutTemplate}" layout.`,
-    });
-    setIsSuggestingLayout(false);
+    try {
+      const result = await runSuggestLayout(newsletter.blocks);
+      if (result.layout && result.layout.length > 0) {
+        const newBlocks = result.layout.flat().map((block, index) => ({
+          ...block,
+          id: `block-${Date.now()}-${index}`,
+        }));
+        updateBlocks(newBlocks);
+        toast({
+          title: 'Layout Updated',
+          description: 'The content has been automatically arranged into a new layout.',
+        });
+      } else {
+        toast({
+          title: 'Layout Suggestion Failed',
+          description: 'Could not generate a new layout. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error suggesting layout:', error);
+      toast({
+        title: 'An Error Occurred',
+        description: 'Failed to suggest a new layout. Please check the console for details.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSuggestingLayout(false);
+    }
   };
   
   const handleStatusChange = (newStatus: ApprovalStatus) => {

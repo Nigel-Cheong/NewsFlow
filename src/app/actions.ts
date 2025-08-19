@@ -19,16 +19,15 @@ export async function runConfidentialityCheck(
 }
 
 export async function runSuggestLayout(content: ContentBlock[]) {
-  const newsletterContent = content.map((block) => block.content).join('\n\n');
-  const contentType = content.some((block) => block.imageUrl)
-    ? 'image-with-text'
-    : 'text-only';
+  const newsletterContent = content
+    .map((block) => `Type: ${block.type}, Content: ${block.content}`)
+    .join('\n\n');
 
   try {
-    const result = await suggestLayout({ contentType, content: newsletterContent });
+    const result = await suggestLayout({ content: newsletterContent });
     return result;
   } catch (error) {
     console.error('Error in layout suggestion:', error);
-    return { layoutTemplate: 'Could not generate suggestion.' };
+    return { layout: [] };
   }
 }

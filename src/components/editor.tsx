@@ -1,7 +1,7 @@
 'use client';
 
 import { ContentBlockView } from './content-block';
-import type { ContentBlock, FlaggedIssue } from '@/lib/types';
+import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { PlusCircle } from 'lucide-react';
 import {
@@ -55,25 +55,33 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
     setBlocks([...blocks, newBlock]);
   };
 
-  const getFlaggedKeywordsForBlock = (blockId: string, allIssues: string[]) => {
-    return allIssues; 
-  };
-
   return (
     <div className="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
-      {blocks.map((block, index) => (
-        <ContentBlockView
-          key={block.id}
-          block={block}
-          flaggedKeywords={flaggedKeywords}
-          onUpdate={handleUpdateBlock}
-          onDelete={handleDeleteBlock}
-          onMove={handleMoveBlock}
-          isFirst={index === 0}
-          isLast={index === blocks.length - 1}
-        />
-      ))}
-      <div className="flex justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {blocks.map((block, index) => (
+          <div
+            key={block.id}
+            className={
+              block.type === 'text' &&
+              (blocks[index - 1]?.type === 'image-with-text' ||
+                blocks[index + 1]?.type === 'image-with-text')
+                ? 'md:col-span-1'
+                : 'md:col-span-2'
+            }
+          >
+            <ContentBlockView
+              block={block}
+              flaggedKeywords={flaggedKeywords}
+              onUpdate={handleUpdateBlock}
+              onDelete={handleDeleteBlock}
+              onMove={handleMoveBlock}
+              isFirst={index === 0}
+              isLast={index === blocks.length - 1}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center col-span-1 md:col-span-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="mt-4">

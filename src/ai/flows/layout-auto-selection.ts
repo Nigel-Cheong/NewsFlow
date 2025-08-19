@@ -12,22 +12,19 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SuggestLayoutInputSchema = z.object({
-  contentType: z
-    .string()
-    .describe(
-      'The type of content for which a layout is to be suggested (e.g., text-only, image-with-text, bullet points).'
-    ),
   content: z.string().describe('The actual content of the newsletter.'),
 });
 
 export type SuggestLayoutInput = z.infer<typeof SuggestLayoutInputSchema>;
 
+const LayoutBlockSchema = z.object({
+  content: z.string().describe('The content of the block.'),
+  type: z.enum(['text', 'image-with-text', 'bullet-points']).describe('The type of the block.'),
+  imageUrl: z.string().optional().describe('The URL of the image, if any.'),
+});
+
 const SuggestLayoutOutputSchema = z.object({
-  layoutTemplate: z
-    .string()
-    .describe(
-      'The suggested layout template based on the content type (e.g., text-only, image-with-text, bullet points).'
-    ),
+  layout: z.array(z.array(LayoutBlockSchema)).describe('A 2D array representing the grid layout of content blocks.'),
 });
 
 export type SuggestLayoutOutput = z.infer<typeof SuggestLayoutOutputSchema>;
@@ -40,11 +37,14 @@ const prompt = ai.definePrompt({
   name: 'suggestLayoutPrompt',
   input: {schema: SuggestLayoutInputSchema},
   output: {schema: SuggestLayoutOutputSchema},
-  prompt: `Based on the content type "{{{contentType}}}" and the content itself:
+  prompt: `Based on the following newsletter content, arrange it into a 2-column grid layout. Prioritize placing image-with-text blocks side-by-side with text or bullet-point blocks.
 
-  """{{{content}}}"""
+Content:
+"""
+{{{content}}}
+"""
 
-  Suggest an appropriate layout template (e.g., text-only, image-with-text, bullet points). Be brief.
+Return the layout as a 2D array of content blocks.
 `,
 });
 
