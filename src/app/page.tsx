@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { mockNewsletters as defaultNewsletters } from '@/lib/mock-data';
 import type { Newsletter } from '@/lib/types';
-import { FileText, PlusCircle, Trash2 } from 'lucide-react';
+import { Newspaper, PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -98,7 +98,7 @@ export default function Home() {
       <div className="flex flex-col h-full bg-background text-foreground">
         <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-4">
-            <FileText className="h-6 w-6 text-primary" />
+            <Newspaper className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">Newsflow</h1>
           </div>
           <Button onClick={handleNewNewsletter}>
