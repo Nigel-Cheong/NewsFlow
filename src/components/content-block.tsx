@@ -118,8 +118,7 @@ export function ContentBlockView({
     );
   };
 
-  const renderContent = () => {
-    if (isEditing) {
+  const renderEditingContent = () => {
       const commonEditFields = (
         <>
            <div className="flex justify-end gap-2 mt-4">
@@ -305,206 +304,201 @@ export function ContentBlockView({
             </div>
           );
       }
-    }
+  }
 
+  const renderViewingContent = () => {
     const contentWithHighlights = highlightText(block.content);
 
-    const renderBlock = () => {
-        switch (block.type) {
-        case 'header':
-            return (
-            <div className="relative text-white">
-                {block.imageUrl && (
-                <Image
-                    src={block.imageUrl}
-                    alt="Header image"
-                    width={1200}
-                    height={400}
-                    className="w-full h-auto max-h-96 object-cover rounded-md"
-                    data-ai-hint="abstract background"
-                />
-                )}
-                <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
-                <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
-                {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
-                </div>
-            </div>
-            )
-        case 'video-with-text':
-            return (
-            <div>
-                {block.videoUrl && (
-                <video
-                    src={block.videoUrl}
-                    controls
-                    className="rounded-md w-full aspect-video"
-                />
-                )}
-                <p className="text-muted-foreground text-sm mt-2">{contentWithHighlights}</p>
-            </div>
-            );
-        case 'image-with-text':
-            return (
-            <div className="flex gap-4 items-start">
-                {block.imageUrl && (
-                <div className="w-1/3 shrink-0">
-                    <Image
-                    src={block.imageUrl}
-                    alt="Newsletter image"
-                    width={200}
-                    height={133}
-                    className="rounded-md object-cover aspect-[3/2]"
-                    data-ai-hint="teamwork collaboration"
-                    />
-                </div>
-                )}
-                <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
-            </div>
-            );
-        case 'link-with-text':
-            return (
-            <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
-                <Link className="h-4 w-4" />
-                <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
-            </a>
-            );
-        case 'spacer':
-            return <div className="h-16 w-full" />;
-        case 'table':
-            return (
-            <div>
-                <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
-                <div className="overflow-x-auto">
-                    <Table>
-                    {block.tableData && block.tableData.length > 0 && (
-                    <>
-                        <TableHeader>
-                        <TableRow>
-                            {block.tableData[0].map((header, index) => (
-                            <TableHead key={index}>{header}</TableHead>
-                            ))}
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {block.tableData.slice(1).map((row, rowIndex) => (
-                            <TableRow key={rowIndex}>
-                            {row.map((cell, cellIndex) => (
-                                <TableCell key={cellIndex}>{cell}</TableCell>
-                            ))}
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </>
-                    )}
-                </Table>
-                </div>
-            </div>
-            );
-        case 'carousel':
-            return (
-            <Carousel className="w-full">
-                <CarouselContent>
-                {Array.from({ length: 3 }).map((_, index) => (
-                    <CarouselItem key={index}>
-                    <Card>
-                        <CardContent className="flex aspect-video items-center justify-center p-6 relative">
-                        <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
-                        </CardContent>
-                    </Card>
-                    </CarouselItem>
-                ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-            </Carousel>
-            )
-        case 'event':
-            return (
-            <Card className="bg-muted/30">
-                <CardContent className="p-4 space-y-2">
-                <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>{block.eventDate || 'Date not set'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{block.eventTime || 'Time not set'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{block.eventLocation || 'Location not set'}</span>
-                </div>
-                </CardContent>
-            </Card>
-            );
-        case 'form':
-            return (
-            <div className="space-y-4">
-                <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
-                <div className="flex flex-col gap-2">
-                    <Input placeholder="Enter your name" />
-                    <Input type="email" placeholder="Enter your email" />
-                    <Button>Submit</Button>
-                </div>
-            </div>
-            )
-        case 'announcement':
-            return (
-                <Alert>
-                <AlertTitle className="font-bold">Announcement!</AlertTitle>
-                <AlertDescription>
-                    {contentWithHighlights}
-                </AlertDescription>
-                </Alert>
-            )
-        case 'footer':
-            return (
-                <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
-                <p>{contentWithHighlights}</p>
-                <p>© 2023 Newsflow. All rights reserved.</p>
-                </div>
-            )
-        case 'text':
-        default:
-            return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
-        }
-    };
-    
-    return (
-        <Card className="relative group/block">
-            <CardContent className="p-4">
-                {renderBlock()}
-            </CardContent>
-             <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
-                {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
-                <span className="sr-only">Toggle Width</span>
-                </Button>
-                {!isEditing && !['spacer'].includes(block.type) && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                    </Button>
-                )}
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'up')} disabled={isFirst}>
-                <ArrowUp className="h-4 w-4" />
-                <span className="sr-only">Move Up</span>
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'down')} disabled={isLast}>
-                <ArrowDown className="h-4 w-4" />
-                <span className="sr-only">Move Down</span>
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(block.id)}>
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Delete</span>
-                </Button>
-            </div>
-             {isEditing && (
-                <div className='p-4 pt-0'>
-                    {renderContent()}
-                </div>
+    switch (block.type) {
+    case 'header':
+        return (
+        <div className="relative text-white">
+            {block.imageUrl && (
+            <Image
+                src={block.imageUrl}
+                alt="Header image"
+                width={1200}
+                height={400}
+                className="w-full h-auto max-h-96 object-cover rounded-md"
+                data-ai-hint="abstract background"
+            />
             )}
+            <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
+            <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
+            {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
+            </div>
+        </div>
+        )
+    case 'video-with-text':
+        return (
+        <div>
+            {block.videoUrl && (
+            <video
+                src={block.videoUrl}
+                controls
+                className="rounded-md w-full aspect-video"
+            />
+            )}
+            <p className="text-muted-foreground text-sm mt-2">{contentWithHighlights}</p>
+        </div>
+        );
+    case 'image-with-text':
+        return (
+        <div className="flex gap-4 items-start">
+            {block.imageUrl && (
+            <div className="w-1/3 shrink-0">
+                <Image
+                src={block.imageUrl}
+                alt="Newsletter image"
+                width={200}
+                height={133}
+                className="rounded-md object-cover aspect-[3/2]"
+                data-ai-hint="teamwork collaboration"
+                />
+            </div>
+            )}
+            <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
+        </div>
+        );
+    case 'link-with-text':
+        return (
+        <a href={block.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+            <Link className="h-4 w-4" />
+            <p className="whitespace-pre-wrap">{contentWithHighlights}</p>
+        </a>
+        );
+    case 'spacer':
+        return <div className="h-16 w-full" />;
+    case 'table':
+        return (
+        <div>
+            <h3 className="font-semibold text-lg mb-2">{contentWithHighlights}</h3>
+            <div className="overflow-x-auto">
+                <Table>
+                {block.tableData && block.tableData.length > 0 && (
+                <>
+                    <TableHeader>
+                    <TableRow>
+                        {block.tableData[0].map((header, index) => (
+                        <TableHead key={index}>{header}</TableHead>
+                        ))}
+                    </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                    {block.tableData.slice(1).map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                        {row.map((cell, cellIndex) => (
+                            <TableCell key={cellIndex}>{cell}</TableCell>
+                        ))}
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </>
+                )}
+            </Table>
+            </div>
+        </div>
+        );
+    case 'carousel':
+        return (
+        <Carousel className="w-full">
+            <CarouselContent>
+            {Array.from({ length: 3 }).map((_, index) => (
+                <CarouselItem key={index}>
+                <Card>
+                    <CardContent className="flex aspect-video items-center justify-center p-6 relative">
+                    <Image src={`https://placehold.co/600x400?text=Slide+${index+1}`} alt={`Slide ${index+1}`} layout="fill" objectFit="cover" className="rounded-md" />
+                    </CardContent>
+                </Card>
+                </CarouselItem>
+            ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+        </Carousel>
+        )
+    case 'event':
+        return (
+        <Card className="bg-muted/30">
+            <CardContent className="p-4 space-y-2">
+            <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>{block.eventDate || 'Date not set'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>{block.eventTime || 'Time not set'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>{block.eventLocation || 'Location not set'}</span>
+            </div>
+            </CardContent>
         </Card>
-    );
+        );
+    case 'form':
+        return (
+        <div className="space-y-4">
+            <h3 className="font-semibold text-lg">{contentWithHighlights}</h3>
+            <div className="flex flex-col gap-2">
+                <Input placeholder="Enter your name" />
+                <Input type="email" placeholder="Enter your email" />
+                <Button>Submit</Button>
+            </div>
+        </div>
+        )
+    case 'announcement':
+        return (
+            <Alert>
+            <AlertTitle className="font-bold">Announcement!</AlertTitle>
+            <AlertDescription>
+                {contentWithHighlights}
+            </AlertDescription>
+            </Alert>
+        )
+    case 'footer':
+        return (
+            <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-4">
+            <p>{contentWithHighlights}</p>
+            <p>© 2023 Newsflow. All rights reserved.</p>
+            </div>
+        )
+    case 'text':
+    default:
+        return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
+    }
+  };
+    
+  return (
+      <Card className="relative group/block">
+          <CardContent className="p-4">
+              {isEditing ? renderEditingContent() : renderViewingContent()}
+          </CardContent>
+           <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
+              {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
+              <span className="sr-only">Toggle Width</span>
+              </Button>
+              {!isEditing && !['spacer'].includes(block.type) && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
+                      <Edit className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                  </Button>
+              )}
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'up')} disabled={isFirst}>
+              <ArrowUp className="h-4 w-4" />
+              <span className="sr-only">Move Up</span>
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'down')} disabled={isLast}>
+              <ArrowDown className="h-4 w-4" />
+              <span className="sr-only">Move Down</span>
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(block.id)}>
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
+              </Button>
+          </div>
+      </Card>
+  );
 }
