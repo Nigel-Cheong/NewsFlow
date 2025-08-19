@@ -50,7 +50,7 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
       content: `New ${type.replace('-', ' ')} block...`,
       colspan: 2, // Default to full-width
     };
-    if (type === 'image-with-text' || type === 'image') {
+    if (type === 'image-with-text') {
       newBlock.imageUrl = 'https://placehold.co/600x400';
     }
     if (type === 'video') {
@@ -93,17 +93,11 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
             <DropdownMenuItem onSelect={() => handleAddBlock('text')}>
               Text
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('image')}>
-              Image
-            </DropdownMenuItem>
              <DropdownMenuItem onSelect={() => handleAddBlock('video')}>
               Video
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => handleAddBlock('image-with-text')}>
               Image with Text
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('bullet-points')}>
-              Bullet Points
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

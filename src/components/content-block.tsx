@@ -78,22 +78,6 @@ export function ContentBlockView({
     const contentWithHighlights = highlightText(block.content);
 
     switch (block.type) {
-      case 'image':
-        return (
-          <div>
-            {block.imageUrl && (
-              <Image
-                src={block.imageUrl}
-                alt={block.content || 'Newsletter image'}
-                width={600}
-                height={400}
-                className="rounded-md object-cover w-full aspect-video"
-                data-ai-hint="newsletter image"
-              />
-            )}
-            <p className="text-muted-foreground text-sm mt-2">{contentWithHighlights}</p>
-          </div>
-        );
       case 'video':
         return (
            <div>
@@ -125,8 +109,6 @@ export function ContentBlockView({
             <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>
           </div>
         );
-      case 'bullet-points':
-        return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
       case 'text':
       default:
         return <p className="text-muted-foreground whitespace-pre-wrap">{contentWithHighlights}</p>;
