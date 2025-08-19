@@ -234,7 +234,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             </ResizablePanel>
             <ResizableHandle withHandle />
              <ResizablePanel defaultSize={25} minSize={15}>
-                <ChatSidebar />
+                <ChatSidebar newsletterContent={newsletter.blocks} />
             </ResizablePanel>
         </ResizablePanelGroup>
       </div>

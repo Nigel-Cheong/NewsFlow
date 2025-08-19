@@ -8,13 +8,18 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, User, Send, Loader2 } from 'lucide-react';
 import { marked } from 'marked';
+import type { ContentBlock } from '@/lib/types';
 
 interface Message {
   role: 'user' | 'bot';
   content: string;
 }
 
-export function ChatSidebar() {
+interface ChatSidebarProps {
+    newsletterContent: ContentBlock[];
+}
+
+export function ChatSidebar({ newsletterContent }: ChatSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,13 +38,15 @@ export function ChatSidebar() {
     setInput('');
     setIsLoading(true);
 
+    const context = newsletterContent.map(block => `Block Type: ${block.type}\nTitle: ${block.title || 'N/A'}\nContent: ${block.content}`).join('\n\n---\n\n');
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({ prompt: input, context }),
       });
 
       if (!response.ok) {
@@ -152,7 +159,7 @@ export function ChatSidebar() {
             <Input
               value={input}
               onChange={handleInputChange}
-              placeholder="Ask Gemini anything..."
+              placeholder="Ask me about this newsletter..."
               disabled={isLoading}
               className="flex-1"
             />

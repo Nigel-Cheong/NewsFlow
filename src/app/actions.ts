@@ -61,10 +61,14 @@ export async function runSuggestLayout(content: ContentBlock[]) {
   }
 }
 
-export async function runChat(prompt: string) {
+export async function runChat(prompt: string, context?: string) {
   try {
-    const { stream } = ai.generateStream({
-      prompt: `You are a helpful assistant. The user's prompt is: ${prompt}`,
+    const { stream } = await ai.generateStream({
+        prompt: `You are a helpful assistant.
+        
+        ${context ? `The user is working on this newsletter, use it for context:\n${context}\n\n` : ''}
+        
+        The user's prompt is: ${prompt}`,
     });
 
     const readableStream = new ReadableStream({

@@ -13,12 +13,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ChatInputSchema = z.object({
-  prompt: z.string().describe('The user\'s message.'),
+  prompt: z.string().describe("The user's message."),
+  context: z.string().optional().describe('The context for the chat, such as the current newsletter content.')
 });
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 const ChatOutputSchema = z.object({
-  response: z.string().describe('The AI\'s response.'),
+  response: z.string().describe("The AI's response."),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
@@ -30,7 +31,14 @@ const prompt = ai.definePrompt({
   name: 'chatPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
-  prompt: `You are a helpful assistant.
+  prompt: `You are a helpful assistant for a newsletter editor.
+
+{{#if context}}
+The user is currently working on a newsletter with the following content. Use this as context for your answers.
+---
+{{{context}}}
+---
+{{/if}}
 
 User: {{{prompt}}}
 AI:`,
