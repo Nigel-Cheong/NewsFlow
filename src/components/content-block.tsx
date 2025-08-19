@@ -66,42 +66,9 @@ export function ContentBlockView({
 
   const renderContent = () => {
     if (isEditing) {
-       if (block.type === 'event') {
-        return (
-          <div className="flex flex-col gap-4">
-            <div>
-              <Label htmlFor={`title-${block.id}`}>Event Title</Label>
-              <Input
-                id={`title-${block.id}`}
-                value={editState.content}
-                onChange={(e) => handleInputChange('content', e.target.value)}
-              />
-            </div>
-            <div>
-               <Label htmlFor={`date-${block.id}`}>Date</Label>
-               <Input
-                id={`date-${block.id}`}
-                value={editState.eventDate}
-                onChange={(e) => handleInputChange('eventDate', e.target.value)}
-              />
-            </div>
-            <div>
-               <Label htmlFor={`time-${block.id}`}>Time</Label>
-              <Input
-                id={`time-${block.id}`}
-                value={editState.eventTime}
-                onChange={(e) => handleInputChange('eventTime', e.target.value)}
-              />
-            </div>
-             <div>
-               <Label htmlFor={`location-${block.id}`}>Location</Label>
-              <Input
-                id={`location-${block.id}`}
-                value={editState.eventLocation}
-                onChange={(e) => handleInputChange('eventLocation', e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
+      const commonEditFields = (
+        <>
+           <div className="flex justify-end gap-2 mt-4">
               <Button variant="ghost" size="sm" onClick={handleCancel}>
                 <Ban /> Cancel
               </Button>
@@ -109,26 +76,92 @@ export function ContentBlockView({
                 <Save /> Save
               </Button>
             </div>
-          </div>
-        )
-       }
-      return (
-        <div className="flex flex-col gap-2">
-          <Textarea
-            value={editState.content}
-            onChange={(e) => handleInputChange('content', e.target.value)}
-            className="text-base min-h-[120px]"
-          />
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={handleCancel}>
-              <Ban /> Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              <Save /> Save
-            </Button>
-          </div>
-        </div>
+        </>
       );
+      
+      switch (block.type) {
+        case 'image-with-text':
+          return (
+             <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
+                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor={`content-${block.id}`}>Text</Label>
+                  <Textarea id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-base min-h-[120px]" />
+                </div>
+                {commonEditFields}
+             </div>
+          )
+        case 'video-with-text':
+          return (
+             <div className="flex flex-col gap-4">
+                <div>
+                  <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
+                  <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor={`content-${block.id}`}>Text</Label>
+                  <Textarea id={`content-${block.id}`} value={editState.content} onChange={(e) => handleInputChange('content', e.target.value)} className="text-base min-h-[120px]" />
+                </div>
+                {commonEditFields}
+             </div>
+          )
+        case 'event':
+          return (
+            <div className="flex flex-col gap-4">
+              <div>
+                <Label htmlFor={`title-${block.id}`}>Event Title</Label>
+                <Input
+                  id={`title-${block.id}`}
+                  value={editState.content}
+                  onChange={(e) => handleInputChange('content', e.target.value)}
+                />
+              </div>
+              <div>
+                 <Label htmlFor={`date-${block.id}`}>Date</Label>
+                 <Input
+                  id={`date-${block.id}`}
+                  value={editState.eventDate}
+                  onChange={(e) => handleInputChange('eventDate', e.target.value)}
+                />
+              </div>
+              <div>
+                 <Label htmlFor={`time-${block.id}`}>Time</Label>
+                <Input
+                  id={`time-${block.id}`}
+                  value={editState.eventTime}
+                  onChange={(e) => handleInputChange('eventTime', e.target.value)}
+                />
+              </div>
+               <div>
+                 <Label htmlFor={`location-${block.id}`}>Location</Label>
+                <Input
+                  id={`location-${block.id}`}
+                  value={editState.eventLocation}
+                  onChange={(e) => handleInputChange('eventLocation', e.target.value)}
+                />
+              </div>
+              {commonEditFields}
+            </div>
+          )
+        case 'table':
+        case 'carousel':
+        case 'footer':
+        case 'text':
+        default:
+           return (
+            <div className="flex flex-col gap-2">
+              <Textarea
+                value={editState.content}
+                onChange={(e) => handleInputChange('content', e.target.value)}
+                className="text-base min-h-[120px]"
+              />
+              {commonEditFields}
+            </div>
+          );
+      }
     }
 
     const contentWithHighlights = highlightText(block.content);
@@ -271,7 +304,7 @@ export function ContentBlockView({
         {renderContent()}
       </CardContent>
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
-        {!isEditing && !['spacer', 'carousel', 'footer'].includes(block.type) && (
+        {!isEditing && !['spacer'].includes(block.type) && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4" />
                 <span className="sr-only">Edit</span>
