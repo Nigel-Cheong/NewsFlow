@@ -18,7 +18,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ToolsSidebar } from './tools-sidebar';
 
 interface AppLayoutProps {
   newsletterId: string;
@@ -455,18 +454,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             </ResizablePanel>
             <ResizableHandle withHandle />
              <ResizablePanel defaultSize={25} minSize={15}>
-                <ResizablePanelGroup direction="vertical">
-                    <ResizablePanel defaultSize={30} minSize={20}>
-                        <ToolsSidebar onAddBlock={handleAddBlock} />
-                    </ResizablePanel>
-                    <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={70} minSize={30}>
-                        <ChatSidebar 
-                            newsletterContent={newsletter.blocks} 
-                            onApplySuggestion={handleUpdateBlockContent}
-                        />
-                    </ResizablePanel>
-                </ResizablePanelGroup>
+                <ChatSidebar 
+                    newsletterContent={newsletter.blocks} 
+                    onApplySuggestion={handleUpdateBlockContent}
+                />
             </ResizablePanel>
         </ResizablePanelGroup>
       </div>
