@@ -156,6 +156,10 @@ export function ContentBlockView({
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
                   <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
                 </div>
+                 <div>
+                    <Label htmlFor={`headerColor-${block.id}`}>Header Overlay Color</Label>
+                    <Input id={`headerColor-${block.id}`} type="color" value={editState.headerColor || '#000000'} onChange={(e) => handleInputChange('headerColor', e.target.value)} className="h-10" />
+                </div>
                 <div className='flex items-center gap-2'>
                     <Separator className='flex-1'/>
                     <span className='text-xs text-muted-foreground'>OR</span>
@@ -327,6 +331,7 @@ export function ContentBlockView({
 
     switch (block.type) {
     case 'header':
+        const headerStyle = block.headerColor ? { backgroundColor: `${block.headerColor}80` } : {}; // Add 80 for 50% opacity in hex
         return (
         <div className="relative text-white">
             {block.imageUrl && (
@@ -339,7 +344,7 @@ export function ContentBlockView({
                 data-ai-hint="abstract background"
             />
             )}
-            <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4">
+            <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4" style={headerStyle}>
             <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
             {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
             </div>

@@ -28,6 +28,7 @@ export const ContentBlockSchema = z.object({
   eventTime: z.string().optional(),
   eventLocation: z.string().optional(),
   tableData: z.array(z.array(z.string())).optional(),
+  headerColor: z.string().optional(),
 });
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
