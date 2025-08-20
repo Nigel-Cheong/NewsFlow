@@ -42,12 +42,15 @@ export const SourceSchema = z.object({
 
 export type Source = z.infer<typeof SourceSchema>;
 
+export type ApprovalStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
+
 export interface Newsletter {
   id: string;
   title: string;
   blocks: ContentBlock[];
   lastUpdated: string;
   sources?: Omit<Source, 'content'>[];
+  status: ApprovalStatus;
 }
 
 export interface FlaggedIssue {
@@ -57,6 +60,3 @@ export interface FlaggedIssue {
   blockTitle?: string;
 }
 
-export type ApprovalStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
-
-    

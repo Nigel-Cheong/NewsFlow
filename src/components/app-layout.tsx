@@ -26,7 +26,6 @@ interface AppLayoutProps {
 
 export function AppLayout({ newsletterId }: AppLayoutProps) {
   const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
-  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('Draft');
   const [flaggedIssues, setFlaggedIssues] = useState<FlaggedIssue[]>([]);
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSuggestingLayout, setIsSuggestingLayout] = useState(false);
@@ -37,8 +36,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const { toast } = useToast();
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    // Load from localStorage first, then fallback to mock data
+  const loadNewsletter = useCallback(() => {
     const savedNewsletterJSON = localStorage.getItem(newsletterId);
     let initialNewsletter: Newsletter | undefined;
 
@@ -50,15 +48,34 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
 
     if (initialNewsletter) {
       setNewsletter(initialNewsletter);
-      setHistory([initialNewsletter.blocks]);
-      setHistoryIndex(0);
+      if(history.length === 0) { // Only set initial history
+        setHistory([initialNewsletter.blocks]);
+        setHistoryIndex(0);
+      }
     }
-  }, [newsletterId]);
+  }, [newsletterId, history.length]);
+
+
+  useEffect(() => {
+    loadNewsletter();
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === newsletterId) {
+        loadNewsletter();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    }
+
+  }, [newsletterId, loadNewsletter]);
   
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
     
-    setNewsletter({ ...newsletter, blocks: newBlocks });
+    setNewsletter(current => current ? { ...current, blocks: newBlocks } : null);
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -149,7 +166,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   };
   
   const handleStatusChange = (newStatus: ApprovalStatus) => {
-    setApprovalStatus(newStatus);
+    if (!newsletter) return;
+    const updatedNewsletter = { ...newsletter, status: newStatus };
+    setNewsletter(updatedNewsletter);
+    localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
     toast({
         title: "Status Updated",
         description: `Newsletter status changed to "${newStatus}".`
@@ -398,8 +418,9 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-full">
       <AppHeader
+        newsletterId={newsletter.id}
         title={newsletter.title}
-        status={approvalStatus}
+        status={newsletter.status}
         onStatusChange={handleStatusChange}
         onSuggestLayout={handleSuggestLayout}
         onSave={handleSave}

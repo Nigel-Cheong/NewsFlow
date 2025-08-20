@@ -131,6 +131,7 @@ export default function Home() {
     const newNewsletter: Newsletter = {
       id: newId,
       title: title || 'Untitled Newsletter',
+      status: 'Draft',
       lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
       sources: finalSources,
       blocks: [

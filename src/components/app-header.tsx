@@ -12,11 +12,14 @@ import {
   X,
   Loader2,
   Save,
+  Eye,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import Link from 'next/link';
 
 interface AppHeaderProps {
+  newsletterId: string;
   title: string;
   status: ApprovalStatus;
   onStatusChange: (newStatus: ApprovalStatus) => void;
@@ -30,6 +33,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
+  newsletterId,
   title,
   status,
   onStatusChange,
@@ -87,12 +91,14 @@ export function AppHeader({
             <Save />
             Save
         </Button>
-        {status === 'Draft' && (
-          <Button onClick={() => onStatusChange('Pending Approval')}>
-            <Send />
-            Submit for Approval
+        
+        <Link href={`/newsletters/${newsletterId}/preview`} target="_blank">
+          <Button>
+            <Eye />
+            Preview
           </Button>
-        )}
+        </Link>
+
         {status === 'Pending Approval' && (
           <>
             <Button onClick={() => onStatusChange('Approved')} variant="default">

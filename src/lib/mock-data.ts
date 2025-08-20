@@ -6,6 +6,7 @@ export const mockNewsletters: Newsletter[] = [
     id: 'newsletter-1',
     title: 'Q3 Company Updates',
     lastUpdated: '2 days ago',
+    status: 'Draft',
     blocks: [
       {
         id: 'block-1-1',
@@ -35,6 +36,7 @@ export const mockNewsletters: Newsletter[] = [
     id: 'newsletter-2',
     title: 'New Product Launch Announcement',
     lastUpdated: '5 days ago',
+    status: 'Approved',
     blocks: [
         {
             id: 'block-2-1',
@@ -48,6 +50,7 @@ export const mockNewsletters: Newsletter[] = [
     id: 'newsletter-3',
     title: 'Monthly Engineering Report',
     lastUpdated: '1 week ago',
+    status: 'Pending Approval',
     blocks: [
         {
             id: 'block-3-1',
