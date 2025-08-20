@@ -17,23 +17,31 @@ import { Separator } from './ui/separator';
 
 interface ContentBlockProps {
   block: ContentBlock;
+  blocks: ContentBlock[]; // Pass the entire list of blocks
+  setBlocks: (blocks: ContentBlock[]) => void;
   flaggedSentences: string[];
-  onUpdate: (id: string, newContent: Partial<ContentBlock>) => void;
-  onDelete: (id: string) => void;
-  isFirst: boolean;
-  isLast: boolean;
 }
 
 export function ContentBlockView({
   block,
+  blocks,
+  setBlocks,
   flaggedSentences,
-  onUpdate,
-  onDelete,
-  isFirst,
-  isLast,
 }: ContentBlockProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState(block);
+
+  const onUpdate = (id: string, newContent: Partial<ContentBlock>) => {
+    setBlocks(
+      blocks.map((b) =>
+        b.id === id ? { ...b, ...newContent } : b
+      )
+    );
+  };
+  
+  const onDelete = (id: string) => {
+    setBlocks(blocks.filter((b) => b.id !== id));
+  };
 
   const handleSave = () => {
     onUpdate(block.id, editState);
@@ -149,11 +157,11 @@ export function ContentBlockView({
                 </div>
                 <div>
                   <Label htmlFor={`subtitle-${block.id}`}>Subtitle</Label>
-                  <Input id={`subtitle-${block.id}`} value={editState.subtitle} onChange={(e) => handleInputChange('subtitle', e.target.value)} />
+                  <Input id={`subtitle-${block.id}`} value={editState.subtitle || ''} onChange={(e) => handleInputChange('subtitle', e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
-                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
+                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl || ''} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
                 </div>
                  <div>
                     <Label htmlFor={`headerColor-${block.id}`}>Header Overlay Color</Label>
@@ -181,7 +189,7 @@ export function ContentBlockView({
                 {commonTitleField}
                 <div>
                   <Label htmlFor={`imageUrl-${block.id}`}>Image URL</Label>
-                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
+                  <Input id={`imageUrl-${block.id}`} value={editState.imageUrl || ''} onChange={(e) => handleInputChange('imageUrl', e.target.value)} />
                 </div>
                 <div className='flex items-center gap-2'>
                     <Separator className='flex-1'/>
@@ -205,7 +213,7 @@ export function ContentBlockView({
                 {commonTitleField}
                 <div>
                   <Label htmlFor={`videoUrl-${block.id}`}>Video URL</Label>
-                  <Input id={`videoUrl-${block.id}`} value={editState.videoUrl} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
+                  <Input id={`videoUrl-${block.id}`} value={editState.videoUrl || ''} onChange={(e) => handleInputChange('videoUrl', e.target.value)} />
                 </div>
                 <div className='flex items-center gap-2'>
                     <Separator className='flex-1'/>
@@ -229,7 +237,7 @@ export function ContentBlockView({
                 {commonTitleField}
                 <div>
                   <Label htmlFor={`linkUrl-${block.id}`}>Link URL</Label>
-                  <Input id={`linkUrl-${block.id}`} value={editState.linkUrl} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
+                  <Input id={`linkUrl-${block.id}`} value={editState.linkUrl || ''} onChange={(e) => handleInputChange('linkUrl', e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Text</Label>
@@ -254,7 +262,7 @@ export function ContentBlockView({
                  <Label htmlFor={`date-${block.id}`}>Date</Label>
                  <Input
                   id={`date-${block.id}`}
-                  value={editState.eventDate}
+                  value={editState.eventDate || ''}
                   onChange={(e) => handleInputChange('eventDate', e.target.value)}
                 />
               </div>
@@ -262,7 +270,7 @@ export function ContentBlockView({
                  <Label htmlFor={`time-${block.id}`}>Time</Label>
                 <Input
                   id={`time-${block.id}`}
-                  value={editState.eventTime}
+                  value={editState.eventTime || ''}
                   onChange={(e) => handleInputChange('eventTime', e.target.value)}
                 />
               </div>
@@ -270,7 +278,7 @@ export function ContentBlockView({
                  <Label htmlFor={`location-${block.id}`}>Location</Label>
                 <Input
                   id={`location-${block.id}`}
-                  value={editState.eventLocation}
+                  value={editState.eventLocation || ''}
                   onChange={(e) => handleInputChange('eventLocation', e.target.value)}
                 />
               </div>

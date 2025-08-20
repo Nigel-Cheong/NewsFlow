@@ -22,22 +22,11 @@ interface EditorProps {
 }
 
 export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: EditorProps) {
-  const handleUpdateBlock = (id: string, newContent: Partial<ContentBlock>) => {
-    setBlocks(
-      blocks.map((block) =>
-        block.id === id ? { ...block, ...newContent } : block
-      )
-    );
-  };
-
-  const handleDeleteBlock = (id: string) => {
-    setBlocks(blocks.filter((block) => block.id !== id));
-  };
 
   return (
     <div className="flex-1 p-4 md:p-6 overflow-y-auto">
       <div className="grid md:grid-cols-2 gap-4">
-        {blocks.map((block, index) => (
+        {blocks.map((block) => (
           <div
             key={block.id}
             className={cn('w-full', {
@@ -47,11 +36,9 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
           >
             <ContentBlockView
               block={block}
+              blocks={blocks}
+              setBlocks={setBlocks}
               flaggedSentences={flaggedSentences}
-              onUpdate={handleUpdateBlock}
-              onDelete={handleDeleteBlock}
-              isFirst={index === 0}
-              isLast={index === blocks.length - 1}
             />
           </div>
         ))}

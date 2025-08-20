@@ -120,8 +120,6 @@ export default function NewsletterPreviewPage() {
     );
   }
   
-  // A simplified render of blocks without editing capabilities.
-  // We reuse ContentBlockView but don't pass any edit/delete handlers.
   return (
     <div className="bg-background min-h-screen">
       <PreviewHeader newsletter={newsletter} onStatusChange={handleStatusChange} />
@@ -137,11 +135,13 @@ export default function NewsletterPreviewPage() {
               >
                 <ContentBlockView
                     block={block}
+                    blocks={newsletter.blocks}
+                    setBlocks={(newBlocks) => {
+                        const updatedNewsletter = {...newsletter, blocks: newBlocks};
+                        setNewsletter(updatedNewsletter);
+                        localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
+                    }}
                     flaggedSentences={[]}
-                    onUpdate={() => {}}
-                    onDelete={() => {}}
-                    isFirst={false}
-                    isLast={false}
                 />
             </div>
           ))}
