@@ -282,6 +282,27 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       });
   };
 
+  const handleDeleteAllSentences = () => {
+    if (!newsletter || flaggedIssues.length === 0) return;
+
+    let blocksToUpdate = [...newsletter.blocks];
+    
+    flaggedIssues.forEach(issue => {
+        blocksToUpdate = blocksToUpdate.map(block => {
+            if (block.id === issue.blockId) {
+                return { ...block, content: block.content.replace(issue.sentence, '') };
+            }
+            return block;
+        });
+    });
+
+    updateBlocks(blocksToUpdate);
+    toast({
+        title: "All Flagged Sentences Removed",
+        description: `${flaggedIssues.length} sentences have been deleted from the newsletter.`
+    });
+  };
+
   if (!newsletter) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
@@ -319,6 +340,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                     onDeleteSource={handleDeleteSource}
                     onUpdateSource={handleUpdateSource}
                     onDeleteSentence={handleDeleteSentence}
+                    onDeleteAllSentences={handleDeleteAllSentences}
                 />
             </ResizablePanel>
             <ResizableHandle withHandle />

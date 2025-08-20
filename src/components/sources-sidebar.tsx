@@ -40,6 +40,7 @@ interface SourcesSidebarProps {
   onDeleteSource: (sourceName: string) => void;
   onUpdateSource: (originalName: string, newName: string) => void;
   onDeleteSentence: (blockId: string, sentence: string) => void;
+  onDeleteAllSentences: () => void;
 }
 
 interface SourceItemProps {
@@ -106,12 +107,13 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
 }
 
 
-export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource, onDeleteSentence }: SourcesSidebarProps) {
+export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource, onDeleteSentence, onDeleteAllSentences }: SourcesSidebarProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const [isFetchingLink, setIsFetchingLink] = useState(false);
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
   const [issueToDelete, setIssueToDelete] = useState<FlaggedIssue | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -201,6 +203,11 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
     }
   };
 
+  const executeDeleteAll = () => {
+    onDeleteAllSentences();
+    setShowDeleteAllConfirm(false);
+  }
+
 
   return (
     <aside className="h-full border-r">
@@ -223,9 +230,9 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-auto">
-                                <div className="space-y-2 pr-2 h-full">
-                                    <ScrollArea className="h-full">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
+                                <ScrollArea className="h-full pr-2">
+                                    <div className="space-y-2">
                                         {sources.length === 0 ? (
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
@@ -250,8 +257,8 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                                 />
                                             ))
                                         )}
-                                    </ScrollArea>
-                                </div>
+                                    </div>
+                                </ScrollArea>
                             </TabsContent>
                             <TabsContent value="file" className="mt-4 flex-1 overflow-hidden">
                               <ScrollArea className="h-full pr-2">
@@ -306,11 +313,14 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
             <ResizablePanel defaultSize={50} minSize={25}>
                  <div className="flex flex-col h-full p-2">
                      <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
-                        <CardHeader className="p-4">
-                        <CardTitle className="flex items-center gap-2 text-base">
-                            <AlertTriangle className="text-destructive" />
-                            Issues
-                        </CardTitle>
+                        <CardHeader className="p-4 flex flex-row items-center justify-between">
+                            <CardTitle className="flex items-center gap-2 text-base">
+                                <AlertTriangle className="text-destructive" />
+                                Issues
+                            </CardTitle>
+                            {issues.length > 0 && (
+                                <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllConfirm(true)}>Delete all?</Button>
+                            )}
                         </CardHeader>
                         <CardContent className="flex-1 space-y-2 overflow-y-auto p-2 pt-0">
                           <ScrollArea className="h-full">
@@ -379,6 +389,22 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                 <AlertDialogCancel onClick={() => setIssueToDelete(null)}>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={executeDelete}>
                   Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to delete all flagged sentences?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete all {issues.length} sentences containing confidential keywords from your newsletter.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={executeDeleteAll}>
+                  Delete All
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
