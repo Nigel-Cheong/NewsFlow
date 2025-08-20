@@ -68,7 +68,7 @@ export default function Home() {
     const newId = `newsletter-${Date.now()}`;
     const combinedText = sources.map(s => {
       if (s.type === 'image') {
-        return `Source: ${s.name}\n[IMAGE: A placeholder for the image named ${s.name}]`
+        return `Source: ${s.name}\n[IMAGE: ${s.name}]`
       }
       return `Source: ${s.name}\n${s.content}`
     }).join('\n\n---\n\n');
@@ -81,8 +81,14 @@ export default function Home() {
                 generatedBlocks = result.blocks.map((block, index) => {
                     const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                     if (newBlock.type === 'image-with-text') {
-                        const imageSource = sources.find(s => s.type === 'image' && newBlock.content.toLowerCase().includes(s.name.split('.')[0].toLowerCase()));
-                        newBlock.imageUrl = imageSource?.content || 'https://placehold.co/600x400';
+                        // The AI was prompted to use the image name in the caption.
+                        // We find the original image source by matching its name.
+                        const imageSource = sources.find(s => s.type === 'image' && block.content.includes(s.name.split('.')[0]));
+                        if (imageSource) {
+                            newBlock.imageUrl = imageSource.content;
+                        } else {
+                            newBlock.imageUrl = 'https://placehold.co/600x400';
+                        }
                     }
                     return newBlock;
                 });
@@ -226,3 +232,5 @@ export default function Home() {
     </>
   );
 }
+
+    

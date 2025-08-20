@@ -129,8 +129,8 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     }
   }
 
-  const handleRemoveSource = (sourceName: string) => {
-    setSources(prev => prev.filter(s => s.name !== sourceName));
+  const handleRemoveSource = (sourceNameToRemove: string) => {
+    setSources(prev => prev.filter(s => s.name !== sourceNameToRemove));
   }
 
 
@@ -168,8 +168,8 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                  <Upload className="h-10 w-10 text-muted-foreground" />
                  <p className="mt-2 text-sm text-muted-foreground">Drag & drop files or click to upload</p>
-                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, and Images</p>
-                 <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,.webp" />
+                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, JPEG, PNG, GIF</p>
+                 <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
               </div>
             </TabsContent>
             <TabsContent value="link" className="mt-4 space-y-3">
@@ -201,10 +201,10 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
           {sources.length > 0 && (
               <div className="space-y-2">
                   <Label>Added Sources</Label>
-                  <ScrollArea className="h-32 w-full rounded-md border p-2">
+                  <ScrollArea className="h-40 w-full rounded-md border p-2">
                       <div className="space-y-2">
-                          {sources.map(source => (
-                              <div key={source.name} className="flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
+                          {sources.map((source, index) => (
+                              <div key={`${source.name}-${index}`} className="flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
                                   <div className="flex items-center gap-2 overflow-hidden">
                                     {source.type === 'file' && <FileText className="h-4 w-4 shrink-0"/>}
                                     {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0"/>}
@@ -233,3 +233,5 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     </Dialog>
   );
 }
+
+    

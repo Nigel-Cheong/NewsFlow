@@ -195,7 +195,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       
       let textToProcess = source.content;
       if (source.type === 'image') {
-          textToProcess = `[IMAGE: A placeholder for the image named ${source.name}]`;
+          textToProcess = `[IMAGE: ${source.name}]`;
       }
 
 
@@ -205,7 +205,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
                 const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                 if (newBlock.type === 'image-with-text') {
-                    newBlock.imageUrl = source.content;
+                    newBlock.imageUrl = source.content; // The content of an image source is its data URL
                 }
                 return newBlock;
             });
@@ -220,7 +220,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
 
             let sourceName = source.name;
             if (source.type === 'text' && source.name === 'Pasted Text') {
-                const textSourceCount = (newsletter.sources?.filter(s => s.type === 'text').length || 0) + 1;
+                const textSourceCount = (newsletter.sources?.filter(s => s.name.startsWith('Pasted Text')).length || 0) + 1;
                 sourceName = `Pasted Text ${textSourceCount}`;
             }
 
@@ -334,3 +334,5 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     </div>
   );
 }
+
+    
