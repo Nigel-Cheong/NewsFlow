@@ -96,18 +96,18 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
                                             sources.map((source, index) => (
-                                                <div key={index} className="relative p-2 rounded-md border text-sm group">
-                                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-muted/80" onClick={() => handleDeleteSource(source.name)}>
-                                                        <Trash2 className="h-4 w-4" />
-                                                        <span className="sr-only">Delete source</span>
-                                                    </Button>
-                                                    <div className="flex items-start gap-2 pr-8">
+                                                <div key={index} className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
+                                                    <div className="flex items-start gap-2 flex-1 min-w-0">
                                                         {source.type === 'file' && <Upload className="h-4 w-4 shrink-0 mt-0.5"/>}
                                                         {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
                                                         {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
                                                         {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
                                                         <span className="flex-1 break-words" title={source.name}>{source.name}</span>
                                                     </div>
+                                                     <Button variant="destructive" size="icon" className="h-6 w-6 !bg-red-600 hover:!bg-gray-500 shrink-0" onClick={() => handleDeleteSource(source.name)}>
+                                                        <Trash2 className="h-4 w-4 text-white" />
+                                                        <span className="sr-only">Delete source</span>
+                                                    </Button>
                                                 </div>
                                             ))
                                         )}
