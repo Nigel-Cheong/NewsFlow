@@ -191,7 +191,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                             Content Sources
                         </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col p-2 pt-0 min-h-0">
+                        <CardContent className="flex-1 flex flex-col p-2 pt-0 overflow-hidden">
                           <Tabs defaultValue="list" className="w-full flex-1 flex flex-col">
                             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                               <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
@@ -200,7 +200,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-auto">
                                 <ScrollArea className="h-full">
                                     <div className="space-y-2 pr-2">
                                         {sources.length === 0 ? (
