@@ -12,6 +12,22 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from './ui/dropdown-menu';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 
 interface EditorProps {
   blocks: ContentBlock[];
@@ -20,7 +36,52 @@ interface EditorProps {
   onAddBlock: (type: ContentBlock['type']) => void;
 }
 
+function DraggableContentBlock({ block, flaggedSentences, onUpdate, onDelete, isFirst, isLast }: {
+  block: ContentBlock;
+  flaggedSentences: string[];
+  onUpdate: (id: string, newContent: Partial<ContentBlock>) => void;
+  onDelete: (id: string) => void;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable({id: block.id});
+    
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+    
+    return (
+      <div ref={setNodeRef} style={style} {...attributes}>
+        <ContentBlockView
+          block={block}
+          flaggedSentences={flaggedSentences}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          isFirst={isFirst}
+          isLast={isLast}
+          dragHandleProps={listeners}
+        />
+      </div>
+    );
+}
+
+
 export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: EditorProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: {
+            distance: 8,
+        },
+    })
+  );
+
   const handleUpdateBlock = (id: string, newContent: Partial<ContentBlock>) => {
     setBlocks(
       blocks.map((block) =>
@@ -32,40 +93,50 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
   const handleDeleteBlock = (id: string) => {
     setBlocks(blocks.filter((block) => block.id !== id));
   };
-
-  const handleMoveBlock = (id:string, direction: 'up' | 'down') => {
-    const index = blocks.findIndex((b) => b.id === id);
-    if (index === -1) return;
+  
+  const handleDragEnd = (event: DragEndEvent) => {
+    const {active, over} = event;
     
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= blocks.length) return;
-
-    const newBlocks = [...blocks];
-    const [movedBlock] = newBlocks.splice(index, 1);
-    newBlocks.splice(newIndex, 0, movedBlock);
-    setBlocks(newBlocks);
-  };
+    if (over && active.id !== over.id) {
+      const oldIndex = blocks.findIndex((b) => b.id === active.id);
+      const newIndex = blocks.findIndex((b) => b.id === over.id);
+      
+      setBlocks(arrayMove(blocks, oldIndex, newIndex));
+    }
+  }
 
   return (
     <div className="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {blocks.map((block, index) => (
-          <div
-            key={block.id}
-            className={block.colspan === 2 ? 'md:col-span-2' : 'md:col-span-1'}
-          >
-            <ContentBlockView
-              block={block}
-              flaggedSentences={flaggedSentences}
-              onUpdate={handleUpdateBlock}
-              onDelete={handleDeleteBlock}
-              onMove={handleMoveBlock}
-              isFirst={index === 0}
-              isLast={index === blocks.length - 1}
-            />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+      >
+        <SortableContext
+          items={blocks.map(b => b.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {blocks.map((block, index) => (
+              <div
+                key={block.id}
+                className={block.colspan === 2 ? 'md:col-span-2' : 'md:col-span-1'}
+              >
+                <DraggableContentBlock
+                  block={block}
+                  flaggedSentences={flaggedSentences}
+                  onUpdate={handleUpdateBlock}
+                  onDelete={handleDeleteBlock}
+                  isFirst={index === 0}
+                  isLast={index === blocks.length - 1}
+                />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
+
       <div className="flex justify-center col-span-1 md:col-span-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -7,7 +7,7 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2, GripVertical } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
@@ -20,9 +20,9 @@ interface ContentBlockProps {
   flaggedSentences: string[];
   onUpdate: (id: string, newContent: Partial<ContentBlock>) => void;
   onDelete: (id: string) => void;
-  onMove: (id: string, direction: 'up' | 'down') => void;
   isFirst: boolean;
   isLast: boolean;
+  dragHandleProps?: any;
 }
 
 export function ContentBlockView({
@@ -30,9 +30,9 @@ export function ContentBlockView({
   flaggedSentences,
   onUpdate,
   onDelete,
-  onMove,
   isFirst,
   isLast,
+  dragHandleProps,
 }: ContentBlockProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState(block);
@@ -524,6 +524,10 @@ export function ContentBlockView({
               {isEditing ? renderEditingContent() : renderViewingContent()}
           </CardContent>
            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
+              <Button {...dragHandleProps} variant="ghost" size="icon" className="h-8 w-8 cursor-grab">
+                <GripVertical className="h-4 w-4" />
+                <span className="sr-only">Drag to reorder</span>
+              </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
               {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
               <span className="sr-only">Toggle Width</span>
@@ -534,14 +538,6 @@ export function ContentBlockView({
                       <span className="sr-only">Edit</span>
                   </Button>
               )}
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'up')} disabled={isFirst}>
-              <ArrowUp className="h-4 w-4" />
-              <span className="sr-only">Move Up</span>
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onMove(block.id, 'down')} disabled={isLast}>
-              <ArrowDown className="h-4 w-4" />
-              <span className="sr-only">Move Down</span>
-              </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(block.id)}>
               <Trash2 className="h-4 w-4" />
               <span className="sr-only">Delete</span>
