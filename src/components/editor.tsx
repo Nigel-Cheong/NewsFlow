@@ -17,9 +17,10 @@ interface EditorProps {
   blocks: ContentBlock[];
   flaggedSentences: string[];
   setBlocks: (blocks: ContentBlock[]) => void;
+  onAddBlock: (type: ContentBlock['type']) => void;
 }
 
-export function Editor({ blocks, flaggedSentences, setBlocks }: EditorProps) {
+export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: EditorProps) {
   const handleUpdateBlock = (id: string, newContent: Partial<ContentBlock>) => {
     setBlocks(
       blocks.map((block) =>
@@ -43,83 +44,6 @@ export function Editor({ blocks, flaggedSentences, setBlocks }: EditorProps) {
     const [movedBlock] = newBlocks.splice(index, 1);
     newBlocks.splice(newIndex, 0, movedBlock);
     setBlocks(newBlocks);
-  };
-  
-  const handleAddBlock = (type: ContentBlock['type']) => {
-    const newBlock: ContentBlock = {
-      id: `block-${Date.now()}`,
-      type,
-      title: `New ${type.replace(/-/g, ' ')}`,
-      content: `New ${type.replace(/-/g, ' ')} block content...`,
-      colspan: 2, // Default to full-width
-    };
-
-    switch (type) {
-        case 'header':
-            newBlock.title = 'Header';
-            newBlock.content = 'Newsletter Title';
-            newBlock.subtitle = 'A catchy subtitle for your newsletter';
-            newBlock.imageUrl = 'https://placehold.co/1200x400';
-            newBlock.colspan = 2;
-            break;
-        case 'image-with-text':
-            newBlock.imageUrl = 'https://placehold.co/600x400';
-            break;
-        case 'video-with-text':
-            newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
-            newBlock.content = 'A short video with text.'
-            break;
-        case 'link-with-text':
-            newBlock.linkUrl = 'https://google.com';
-            newBlock.content = 'Click here to learn more';
-            newBlock.colspan = 2;
-            break;
-        case 'spacer':
-            newBlock.title = 'Spacer';
-            newBlock.content = '';
-            newBlock.colspan = 2;
-            break;
-        case 'table':
-            newBlock.title = 'Data Table';
-            newBlock.content = 'Data Table';
-            newBlock.colspan = 2;
-            newBlock.tableData = [
-                ['Header 1', 'Header 2', 'Header 3'],
-                ['Row 1, Cell 1', 'Row 1, Cell 2', 'Row 1, Cell 3'],
-                ['Row 2, Cell 1', 'Row 2, Cell 2', 'Row 2, Cell 3'],
-            ]
-            break;
-        case 'carousel':
-            newBlock.title = 'Image Carousel';
-            newBlock.content = '';
-            newBlock.colspan = 2;
-            break;
-        case 'event':
-            newBlock.title = 'Upcoming Event';
-            newBlock.content = 'Company Offsite';
-            newBlock.colspan = 1;
-            newBlock.eventDate = 'October 26, 2023';
-            newBlock.eventTime = '10:00 AM - 4:00 PM';
-            newBlock.eventLocation = 'Virtual Event';
-            break;
-        case 'form':
-            newBlock.title = 'Signup Form';
-            newBlock.content = 'Sign up for our newsletter';
-            newBlock.colspan = 1;
-            break;
-        case 'announcement':
-            newBlock.title = 'Announcement';
-            newBlock.content = 'A new feature is launching next week!';
-            newBlock.colspan = 2;
-            break;
-         case 'footer':
-            newBlock.title = 'Footer';
-            newBlock.content = 'Contact us at contact@newsgenius.com';
-            newBlock.colspan = 2;
-            break;
-    }
-
-    setBlocks([...blocks, newBlock]);
   };
 
   return (
@@ -151,42 +75,42 @@ export function Editor({ blocks, flaggedSentences, setBlocks }: EditorProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onSelect={() => handleAddBlock('header')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('header')}>
               Header
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('text')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('text')}>
               Text
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => handleAddBlock('image-with-text')}>
+             <DropdownMenuItem onSelect={() => onAddBlock('image-with-text')}>
               Image with Text
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('video-with-text')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('video-with-text')}>
               Video with Text
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('link-with-text')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('link-with-text')}>
               Link with Text
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => handleAddBlock('announcement')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('announcement')}>
               Announcement
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => handleAddBlock('event')}>
+             <DropdownMenuItem onSelect={() => onAddBlock('event')}>
               Event
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => handleAddBlock('table')}>
+             <DropdownMenuItem onSelect={() => onAddBlock('table')}>
               Table
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('carousel')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('carousel')}>
               Carousel
             </DropdownMenuItem>
              <DropdownMenuSeparator />
-             <DropdownMenuItem onSelect={() => handleAddBlock('form')}>
+             <DropdownMenuItem onSelect={() => onAddBlock('form')}>
               Form
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => handleAddBlock('spacer')}>
+             <DropdownMenuItem onSelect={() => onAddBlock('spacer')}>
               Spacer
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleAddBlock('footer')}>
+            <DropdownMenuItem onSelect={() => onAddBlock('footer')}>
               Footer
             </DropdownMenuItem>
           </DropdownMenuContent>

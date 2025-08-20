@@ -18,6 +18,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { ToolsSidebar } from './tools-sidebar';
 
 interface AppLayoutProps {
   newsletterId: string;
@@ -207,7 +208,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         const result = await runGenerateBlocks(textToProcess);
         if (result.blocks && result.blocks.length > 0) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
-                const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
+                const newBlock: ContentBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                 if (newBlock.type === 'image-with-text') {
                     newBlock.imageUrl = source.content; 
                 }
@@ -303,6 +304,85 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     });
   };
 
+  const handleAddBlock = (type: ContentBlock['type']) => {
+    if (!newsletter) return;
+    const newBlock: ContentBlock = {
+      id: `block-${Date.now()}`,
+      type,
+      title: `New ${type.replace(/-/g, ' ')}`,
+      content: `New ${type.replace(/-/g, ' ')} block content...`,
+      colspan: 2, // Default to full-width
+    };
+
+    switch (type) {
+        case 'header':
+            newBlock.title = 'Header';
+            newBlock.content = 'Newsletter Title';
+            newBlock.subtitle = 'A catchy subtitle for your newsletter';
+            newBlock.imageUrl = 'https://placehold.co/1200x400';
+            newBlock.colspan = 2;
+            break;
+        case 'image-with-text':
+            newBlock.imageUrl = 'https://placehold.co/600x400';
+            break;
+        case 'video-with-text':
+            newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
+            newBlock.content = 'A short video with text.'
+            break;
+        case 'link-with-text':
+            newBlock.linkUrl = 'https://google.com';
+            newBlock.content = 'Click here to learn more';
+            newBlock.colspan = 2;
+            break;
+        case 'spacer':
+            newBlock.title = 'Spacer';
+            newBlock.content = '';
+            newBlock.colspan = 2;
+            break;
+        case 'table':
+            newBlock.title = 'Data Table';
+            newBlock.content = 'Data Table';
+            newBlock.colspan = 2;
+            newBlock.tableData = [
+                ['Header 1', 'Header 2', 'Header 3'],
+                ['Row 1, Cell 1', 'Row 1, Cell 2', 'Row 1, Cell 3'],
+                ['Row 2, Cell 1', 'Row 2, Cell 2', 'Row 2, Cell 3'],
+            ]
+            break;
+        case 'carousel':
+            newBlock.title = 'Image Carousel';
+            newBlock.content = '';
+            newBlock.colspan = 2;
+            break;
+        case 'event':
+            newBlock.title = 'Upcoming Event';
+            newBlock.content = 'Company Offsite';
+            newBlock.colspan = 1;
+            newBlock.eventDate = 'October 26, 2023';
+            newBlock.eventTime = '10:00 AM - 4:00 PM';
+            newBlock.eventLocation = 'Virtual Event';
+            break;
+        case 'form':
+            newBlock.title = 'Signup Form';
+            newBlock.content = 'Sign up for our newsletter';
+            newBlock.colspan = 1;
+            break;
+        case 'announcement':
+            newBlock.title = 'Announcement';
+            newBlock.content = 'A new feature is launching next week!';
+            newBlock.colspan = 2;
+            break;
+         case 'footer':
+            newBlock.title = 'Footer';
+            newBlock.content = 'Contact us at contact@newsgenius.com';
+            newBlock.colspan = 2;
+            break;
+    }
+
+    updateBlocks([...newsletter.blocks, newBlock]);
+  };
+
+
   if (!newsletter) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
@@ -349,16 +429,25 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                   <Editor
                     blocks={newsletter.blocks}
                     setBlocks={(newBlocks) => updateBlocks(newBlocks)}
+                    onAddBlock={handleAddBlock}
                     flaggedSentences={flaggedIssues.map(issue => issue.sentence)}
                   />
                 </main>
             </ResizablePanel>
             <ResizableHandle withHandle />
              <ResizablePanel defaultSize={25} minSize={15}>
-                <ChatSidebar 
-                  newsletterContent={newsletter.blocks} 
-                  onApplySuggestion={handleUpdateBlockContent}
-                />
+                <ResizablePanelGroup direction="vertical">
+                    <ResizablePanel defaultSize={30} minSize={20}>
+                        <ToolsSidebar onAddBlock={handleAddBlock} />
+                    </ResizablePanel>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={70} minSize={30}>
+                        <ChatSidebar 
+                            newsletterContent={newsletter.blocks} 
+                            onApplySuggestion={handleUpdateBlockContent}
+                        />
+                    </ResizablePanel>
+                </ResizablePanelGroup>
             </ResizablePanel>
         </ResizablePanelGroup>
       </div>
