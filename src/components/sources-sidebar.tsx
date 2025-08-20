@@ -210,8 +210,8 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
 
 
   return (
-    <aside className="h-full border-r">
-        <ResizablePanelGroup direction="vertical" className="h-full">
+    <aside className="h-full border-r flex flex-col">
+        <ResizablePanelGroup direction="vertical" className="flex-1">
             <ResizablePanel defaultSize={50} minSize={30}>
                 <div className="flex flex-col h-full p-2">
                      <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
@@ -230,7 +230,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-auto">
                                 <ScrollArea className="h-full pr-2">
                                     <div className="space-y-2">
                                         {sources.length === 0 ? (
@@ -260,7 +260,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                     </div>
                                 </ScrollArea>
                             </TabsContent>
-                            <TabsContent value="file" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="file" className="mt-4 flex-1 overflow-auto">
                               <ScrollArea className="h-full pr-2">
                                 <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                                   <Upload className="h-10 w-10 text-muted-foreground" />
@@ -270,7 +270,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                 </div>
                               </ScrollArea>
                             </TabsContent>
-                            <TabsContent value="link" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="link" className="mt-4 flex-1 overflow-auto">
                                <ScrollArea className="h-full pr-2">
                                 <div className="space-y-3">
                                   <Label htmlFor="link-url">Add a web link</Label>
@@ -283,7 +283,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                 </div>
                               </ScrollArea>
                             </TabsContent>
-                            <TabsContent value="text" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="text" className="mt-4 flex-1 overflow-auto">
                                <ScrollArea className="h-full pr-2">
                                 <div className="space-y-3">
                                   <Label htmlFor="text-input">Paste your text</Label>
@@ -294,7 +294,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                 </div>
                               </ScrollArea>
                             </TabsContent>
-                            <TabsContent value="gdrive" className="mt-4 flex-1 overflow-hidden">
+                            <TabsContent value="gdrive" className="mt-4 flex-1 overflow-auto">
                                 <ScrollArea className="h-full pr-2">
                                   <div className="flex flex-col items-center justify-center rounded-lg border border-muted/50 p-8 text-center">
                                       <Bot className="h-10 w-10 text-muted-foreground"/>
@@ -338,22 +338,25 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                   {issues.length > 0 ? (
                                   <div className="space-y-2">
                                       {issues.map((issue, index) => (
-                                      <Alert key={index} className="relative group">
-                                          <AlertTriangle className="h-4 w-4" />
-                                          <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
-                                          <AlertDescription>
-                                              Found in block: "{issue.blockTitle || 'Untitled'}"
-                                              <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-xs italic">
-                                                {issue.sentence}
-                                              </blockquote>
-                                          </AlertDescription>
+                                      <Alert key={index} className="flex items-start justify-between">
+                                          <div>
+                                              <AlertTriangle className="h-4 w-4" />
+                                              <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
+                                              <AlertDescription>
+                                                  Found in block: "{issue.blockTitle || 'Untitled'}"
+                                                  <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-xs italic">
+                                                    {issue.sentence}
+                                                  </blockquote>
+                                              </AlertDescription>
+                                          </div>
                                            <Button 
-                                            variant="destructive" 
+                                            variant="ghost" 
                                             size="icon" 
-                                            className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="h-7 w-7 flex-shrink-0 text-destructive hover:bg-destructive/10"
                                             onClick={() => confirmDeleteSentence(issue)}
                                            >
                                                 <Trash2 className="h-4 w-4" />
+                                                <span className="sr-only">Delete sentence</span>
                                            </Button>
                                       </Alert>
                                       ))}
@@ -364,7 +367,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                           <AlertDescription>
                                               The content seems to be clear of any sensitive keywords.
                                           </AlertDescription>
-                                      </Alert>
+                                      </Aler>
                                   )}
                               </div>
                             </ScrollArea>
