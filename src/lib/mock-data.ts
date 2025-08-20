@@ -68,4 +68,8 @@ export const SENSITIVE_KEYWORDS = [
   'Project Phoenix',
   'financial data',
   'secret',
+  'Internal',
+  'External under NDA',
+  'External NDA',
+  'Non disclosure agreement',
 ];
