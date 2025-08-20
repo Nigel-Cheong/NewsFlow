@@ -46,13 +46,13 @@ export default function Home() {
       
       const storedMap = new Map(storedNewsletters.map(n => [n.id, n]));
       
+      // Update default newsletters with any stored versions
       loadedNewsletters = defaultNewsletters.map(n => storedMap.get(n.id) || n);
+      // Remove the ones we just updated from the map
+      defaultNewsletters.forEach(n => storedMap.delete(n.id));
+      // Add any remaining stored newsletters that weren't in the defaults
+      loadedNewsletters.push(...Array.from(storedMap.values()));
 
-      storedNewsletters.forEach(sn => {
-          if (!loadedNewsletters.some(ln => ln.id === sn.id)) {
-              loadedNewsletters.push(sn);
-          }
-      });
     }
     
     setNewsletters(loadedNewsletters);
@@ -66,14 +66,14 @@ export default function Home() {
     });
 
     const newId = `newsletter-${Date.now()}`;
-    const combinedText = sources.map(s => `Source: ${s.name}\nContent:\n${s.content}`).join('\n\n---\n\n');
+    const combinedText = sources.map(s => `Source: ${s.name}\n${s.content}`).join('\n\n---\n\n');
     
     let generatedBlocks = [];
-    if (combinedText) {
+    if (combinedText.trim()) {
         try {
             const result = await runGenerateBlocks(combinedText);
             if (result.blocks) {
-                generatedBlocks = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`}));
+                generatedBlocks = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`, colspan: 2}));
             }
         } catch(error) {
             console.error("Failed to generate blocks from text", error);
@@ -94,12 +94,20 @@ export default function Home() {
         {
           id: `block-header-${Date.now()}`,
           type: 'header',
+          title: 'Header',
           content: title || 'Your New Newsletter',
           subtitle: 'A great start!',
           colspan: 2,
           imageUrl: 'https://placehold.co/1200x400'
         },
-        ...generatedBlocks
+        ...generatedBlocks,
+        {
+            id: `block-footer-${Date.now()}`,
+            type: 'footer',
+            title: 'Footer',
+            content: '© 2024 Newsflow. All rights reserved. | Contact us at contact@newsflow.com',
+            colspan: 2
+        }
       ]
     };
 
