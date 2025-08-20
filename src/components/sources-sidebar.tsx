@@ -81,7 +81,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
                         <Check className="h-4 w-4" />
                     </Button>
                 ) : (
-                     <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => setIsEditing(true)}>
+                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
                         <Edit className="h-4 w-4" />
                     </Button>
                 )}
@@ -234,8 +234,8 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                                 <Upload className="h-10 w-10 text-muted-foreground" />
                                 <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                                <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, Images</p>
-                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,.webp" />
+                                <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, JPEG, PNG, GIF</p>
+                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
                               </div>
                             </TabsContent>
                             <TabsContent value="link" className="mt-4 space-y-3">
