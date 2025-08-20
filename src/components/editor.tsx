@@ -23,7 +23,7 @@ import {
 import {
   SortableContext,
   useSortable,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -111,11 +111,11 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+        modifiers={[restrictToWindowEdges]}
       >
         <SortableContext
           items={blocks.map(b => b.id)}
-          strategy={verticalListSortingStrategy}
+          strategy={rectSortingStrategy}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {blocks.map((block, index) => (
