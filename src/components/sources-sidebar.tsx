@@ -23,9 +23,10 @@ interface SourcesSidebarProps {
   sources: Omit<Source, 'content'>[];
   issues: FlaggedIssue[];
   isConfidential: boolean;
+  onAddNewSource: (source: Source) => void;
 }
 
-export function SourcesSidebar({ sources: initialSources, issues, isConfidential }: SourcesSidebarProps) {
+export function SourcesSidebar({ sources: initialSources, issues, isConfidential, onAddNewSource }: SourcesSidebarProps) {
   const [sources, setSources] = useState(initialSources);
   const [linkUrl, setLinkUrl] = useState('');
   const [textInput, setTextInput] = useState('');
@@ -52,11 +53,9 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
 
   const handleAddText = () => {
     if (textInput.trim()) {
-      toast({
-          title: "Text Adding Not Implemented",
-          description: "This is a demo. Text processing happens at creation.",
-      });
-      setTextInput('');
+        const newSource: Source = { name: 'Pasted Text', type: 'text', content: textInput };
+        onAddNewSource(newSource);
+        setTextInput('');
     }
   }
 
@@ -133,7 +132,7 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                               <Label htmlFor="text-input">Paste your text</Label>
                               <div className="flex flex-col gap-2">
                                 <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
-                                <Button onClick={handleAddText} className="self-end">Add</Button>
+                                <Button onClick={handleAddText} className="self-end">Add Text</Button>
                               </div>
                             </TabsContent>
                             <TabsContent value="gdrive" className="mt-4">

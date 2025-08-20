@@ -8,7 +8,7 @@ import { SourcesSidebar } from './sources-sidebar';
 import { ChatSidebar } from './chat-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter, Source } from '@/lib/types';
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
-import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
+import { runConfidentialityCheck, runSuggestLayout, runGenerateBlocks } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -184,6 +184,53 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       });
     }
   }
+  
+  const handleAddNewSource = async (source: Source) => {
+      if (!newsletter || !source.content) return;
+      
+      toast({
+        title: "Generating Content...",
+        description: "The AI is processing the new source. Please wait."
+      });
+
+      try {
+        const result = await runGenerateBlocks(source.content);
+        if (result.blocks && result.blocks.length > 0) {
+            const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`, colspan: 2}));
+            
+            // Exclude header/footer when adding new content in the middle
+            const footerIndex = newsletter.blocks.findIndex(b => b.type === 'footer');
+            const insertionPoint = footerIndex !== -1 ? footerIndex : newsletter.blocks.length;
+
+            const newBlocks = [...newsletter.blocks];
+            newBlocks.splice(insertionPoint, 0, ...newContentBlocks);
+            
+            updateBlocks(newBlocks);
+
+            const newSources = [...(newsletter.sources || []), { name: source.name, type: source.type }];
+            setNewsletter({...newsletter, blocks: newBlocks, sources: newSources });
+
+            toast({
+                title: "Content Added!",
+                description: `New content from "${source.name}" has been added to your newsletter.`,
+            });
+
+        } else {
+             toast({
+                title: "AI Generation Failed",
+                description: "Could not generate content from the new source.",
+                variant: "destructive"
+            });
+        }
+      } catch (error) {
+        console.error("Failed to generate blocks from new source", error);
+        toast({
+            title: "An Error Occurred",
+            description: "Could not process the new source.",
+            variant: "destructive"
+        });
+      }
+  }
 
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
     flaggedKeywords
@@ -229,6 +276,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                     sources={newsletter.sources || []}
                     issues={flaggedIssues}
                     isConfidential={isConfidential}
+                    onAddNewSource={handleAddNewSource}
                 />
             </ResizablePanel>
             <ResizableHandle withHandle />
