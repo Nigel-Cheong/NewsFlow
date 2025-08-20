@@ -7,7 +7,7 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2, GripVertical } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
@@ -22,7 +22,6 @@ interface ContentBlockProps {
   onDelete: (id: string) => void;
   isFirst: boolean;
   isLast: boolean;
-  dragHandleProps?: any;
 }
 
 export function ContentBlockView({
@@ -32,7 +31,6 @@ export function ContentBlockView({
   onDelete,
   isFirst,
   isLast,
-  dragHandleProps,
 }: ContentBlockProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState(block);
@@ -528,10 +526,6 @@ export function ContentBlockView({
               {isEditing ? renderEditingContent() : renderViewingContent()}
           </CardContent>
            <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover/block:opacity-100 transition-opacity">
-              <Button {...dragHandleProps} variant="ghost" size="icon" className="h-8 w-8 cursor-grab">
-                <GripVertical className="h-4 w-4" />
-                <span className="sr-only">Drag to reorder</span>
-              </Button>
                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
                   {block.colspan === 2 ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                   <span className="sr-only">Toggle size</span>
@@ -550,5 +544,3 @@ export function ContentBlockView({
       </Card>
   );
 }
-
-    
