@@ -17,7 +17,7 @@ import { Separator } from './ui/separator';
 
 interface ContentBlockProps {
   block: ContentBlock;
-  flaggedKeywords: string[];
+  flaggedSentences: string[];
   onUpdate: (id: string, newContent: Partial<ContentBlock>) => void;
   onDelete: (id: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void;
@@ -27,7 +27,7 @@ interface ContentBlockProps {
 
 export function ContentBlockView({
   block,
-  flaggedKeywords,
+  flaggedSentences,
   onUpdate,
   onDelete,
   onMove,
@@ -105,10 +105,12 @@ export function ContentBlockView({
 
 
   const highlightText = (text: string) => {
-    if (!flaggedKeywords.length || !text) return text;
-    const regex = new RegExp(`(${flaggedKeywords.join('|')})`, 'gi');
+    if (!flaggedSentences.length || !text) return text;
+    // Create a regex that matches any of the flagged sentences.
+    const regex = new RegExp(`(${flaggedSentences.map(s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|')})`, 'gi');
+    
     return text.split(regex).map((part, i) =>
-      flaggedKeywords.some(kw => kw.toLowerCase() === part.toLowerCase()) ? (
+      flaggedSentences.some(s => s.toLowerCase() === part.toLowerCase()) ? (
         <mark key={i} className="bg-accent/30 rounded px-1 py-0.5">
           {part}
         </mark>

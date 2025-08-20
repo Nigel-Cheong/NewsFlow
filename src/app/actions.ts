@@ -12,13 +12,13 @@ export async function runConfidentialityCheck(
   content: ContentBlock[],
   sensitiveKeywords: string[]
 ) {
-  const newsletterContent = content.map((block) => block.content).join('\n\n');
+  const newsletterContent = content.map((block) => `id: ${block.id}\n${block.content}`).join('\n\n---\n\n');
   try {
     const result = await confidentialityCheck({ newsletterContent, sensitiveKeywords });
     return result;
   } catch (error) {
     console.error('Error in confidentiality check:', error);
-    return { flaggedKeywords: [], isConfidential: false };
+    return { flaggedItems: [], isConfidential: false };
   }
 }
 

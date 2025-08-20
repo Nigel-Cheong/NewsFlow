@@ -20,6 +20,16 @@ import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUrlContent } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 
 interface SourcesSidebarProps {
@@ -29,6 +39,7 @@ interface SourcesSidebarProps {
   onAddNewSource: (source: Source) => void;
   onDeleteSource: (sourceName: string) => void;
   onUpdateSource: (originalName: string, newName: string) => void;
+  onDeleteSentence: (blockId: string, sentence: string) => void;
 }
 
 interface SourceItemProps {
@@ -53,7 +64,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
     }
     
     return (
-        <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
+        <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2 group">
             <div className="flex items-start gap-2 flex-1 min-w-0">
                 {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-1"/>}
@@ -95,11 +106,12 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
 }
 
 
-export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource }: SourcesSidebarProps) {
+export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource, onDeleteSentence }: SourcesSidebarProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const [isFetchingLink, setIsFetchingLink] = useState(false);
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
+  const [issueToDelete, setIssueToDelete] = useState<FlaggedIssue | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -177,6 +189,17 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
         setTextInput('');
     }
   }
+  
+  const confirmDeleteSentence = (issue: FlaggedIssue) => {
+    setIssueToDelete(issue);
+  };
+
+  const executeDelete = () => {
+    if (issueToDelete) {
+      onDeleteSentence(issueToDelete.blockId, issueToDelete.sentence);
+      setIssueToDelete(null);
+    }
+  };
 
 
   return (
@@ -305,12 +328,23 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                   {issues.length > 0 ? (
                                   <div className="space-y-2">
                                       {issues.map((issue, index) => (
-                                      <Alert key={index}>
+                                      <Alert key={index} className="relative group">
                                           <AlertTriangle className="h-4 w-4" />
                                           <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
                                           <AlertDescription>
                                               Found in block: "{issue.blockTitle || 'Untitled'}"
+                                              <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-xs italic">
+                                                {issue.sentence}
+                                              </blockquote>
                                           </AlertDescription>
+                                           <Button 
+                                            variant="destructive" 
+                                            size="icon" 
+                                            className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => confirmDeleteSentence(issue)}
+                                           >
+                                                <Trash2 className="h-4 w-4" />
+                                           </Button>
                                       </Alert>
                                       ))}
                                   </div>
@@ -329,6 +363,26 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                 </div>
             </ResizablePanel>
         </ResizablePanelGroup>
+
+        <AlertDialog open={!!issueToDelete} onOpenChange={(isOpen) => !isOpen && setIssueToDelete(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the following sentence from your newsletter:
+                   <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-sm italic bg-muted p-2 rounded-md">
+                     {issueToDelete?.sentence}
+                   </blockquote>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setIssueToDelete(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={executeDelete}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </aside>
   );
 }

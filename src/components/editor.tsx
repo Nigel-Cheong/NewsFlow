@@ -15,11 +15,11 @@ import {
 
 interface EditorProps {
   blocks: ContentBlock[];
-  flaggedKeywords: string[];
+  flaggedSentences: string[];
   setBlocks: (blocks: ContentBlock[]) => void;
 }
 
-export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
+export function Editor({ blocks, flaggedSentences, setBlocks }: EditorProps) {
   const handleUpdateBlock = (id: string, newContent: Partial<ContentBlock>) => {
     setBlocks(
       blocks.map((block) =>
@@ -132,7 +132,7 @@ export function Editor({ blocks, flaggedKeywords, setBlocks }: EditorProps) {
           >
             <ContentBlockView
               block={block}
-              flaggedKeywords={flaggedKeywords}
+              flaggedSentences={flaggedSentences}
               onUpdate={handleUpdateBlock}
               onDelete={handleDeleteBlock}
               onMove={handleMoveBlock}

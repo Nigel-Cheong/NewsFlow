@@ -51,6 +51,7 @@ export interface Newsletter {
 
 export interface FlaggedIssue {
   keyword: string;
+  sentence: string;
   blockId: string;
   blockTitle?: string;
 }

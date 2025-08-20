@@ -26,7 +26,7 @@ interface AppLayoutProps {
 export function AppLayout({ newsletterId }: AppLayoutProps) {
   const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>('Draft');
-  const [flaggedKeywords, setFlaggedKeywords] = useState<string[]>([]);
+  const [flaggedIssues, setFlaggedIssues] = useState<FlaggedIssue[]>([]);
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSuggestingLayout, setIsSuggestingLayout] = useState(false);
   
@@ -93,7 +93,11 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
 
   const checkConfidentiality = useCallback(async (content: ContentBlock[]) => {
     const result = await runConfidentialityCheck(content, SENSITIVE_KEYWORDS);
-    setFlaggedKeywords(result.flaggedKeywords);
+    const issues = result.flaggedItems.map(item => {
+        const block = content.find(b => b.id === item.blockId);
+        return { ...item, blockTitle: block?.title };
+    });
+    setFlaggedIssues(issues);
     setIsConfidential(result.isConfidential);
   }, []);
 
@@ -205,7 +209,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
                 const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                 if (newBlock.type === 'image-with-text') {
-                    // The content of an image source is its data URI
                     newBlock.imageUrl = source.content; 
                 }
                 return newBlock;
@@ -264,16 +267,20 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       setNewsletter({...newsletter, sources: newSources});
   }
 
-  const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
-    flaggedKeywords
-      .filter(kw => new RegExp(`\\b${kw}\\b`, 'i').test(block.content))
-      .map(kw => ({ keyword: kw, blockId: block.id, blockTitle: block.title }))
-  )
-  .filter((issue, index, self) => 
-    index === self.findIndex(t => (
-      t.keyword === issue.keyword && t.blockId === issue.blockId
-    ))
-  ) || [];
+  const handleDeleteSentence = (blockId: string, sentenceToDelete: string) => {
+      if (!newsletter) return;
+      const newBlocks = newsletter.blocks.map(block => {
+          if (block.id === blockId) {
+              return { ...block, content: block.content.replace(sentenceToDelete, '') };
+          }
+          return block;
+      });
+      updateBlocks(newBlocks);
+      toast({
+        title: "Sentence Removed",
+        description: "The selected sentence has been deleted from the content block."
+      });
+  };
 
   if (!newsletter) {
     return (
@@ -311,6 +318,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                     onAddNewSource={handleAddNewSource}
                     onDeleteSource={handleDeleteSource}
                     onUpdateSource={handleUpdateSource}
+                    onDeleteSentence={handleDeleteSentence}
                 />
             </ResizablePanel>
             <ResizableHandle withHandle />
@@ -319,7 +327,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                   <Editor
                     blocks={newsletter.blocks}
                     setBlocks={(newBlocks) => updateBlocks(newBlocks)}
-                    flaggedKeywords={flaggedKeywords}
+                    flaggedSentences={flaggedIssues.map(issue => issue.sentence)}
                   />
                 </main>
             </ResizablePanel>
@@ -335,5 +343,3 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     </div>
   );
 }
-
-    
