@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List, Trash2, Edit, Check } from 'lucide-react';
+import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List, Trash2, Edit, Check, ImageIcon } from 'lucide-react';
 import type { FlaggedIssue, Source } from '@/lib/types';
 import {
   ResizableHandle,
@@ -52,7 +52,8 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
     return (
          <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
             <div className="flex items-start gap-2 flex-1 min-w-0">
-                {source.type === 'file' && <Upload className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-0.5"/>}
                 {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
                 {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
                 {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
@@ -98,9 +99,32 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-        toast({
-            title: "File Upload Not Implemented",
-            description: "This is a demo. File content processing happens at creation.",
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            const isImage = file.type.startsWith('image/');
+
+            reader.onload = (event) => {
+                const content = event.target?.result as string;
+                const newSource: Source = { 
+                    name: file.name, 
+                    type: isImage ? 'image' : 'file', 
+                    content 
+                };
+                onAddNewSource(newSource);
+            };
+            reader.onerror = () => {
+                toast({
+                    title: "File Read Error",
+                    description: `Could not read the file: ${file.name}`,
+                    variant: 'destructive'
+                });
+            };
+            
+            if(isImage) {
+              reader.readAsDataURL(file);
+            } else {
+              reader.readAsText(file);
+            }
         });
     }
   };
@@ -179,8 +203,8 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                                 <Upload className="h-10 w-10 text-muted-foreground" />
                                 <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                                <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD</p>
-                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md" />
+                                <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, Images</p>
+                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,.webp" />
                               </div>
                             </TabsContent>
                             <TabsContent value="link" className="mt-4 space-y-3">

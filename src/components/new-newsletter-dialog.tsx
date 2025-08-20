@@ -15,10 +15,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Link, FileText, Bot, Loader2 } from 'lucide-react';
+import { Upload, Link, FileText, Bot, Loader2, Image as ImageIcon, Trash2 } from 'lucide-react';
 import type { Source } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUrlContent } from '@/app/actions';
+import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
@@ -36,14 +38,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
   const { toast } = useToast();
 
   const handleCreate = () => {
-    const numberedSources = sources.map((source) => {
-      if (source.type === 'text' && source.name === 'Pasted Text') {
-          const count = sources.filter(s => s.type === 'text').length;
-          return { ...source, name: `Pasted Text ${count}` };
-      }
-      return source;
-    });
-    onCreate(title, numberedSources);
+    onCreate(title, sources);
     // Don't close the dialog immediately, let the parent handle it
     // Reset state for next time
     setTitle('');
@@ -54,9 +49,15 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     if (e.target.files) {
         Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
+            const isImage = file.type.startsWith('image/');
+
             reader.onload = (event) => {
                 const content = event.target?.result as string;
-                const newSource: Source = { name: file.name, type: 'file', content };
+                const newSource: Source = { 
+                    name: file.name, 
+                    type: isImage ? 'image' : 'file', 
+                    content 
+                };
                 setSources(prev => [...prev, newSource]);
             };
             reader.onerror = () => {
@@ -66,7 +67,12 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
                     variant: 'destructive'
                 });
             };
-            reader.readAsText(file);
+            
+            if(isImage) {
+              reader.readAsDataURL(file);
+            } else {
+              reader.readAsText(file);
+            }
         });
     }
   };
@@ -114,14 +120,19 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
 
   const handleAddText = () => {
     if (textInput.trim()) {
-        const newSource: Source = { name: 'Pasted Text', type: 'text', content: textInput };
+        const textSourceCount = sources.filter(s => s.type === 'text').length + 1;
+        const newSource: Source = { name: `Pasted Text ${textSourceCount}`, type: 'text', content: textInput };
         setSources(prev => [...prev, newSource]);
         setTextInput('');
         toast({
             title: "Text Added!",
-            description: `${textInput.substring(0, 30)}... added as a source.`
+            description: `Pasted Text ${textSourceCount} added as a source.`
         });
     }
+  }
+
+  const handleRemoveSource = (sourceName: string) => {
+    setSources(prev => prev.filter(s => s.name !== sourceName));
   }
 
 
@@ -159,8 +170,8 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                  <Upload className="h-10 w-10 text-muted-foreground" />
                  <p className="mt-2 text-sm text-muted-foreground">Drag & drop files or click to upload</p>
-                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, and Markdown</p>
-                 <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md" />
+                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, and Images</p>
+                 <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,.webp" />
               </div>
             </TabsContent>
             <TabsContent value="link" className="mt-4 space-y-3">
@@ -189,6 +200,29 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
             </TabsContent>
           </Tabs>
 
+          {sources.length > 0 && (
+              <div className="space-y-2">
+                  <Label>Added Sources</Label>
+                  <ScrollArea className="h-32 w-full rounded-md border p-2">
+                      <div className="space-y-2">
+                          {sources.map(source => (
+                              <div key={source.name} className="flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
+                                  <div className="flex items-center gap-2 overflow-hidden">
+                                    {source.type === 'file' && <FileText className="h-4 w-4 shrink-0"/>}
+                                    {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0"/>}
+                                    {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
+                                    {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
+                                    <span className="truncate" title={source.name}>{source.name}</span>
+                                  </div>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => handleRemoveSource(source.name)}>
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                              </div>
+                          ))}
+                      </div>
+                  </ScrollArea>
+              </div>
+          )}
         </div>
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isCreating}>Cancel</Button>

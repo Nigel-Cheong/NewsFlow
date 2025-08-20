@@ -13,16 +13,16 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateBlocksInputSchema = z.object({
-  text: z.string().describe('The raw text content from various sources.'),
+  text: z.string().describe('The raw text content from various sources, which may include markers for images like "[IMAGE: ...]".'),
 });
 export type GenerateBlocksInput = z.infer<typeof GenerateBlocksInputSchema>;
 
 const GeneratedBlockSchema = z.object({
   title: z.string().optional().describe('A concise title for the content block, derived from headings in the text.'),
-  content: z.string().describe('The main text content of the block, typically a paragraph.'),
+  content: z.string().describe('The main text content of the block, typically a paragraph. If the block is for an image, this should be a descriptive caption for the image.'),
   type: z
     .enum(['text', 'image-with-text'])
-    .describe("The type of the block. Use 'image-with-text' if the content describes a visual concept, otherwise use 'text'."),
+    .describe("The type of the block. Use 'image-with-text' if the content is an image marker (e.g., '[IMAGE: ...]'), otherwise use 'text'."),
 });
 
 const GenerateBlocksOutputSchema = z.object({
@@ -49,12 +49,13 @@ const prompt = ai.definePrompt({
 
 Rules:
 1.  Read through the entire text provided.
-2.  Identify natural sections, headings, and paragraphs.
+2.  Identify natural sections, headings, paragraphs, and image markers.
 3.  For each section, create a content block object.
-4.  Use any clear heading in the text as the 'title' for the block. If there's no clear heading for a paragraph, you can omit the title.
-5.  The 'content' of the block should be the main paragraph text.
-6.  Set the 'type' to 'text'. If the text strongly implies a visual component (e.g., "the chart shows...", "in the photo, you can see..."), you can use 'image-with-text'.
-7.  Do not create blocks for source markers like "Source: file.pdf".
+4.  If you encounter an image marker like "[IMAGE: A placeholder for the image named image.png]", create a block of type 'image-with-text'. The 'content' for this block should be a creative and relevant caption for the image based on its name and the surrounding text context. Do not include the marker itself in the content.
+5.  For textual content, use any clear heading in the text as the 'title' for the block. If there's no clear heading for a paragraph, you can omit the title.
+6.  The 'content' of the block should be the main paragraph text.
+7.  Set the 'type' to 'text' for all non-image content.
+8.  Do not create blocks for source markers like "Source: file.pdf".
 
 Raw Text:
 """

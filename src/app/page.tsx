@@ -66,14 +66,26 @@ export default function Home() {
     });
 
     const newId = `newsletter-${Date.now()}`;
-    const combinedText = sources.map(s => `Source: ${s.name}\n${s.content}`).join('\n\n---\n\n');
+    const combinedText = sources.map(s => {
+      if (s.type === 'image') {
+        return `Source: ${s.name}\n[IMAGE: A placeholder for the image named ${s.name}]`
+      }
+      return `Source: ${s.name}\n${s.content}`
+    }).join('\n\n---\n\n');
     
     let generatedBlocks = [];
     if (combinedText.trim()) {
         try {
             const result = await runGenerateBlocks(combinedText);
             if (result.blocks) {
-                generatedBlocks = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`, colspan: 2}));
+                generatedBlocks = result.blocks.map((block, index) => {
+                    const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
+                    if (newBlock.type === 'image-with-text') {
+                        const imageSource = sources.find(s => s.type === 'image' && block.content.includes(s.name));
+                        newBlock.imageUrl = imageSource?.content || 'https://placehold.co/600x400';
+                    }
+                    return newBlock;
+                });
             }
         } catch(error) {
             console.error("Failed to generate blocks from text", error);
