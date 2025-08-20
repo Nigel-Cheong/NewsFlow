@@ -65,7 +65,16 @@ export function AppHeader({
     <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-4">
         <Newspaper className="h-6 w-6 text-primary" />
-        <h1 className="text-xl font-semibold">{title}</h1>
+        <h1 className="text-xl font-semibold">
+              <span style={{ color: '#d9432f' }}>N</span>
+              <span style={{ color: '#176ced' }}>e</span>
+              <span style={{ color: '#ffb700' }}>w</span>
+              <span style={{ color: '#009a57' }}>s</span>
+              <span style={{ color: '#d9432f' }}>F</span>
+              <span style={{ color: '#176ced' }}>l</span>
+              <span style={{ color: '#ffb700' }}>o</span>
+              <span style={{ color: '#009a57' }}>w</span>
+        </h1>
         <Badge variant={getStatusVariant(status)} className="capitalize">
           {status}
         </Badge>
