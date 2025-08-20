@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List } from 'lucide-react';
+import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List, Trash2 } from 'lucide-react';
 import type { FlaggedIssue, Source } from '@/lib/types';
 import {
   ResizableHandle,
@@ -60,6 +60,14 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
     }
   }
 
+  const handleDeleteSource = (sourceNameToDelete: string) => {
+    setSources(sources.filter(source => source.name !== sourceNameToDelete));
+    toast({
+        title: "Source Removed",
+        description: `"${sourceNameToDelete}" has been removed.`,
+    });
+  }
+
   return (
     <aside className="h-full border-r">
         <ResizablePanelGroup direction="vertical" className="h-full">
@@ -88,12 +96,16 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
                                             sources.map((source, index) => (
-                                                <div key={index} className="flex items-center gap-2 p-2 rounded-md border text-sm">
+                                                <div key={index} className="flex items-center gap-2 p-2 rounded-md border text-sm group">
                                                     {source.type === 'file' && <Upload className="h-4 w-4 shrink-0"/>}
                                                     {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
                                                     {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
                                                     {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0"/>}
-                                                    <span className="truncate" title={source.name}>{source.name}</span>
+                                                    <span className="flex-1 truncate" title={source.name}>{source.name}</span>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteSource(source.name)}>
+                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                        <span className="sr-only">Delete source</span>
+                                                    </Button>
                                                 </div>
                                             ))
                                         )}
