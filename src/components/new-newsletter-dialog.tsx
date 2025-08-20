@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, Link, FileText, Bot, Loader2 } from 'lucide-react';
 import type { Source } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { fetchUrlContent } from '@/app/actions';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
   const [title, setTitle] = useState('');
   const [sources, setSources] = useState<Source[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
+  const [isFetchingLink, setIsFetchingLink] = useState(false);
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
 
@@ -62,15 +64,44 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     }
   };
 
-  const handleAddLink = () => {
-    if (linkUrl.trim()) {
-      // TODO: Implement link fetching logic
-      console.log('Link added:', linkUrl);
+  const handleAddLink = async () => {
+    if (linkUrl.trim() && !isFetchingLink) {
+      setIsFetchingLink(true);
       toast({
-          title: "Link parsing not implemented",
-          description: "This feature is coming soon."
+          title: "Parsing URL...",
+          description: "The AI is reading the content from the provided link."
       });
-      setLinkUrl('');
+
+      try {
+        const result = await fetchUrlContent(linkUrl);
+        if (result.content) {
+            const newSource: Source = {
+                name: result.title || linkUrl,
+                type: 'link',
+                content: `Source: ${result.title || linkUrl}\n${result.content}`
+            }
+            setSources(prev => [...prev, newSource]);
+            toast({
+                title: "Link Content Added!",
+                description: `${result.title || linkUrl} has been added as a source.`
+            });
+        } else {
+            toast({
+                title: "Failed to Parse URL",
+                description: "Could not extract content from the link. Please try another URL.",
+                variant: 'destructive'
+            });
+        }
+      } catch (error) {
+         toast({
+            title: "Error Fetching Link",
+            description: "An unexpected error occurred while fetching the link.",
+            variant: 'destructive'
+        });
+      } finally {
+        setIsFetchingLink(false);
+        setLinkUrl('');
+      }
     }
   }
 
@@ -128,8 +159,10 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
             <TabsContent value="link" className="mt-4 space-y-3">
                <Label htmlFor="link-url">Add a web link</Label>
                <div className="flex gap-2">
-                 <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
-                 <Button onClick={handleAddLink}>Add Link</Button>
+                 <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink} />
+                 <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
+                    {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add Link'}
+                 </Button>
                </div>
             </TabsContent>
             <TabsContent value="text" className="mt-4 space-y-3">

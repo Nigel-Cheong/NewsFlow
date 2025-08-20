@@ -5,6 +5,7 @@ import { confidentialityCheck } from '@/ai/flows/confidentiality-check';
 import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
+import { extractContentFromUrl } from '@/ai/flows/extract-content-from-url';
 import type { ContentBlock } from '@/lib/types';
 
 export async function runConfidentialityCheck(
@@ -81,4 +82,14 @@ export async function runGenerateBlocks(text: string) {
         console.error('Error in block generation:', error);
         return { blocks: [] };
     }
+}
+
+export async function fetchUrlContent(url: string) {
+  try {
+    const result = await extractContentFromUrl({ url });
+    return result;
+  } catch (error) {
+    console.error('Error fetching URL content:', error);
+    return { content: '', title: '' };
+  }
 }
