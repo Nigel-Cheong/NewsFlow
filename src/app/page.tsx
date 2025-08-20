@@ -17,19 +17,22 @@ import {
 } from '@/components/ui/alert-dialog';
 import { NewNewsletterDialog } from '@/components/new-newsletter-dialog';
 import { mockNewsletters as defaultNewsletters } from '@/lib/mock-data';
-import type { Newsletter } from '@/lib/types';
+import type { Newsletter, Source } from '@/lib/types';
 import { Newspaper, PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { runGenerateBlocks } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newsletterToDelete, setNewsletterToDelete] = useState<string | null>(null);
   const [isNewNewsletterDialogOpen, setIsNewNewsletterDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // On component mount, load all newsletters from localStorage
     const allKeys = Object.keys(window.localStorage);
     const newsletterKeys = allKeys.filter(key => key.startsWith('newsletter-'));
     
@@ -50,34 +53,62 @@ export default function Home() {
               loadedNewsletters.push(sn);
           }
       });
-
     }
     
     setNewsletters(loadedNewsletters);
   }, []);
 
-  const handleNewNewsletter = (title: string, sources: any[]) => {
+  const handleNewNewsletter = async (title: string, sources: Source[]) => {
+    setIsCreating(true);
+    toast({
+        title: "Generating Newsletter...",
+        description: "The AI is crafting your newsletter from the sources provided. Please wait."
+    });
+
     const newId = `newsletter-${Date.now()}`;
+    const combinedText = sources.map(s => `Source: ${s.name}\nContent:\n${s.content}`).join('\n\n---\n\n');
+    
+    let generatedBlocks = [];
+    if (combinedText) {
+        try {
+            const result = await runGenerateBlocks(combinedText);
+            if (result.blocks) {
+                generatedBlocks = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`}));
+            }
+        } catch(error) {
+            console.error("Failed to generate blocks from text", error);
+            toast({
+                title: "AI Generation Failed",
+                description: "Could not generate content from the sources. A blank newsletter will be created.",
+                variant: "destructive"
+            });
+        }
+    }
+
     const newNewsletter: Newsletter = {
       id: newId,
       title: title || 'Untitled Newsletter',
       lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
+      sources: sources.map(({ name, type }) => ({ name, type })),
       blocks: [
         {
-          id: `block-${Date.now()}`,
+          id: `block-header-${Date.now()}`,
           type: 'header',
           content: title || 'Your New Newsletter',
           subtitle: 'A great start!',
           colspan: 2,
           imageUrl: 'https://placehold.co/1200x400'
-        }
+        },
+        ...generatedBlocks
       ]
     };
 
-    // TODO: Process sources and add them as content blocks
-
     localStorage.setItem(newId, JSON.stringify(newNewsletter));
-    
+    setIsCreating(false);
+    toast({
+        title: "Newsletter Created!",
+        description: "Your new newsletter is ready.",
+    });
     router.push(`/newsletters/${newId}`);
   };
 
@@ -145,6 +176,7 @@ export default function Home() {
         isOpen={isNewNewsletterDialogOpen}
         onOpenChange={setIsNewNewsletterDialogOpen}
         onCreate={handleNewNewsletter}
+        isCreating={isCreating}
       />
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>

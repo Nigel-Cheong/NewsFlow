@@ -4,8 +4,8 @@
 import { confidentialityCheck } from '@/ai/flows/confidentiality-check';
 import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
+import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
 import type { ContentBlock } from '@/lib/types';
-import { ai } from '@/ai/genkit';
 
 export async function runConfidentialityCheck(
   content: ContentBlock[],
@@ -71,4 +71,14 @@ export async function runChat(prompt: string, context?: string) {
     console.error('Error in chat:', error);
     return new Response(JSON.stringify({ response: 'An error occurred.' }), { status: 500, headers: { 'Content-Type': 'application/json' }});
   }
+}
+
+export async function runGenerateBlocks(text: string) {
+    try {
+        const result = await generateBlocksFromText({ text });
+        return result;
+    } catch (error) {
+        console.error('Error in block generation:', error);
+        return { blocks: [] };
+    }
 }

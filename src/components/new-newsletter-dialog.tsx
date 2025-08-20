@@ -15,23 +15,27 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Link, FileText, Bot } from 'lucide-react';
+import { Upload, Link, FileText, Bot, Loader2 } from 'lucide-react';
+import type { Source } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onCreate: (title: string, sources: any[]) => void;
+  onCreate: (title: string, sources: Source[]) => void;
+  isCreating: boolean;
 }
 
-export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate }: NewNewsletterDialogProps) {
+export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating }: NewNewsletterDialogProps) {
   const [title, setTitle] = useState('');
-  const [sources, setSources] = useState<any[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [linkUrl, setLinkUrl] = useState('');
   const [textInput, setTextInput] = useState('');
+  const { toast } = useToast();
 
   const handleCreate = () => {
     onCreate(title, sources);
-    onOpenChange(false);
+    // Don't close the dialog immediately, let the parent handle it
     // Reset state for next time
     setTitle('');
     setSources([]);
@@ -39,22 +43,46 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate }: NewNewsl
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-        // TODO: Handle file uploads
-      console.log('Files selected:', e.target.files);
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target?.result as string;
+                const newSource: Source = { name: file.name, type: 'file', content };
+                setSources(prev => [...prev, newSource]);
+            };
+            reader.onerror = () => {
+                toast({
+                    title: "File Read Error",
+                    description: `Could not read the file: ${file.name}`,
+                    variant: 'destructive'
+                });
+            };
+            reader.readAsText(file);
+        });
     }
   };
 
   const handleAddLink = () => {
-    if (linkUrl) {
+    if (linkUrl.trim()) {
+      // TODO: Implement link fetching logic
       console.log('Link added:', linkUrl);
+      toast({
+          title: "Link parsing not implemented",
+          description: "This feature is coming soon."
+      });
       setLinkUrl('');
     }
   }
 
   const handleAddText = () => {
-    if (textInput) {
-        console.log('Text added:', textInput);
+    if (textInput.trim()) {
+        const newSource: Source = { name: 'Pasted Text', type: 'text', content: textInput };
+        setSources(prev => [...prev, newSource]);
         setTextInput('');
+        toast({
+            title: "Text Added!",
+            description: `${textInput.substring(0, 30)}... added as a source.`
+        });
     }
   }
 
@@ -65,7 +93,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate }: NewNewsl
         <DialogHeader>
           <DialogTitle>Create New Newsletter</DialogTitle>
           <DialogDescription>
-            Give your newsletter a title and add content sources to get started.
+            Give your newsletter a title and add content sources to get started. The AI will generate a draft for you.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -123,8 +151,11 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate }: NewNewsl
 
         </div>
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button type="submit" onClick={handleCreate} disabled={!title}>Create Newsletter</Button>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isCreating}>Cancel</Button>
+          <Button type="submit" onClick={handleCreate} disabled={!title || sources.length === 0 || isCreating}>
+            {isCreating && <Loader2 className='animate-spin' />}
+            Create Newsletter
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

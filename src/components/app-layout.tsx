@@ -6,7 +6,7 @@ import { AppHeader } from './app-header';
 import { Editor } from './editor';
 import { SourcesSidebar } from './sources-sidebar';
 import { ChatSidebar } from './chat-sidebar';
-import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter } from '@/lib/types';
+import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter, Source } from '@/lib/types';
 import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
 import { runConfidentialityCheck, runSuggestLayout } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -226,6 +226,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         <ResizablePanelGroup direction="horizontal">
             <ResizablePanel defaultSize={20} minSize={20}>
                 <SourcesSidebar
+                    sources={newsletter.sources || []}
                     issues={flaggedIssues}
                     isConfidential={isConfidential}
                 />

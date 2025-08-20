@@ -32,12 +32,20 @@ export const ContentBlockSchema = z.object({
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
 
+export const SourceSchema = z.object({
+    name: z.string(),
+    type: z.enum(['file', 'link', 'text', 'gdrive']),
+    content: z.string().optional(), // Raw content for processing
+});
+
+export type Source = z.infer<typeof SourceSchema>;
 
 export interface Newsletter {
   id: string;
   title: string;
   blocks: ContentBlock[];
   lastUpdated: string;
+  sources?: Omit<Source, 'content'>[];
 }
 
 export interface FlaggedIssue {

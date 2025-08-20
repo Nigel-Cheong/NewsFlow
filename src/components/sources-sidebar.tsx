@@ -10,53 +10,53 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List } from 'lucide-react';
-import type { FlaggedIssue } from '@/lib/types';
+import type { FlaggedIssue, Source } from '@/lib/types';
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { ScrollArea } from './ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface SourcesSidebarProps {
+  sources: Omit<Source, 'content'>[];
   issues: FlaggedIssue[];
   isConfidential: boolean;
 }
 
-type Source = {
-    type: 'file' | 'link' | 'text';
-    value: string;
-    name?: string;
-}
-
-export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) {
-  const [sources, setSources] = useState<Source[]>([]);
+export function SourcesSidebar({ sources: initialSources, issues, isConfidential }: SourcesSidebarProps) {
+  const [sources, setSources] = useState(initialSources);
   const [linkUrl, setLinkUrl] = useState('');
   const [textInput, setTextInput] = useState('');
+  const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newSources = Array.from(e.target.files).map(file => ({
-          type: 'file' as const,
-          value: file.name,
-          name: file.name,
-      }));
-      setSources(prev => [...prev, ...newSources]);
-      console.log('Files selected:', e.target.files);
+      toast({
+          title: "File Upload Not Implemented",
+          description: "This is a demo. File content processing happens at creation.",
+      });
     }
   };
 
   const handleAddLink = () => {
     if (linkUrl.trim()) {
-      setSources(prev => [...prev, { type: 'link', value: linkUrl.trim() }]);
+      toast({
+          title: "Link Adding Not Implemented",
+          description: "This is a demo. Link processing happens at creation.",
+      });
       setLinkUrl('');
     }
   }
 
   const handleAddText = () => {
     if (textInput.trim()) {
-        setSources(prev => [...prev, { type: 'text', value: textInput.trim() }]);
-        setTextInput('');
+      toast({
+          title: "Text Adding Not Implemented",
+          description: "This is a demo. Text processing happens at creation.",
+      });
+      setTextInput('');
     }
   }
 
@@ -73,26 +73,27 @@ export function SourcesSidebar({ issues, isConfidential }: SourcesSidebarProps) 
                         </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col overflow-y-auto p-2 pt-0">
-                          <Tabs defaultValue="add" className="w-full flex-1 flex flex-col">
+                          <Tabs defaultValue="list" className="w-full flex-1 flex flex-col">
                             <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
-                              <TabsTrigger value="add" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
+                              <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
                               <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
                               <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="add" className="mt-4 flex-1">
+                            <TabsContent value="list" className="mt-4 flex-1">
                                 <ScrollArea className="h-full">
                                     <div className="space-y-2 pr-4">
                                         {sources.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground text-center py-4">No sources added yet.</p>
+                                            <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
                                             sources.map((source, index) => (
                                                 <div key={index} className="flex items-center gap-2 p-2 rounded-md border text-sm">
                                                     {source.type === 'file' && <Upload className="h-4 w-4 shrink-0"/>}
                                                     {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
                                                     {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
-                                                    <span className="truncate" title={source.value}>{source.value}</span>
+                                                    {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0"/>}
+                                                    <span className="truncate" title={source.name}>{source.name}</span>
                                                 </div>
                                             ))
                                         )}
