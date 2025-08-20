@@ -6,7 +6,7 @@ import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
 import { extractContentFromUrl } from '@/ai/flows/extract-content-from-url';
-import type { ContentBlock } from '@/lib/types';
+import type { ContentBlock, Newsletter } from '@/lib/types';
 
 export async function runConfidentialityCheck(
   content: ContentBlock[],
@@ -92,4 +92,22 @@ export async function fetchUrlContent(url: string) {
     console.error('Error fetching URL content:', error);
     return { content: '', title: '' };
   }
+}
+
+export async function sendApprovalEmail(email: string, newsletter: Newsletter) {
+    // This is a mock function. In a real app, you would use a service like Resend, SendGrid, or Nodemailer.
+    console.log(`
+      ===============================================
+      Sending Approval Request to: ${email}
+      -----------------------------------------------
+      Newsletter Title: ${newsletter.title}
+      Newsletter ID: ${newsletter.id}
+      Preview URL: /newsletters/${newsletter.id}/preview
+      ===============================================
+    `);
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return { success: true };
 }

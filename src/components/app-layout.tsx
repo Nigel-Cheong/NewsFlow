@@ -418,9 +418,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-full">
       <AppHeader
-        newsletterId={newsletter.id}
-        title={newsletter.title}
-        status={newsletter.status}
+        newsletter={newsletter}
         onStatusChange={handleStatusChange}
         onSuggestLayout={handleSuggestLayout}
         onSave={handleSave}

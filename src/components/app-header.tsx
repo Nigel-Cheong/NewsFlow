@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { ApprovalStatus } from '@/lib/types';
+import { useState } from 'react';
+import type { ApprovalStatus, Newsletter } from '@/lib/types';
 import {
   Newspaper,
   Undo,
@@ -17,11 +18,75 @@ import {
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { sendApprovalEmail } from '@/app/actions';
+
+interface ApprovalDialogProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  onSubmit: (email: string) => Promise<void>;
+}
+
+function ApprovalDialog({ isOpen, onOpenChange, onSubmit }: ApprovalDialogProps) {
+    const [email, setEmail] = useState('');
+    const [isSending, setIsSending] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsSending(true);
+        await onSubmit(email);
+        setIsSending(false);
+        onOpenChange(false);
+    }
+    
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Submit for Approval</DialogTitle>
+                    <DialogDescription>
+                        Enter the email of the person you want to send this newsletter to for approval.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="email" className="text-right">
+                        Email
+                        </Label>
+                        <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="col-span-3"
+                        placeholder="approver@example.com"
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+                    <Button onClick={handleSubmit} disabled={isSending || !email}>
+                        {isSending ? <Loader2 className="animate-spin" /> : <Send />}
+                        Send for Approval
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 
 interface AppHeaderProps {
-  newsletterId: string;
-  title: string;
-  status: ApprovalStatus;
+  newsletter: Newsletter;
   onStatusChange: (newStatus: ApprovalStatus) => void;
   onSuggestLayout: () => void;
   onSave: () => void;
@@ -33,9 +98,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  newsletterId,
-  title,
-  status,
+  newsletter,
   onStatusChange,
   onSuggestLayout,
   onSave,
@@ -45,6 +108,9 @@ export function AppHeader({
   canRedo,
   isSuggestingLayout,
 }: AppHeaderProps) {
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const { toast } = useToast();
+  
   const getStatusVariant = (
     status: ApprovalStatus
   ): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -60,8 +126,27 @@ export function AppHeader({
         return 'outline';
     }
   };
+  
+  const handleEmailSubmit = async (email: string) => {
+    try {
+      await sendApprovalEmail(email, newsletter);
+      onStatusChange('Pending Approval');
+      toast({
+        title: 'Approval Request Sent',
+        description: `The newsletter has been sent to ${email} for approval.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Failed to Send Email',
+        description: 'Could not send the approval request. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
 
   return (
+    <>
     <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-4">
         <Newspaper className="h-6 w-6 text-primary" />
@@ -75,8 +160,8 @@ export function AppHeader({
               <span style={{ color: '#ffb700' }}>o</span>
               <span style={{ color: '#009a57' }}>w</span>
         </h1>
-        <Badge variant={getStatusVariant(status)} className="capitalize">
-          {status}
+        <Badge variant={getStatusVariant(newsletter.status)} className="capitalize">
+          {newsletter.status}
         </Badge>
       </div>
       <div className="flex items-center gap-2">
@@ -101,21 +186,21 @@ export function AppHeader({
             Save
         </Button>
         
-        <Link href={`/newsletters/${newsletterId}/preview`} target="_blank">
+        <Link href={`/newsletters/${newsletter.id}/preview`} target="_blank">
           <Button size="sm">
             <Eye />
             Preview
           </Button>
         </Link>
         
-        {status === 'Draft' && (
-            <Button onClick={() => onStatusChange('Pending Approval')} size="sm">
+        {newsletter.status === 'Draft' && (
+            <Button onClick={() => setIsApprovalDialogOpen(true)} size="sm">
               <Send />
               Submit for Approval
             </Button>
         )}
 
-        {status === 'Pending Approval' && (
+        {newsletter.status === 'Pending Approval' && (
           <>
             <Button onClick={() => onStatusChange('Approved')} variant="default" size="sm">
               <Check />
@@ -127,12 +212,18 @@ export function AppHeader({
             </Button>
           </>
         )}
-        {(status === 'Approved' || status === 'Rejected') && (
+        {(newsletter.status === 'Approved' || newsletter.status === 'Rejected') && (
            <Button onClick={() => onStatusChange('Draft')} variant="outline" size="sm">
             Revert to Draft
           </Button>
         )}
       </div>
     </header>
+     <ApprovalDialog 
+        isOpen={isApprovalDialogOpen}
+        onOpenChange={setIsApprovalDialogOpen}
+        onSubmit={handleEmailSubmit}
+      />
+    </>
   );
 }
