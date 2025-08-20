@@ -66,8 +66,12 @@ export default function Home() {
     });
 
     const newId = `newsletter-${Date.now()}`;
+    
+    const imageSources = sources.filter(s => s.type === 'image');
+
     const combinedText = sources.map(s => {
       if (s.type === 'image') {
+        // Create a marker for the AI to understand where an image goes.
         return `Source: ${s.name}\n[IMAGE: ${s.name}]`
       }
       return `Source: ${s.name}\n${s.content}`
@@ -82,12 +86,18 @@ export default function Home() {
                     const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                     if (newBlock.type === 'image-with-text') {
                         // The AI was prompted to use the image name in the caption.
-                        // We find the original image source by matching its name.
-                        const imageSource = sources.find(s => s.type === 'image' && block.content.includes(s.name.split('.')[0]));
+                        // We find the original image source by matching its name in the generated content.
+                        const imageSource = imageSources.find(s => 
+                            block.content.toLowerCase().includes(s.name.split('.')[0].toLowerCase()) ||
+                            s.name.toLowerCase().includes(block.content.toLowerCase())
+                        );
+
                         if (imageSource) {
                             newBlock.imageUrl = imageSource.content;
                         } else {
-                            newBlock.imageUrl = 'https://placehold.co/600x400';
+                            // Fallback in case the AI doesn't include the name or it can't be matched
+                            const firstImage = imageSources.shift();
+                            newBlock.imageUrl = firstImage ? firstImage.content : 'https://placehold.co/600x400';
                         }
                     }
                     return newBlock;
@@ -105,6 +115,13 @@ export default function Home() {
     
     let textSourceCounter = 1;
     const finalSources = sources.map(s => {
+      // Don't store the large data URI content in the final newsletter object
+      if (s.type === 'image' || s.type === 'file' || s.type === 'link') {
+          if (s.type === 'text' && s.name === 'Pasted Text') {
+            return { name: `Pasted Text ${textSourceCounter++}`, type: s.type };
+          }
+          return { name: s.name, type: s.type };
+      }
       if (s.type === 'text' && s.name === 'Pasted Text') {
         return { name: `Pasted Text ${textSourceCounter++}`, type: s.type };
       }

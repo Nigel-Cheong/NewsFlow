@@ -20,6 +20,7 @@ import type { Source } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUrlContent } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
@@ -157,70 +158,76 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
             />
           </div>
           
-          <Tabs defaultValue="file" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="file"><Upload className="mr-1 h-4 w-4"/> File</TabsTrigger>
-              <TabsTrigger value="link"><Link className="mr-1 h-4 w-4"/> Link</TabsTrigger>
-              <TabsTrigger value="text"><FileText className="mr-1 h-4 w-4"/> Text</TabsTrigger>
-              <TabsTrigger value="gdrive"><Bot className="mr-1 h-4 w-4"/> Drive</TabsTrigger>
-            </TabsList>
-            <TabsContent value="file" className="mt-4">
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
-                 <Upload className="h-10 w-10 text-muted-foreground" />
-                 <p className="mt-2 text-sm text-muted-foreground">Drag & drop files or click to upload</p>
-                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, JPEG, PNG, GIF</p>
-                 <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
-              </div>
-            </TabsContent>
-            <TabsContent value="link" className="mt-4 space-y-3">
-               <Label htmlFor="link-url">Add a web link</Label>
-               <div className="flex gap-2">
-                 <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink} />
-                 <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
-                    {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add Link'}
-                 </Button>
-               </div>
-            </TabsContent>
-            <TabsContent value="text" className="mt-4 space-y-3">
-               <Label htmlFor="text-input">Paste your text</Label>
-               <div className="flex flex-col gap-2">
-                 <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
-                 <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
-               </div>
-            </TabsContent>
-            <TabsContent value="gdrive" className="mt-4">
-                <div className="flex flex-col items-center justify-center rounded-lg border border-muted/50 p-8 text-center">
-                    <Bot className="h-10 w-10 text-muted-foreground"/>
-                    <p className="mt-2 font-semibold">Sync with Google Drive</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Import documents directly from your Google Drive account.</p>
-                    <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
-                </div>
-            </TabsContent>
-          </Tabs>
-
-          {sources.length > 0 && (
-              <div className="space-y-2">
-                  <Label>Added Sources</Label>
-                  <ScrollArea className="h-40 w-full rounded-md border p-2">
-                      <div className="space-y-2">
-                          {sources.map((source, index) => (
-                              <div key={`${source.name}-${index}`} className="flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
-                                  <div className="flex items-center gap-2 overflow-hidden">
-                                    {source.type === 'file' && <FileText className="h-4 w-4 shrink-0"/>}
-                                    {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0"/>}
-                                    {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
-                                    {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
-                                    <span className="truncate" title={source.name}>{source.name}</span>
-                                  </div>
-                                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => handleRemoveSource(source.name)}>
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                  </Button>
-                              </div>
-                          ))}
-                      </div>
-                  </ScrollArea>
-              </div>
-          )}
+            <ResizablePanelGroup direction="vertical" className="min-h-[400px]">
+                <ResizablePanel defaultSize={40}>
+                    <Tabs defaultValue="file" className="w-full">
+                        <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="file"><Upload className="mr-1 h-4 w-4"/> File</TabsTrigger>
+                        <TabsTrigger value="link"><Link className="mr-1 h-4 w-4"/> Link</TabsTrigger>
+                        <TabsTrigger value="text"><FileText className="mr-1 h-4 w-4"/> Text</TabsTrigger>
+                        <TabsTrigger value="gdrive"><Bot className="mr-1 h-4 w-4"/> Drive</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="file" className="mt-4">
+                        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
+                            <Upload className="h-10 w-10 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">Drag & drop files or click to upload</p>
+                            <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, PNG, JPG, GIF</p>
+                            <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
+                        </div>
+                        </TabsContent>
+                        <TabsContent value="link" className="mt-4 space-y-3">
+                        <Label htmlFor="link-url">Add a web link</Label>
+                        <div className="flex gap-2">
+                            <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink} />
+                            <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
+                                {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add Link'}
+                            </Button>
+                        </div>
+                        </TabsContent>
+                        <TabsContent value="text" className="mt-4 space-y-3">
+                        <Label htmlFor="text-input">Paste your text</Label>
+                        <div className="flex flex-col gap-2">
+                            <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
+                            <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
+                        </div>
+                        </TabsContent>
+                        <TabsContent value="gdrive" className="mt-4">
+                            <div className="flex flex-col items-center justify-center rounded-lg border border-muted/50 p-8 text-center">
+                                <Bot className="h-10 w-10 text-muted-foreground"/>
+                                <p className="mt-2 font-semibold">Sync with Google Drive</p>
+                                <p className="mt-1 text-sm text-muted-foreground">Import documents directly from your Google Drive account.</p>
+                                <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={60}>
+                    {sources.length > 0 && (
+                        <div className="space-y-2 pt-4 h-full flex flex-col">
+                            <Label>Added Sources</Label>
+                            <ScrollArea className="flex-1 w-full rounded-md border p-2">
+                                <div className="space-y-2">
+                                    {sources.map((source, index) => (
+                                        <div key={`${source.name}-${index}`} className="flex items-center justify-between p-2 rounded-md bg-muted/50 text-sm">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                            {source.type === 'file' && <FileText className="h-4 w-4 shrink-0"/>}
+                                            {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0"/>}
+                                            {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
+                                            {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
+                                            <span className="truncate" title={source.name}>{source.name}</span>
+                                            </div>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => handleRemoveSource(source.name)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    )}
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </div>
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isCreating}>Cancel</Button>
@@ -233,5 +240,3 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     </Dialog>
   );
 }
-
-    

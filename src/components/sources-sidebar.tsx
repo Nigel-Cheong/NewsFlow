@@ -53,7 +53,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
     }
     
     return (
-        <div className="group p-2 rounded-md border text-sm flex items-center justify-between gap-2">
+        <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
             <div className="flex items-start gap-2 flex-1 min-w-0">
                 {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-1"/>}
@@ -81,11 +81,11 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
                         <Check className="h-4 w-4" />
                     </Button>
                 ) : (
-                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                     <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setIsEditing(true)}>
                         <Edit className="h-4 w-4" />
                     </Button>
                 )}
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={onDelete}>
+                <Button variant="destructive" size="icon" className="h-6 w-6" onClick={onDelete}>
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Delete source</span>
                 </Button>
@@ -200,9 +200,9 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
-                                <ScrollArea className="h-full">
-                                    <div className="space-y-2 pr-2">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-auto">
+                                <div className="space-y-2 pr-2 h-full">
+                                    <ScrollArea className="h-full">
                                         {sources.length === 0 ? (
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
@@ -227,15 +227,15 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                                 />
                                             ))
                                         )}
-                                    </div>
-                                </ScrollArea>
+                                    </ScrollArea>
+                                </div>
                             </TabsContent>
                             <TabsContent value="file" className="mt-4 flex-1 overflow-hidden">
                               <ScrollArea className="h-full pr-2">
                                 <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
                                   <Upload className="h-10 w-10 text-muted-foreground" />
                                   <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                                  <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, JPEG, PNG, GIF</p>
+                                  <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, PNG, JPG, GIF</p>
                                   <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
                                 </div>
                               </ScrollArea>

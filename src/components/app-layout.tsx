@@ -205,7 +205,8 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
                 const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                 if (newBlock.type === 'image-with-text') {
-                    newBlock.imageUrl = source.content; // The content of an image source is its data URL
+                    // The content of an image source is its data URI
+                    newBlock.imageUrl = source.content; 
                 }
                 return newBlock;
             });
