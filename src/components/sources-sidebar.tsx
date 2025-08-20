@@ -368,7 +368,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                             <AlertDescription>
                                                 The content seems to be clear of any sensitive keywords.
                                             </AlertDescription>
-                                        </Aler>
+                                        </Alert>
                                     )}
                                 </div>
                               </ScrollArea>
@@ -402,9 +402,9 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure you want to delete all flagged sentences?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDescription>
                 This action cannot be undone. This will permanently delete all {issues.length} sentences containing confidential keywords from your newsletter.
-              </AlertDialogDescription>
+              </AlertDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
