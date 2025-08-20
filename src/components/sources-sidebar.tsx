@@ -82,30 +82,32 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col p-2 pt-0 min-h-0">
                           <Tabs defaultValue="list" className="w-full flex-1 flex flex-col">
-                            <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+                            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                               <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
                               <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
                               <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-y-auto">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
                                 <ScrollArea className="h-full">
                                     <div className="space-y-2 pr-2">
                                         {sources.length === 0 ? (
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
                                             sources.map((source, index) => (
-                                                <div key={index} className="flex items-center gap-2 p-2 rounded-md border text-sm group">
-                                                    {source.type === 'file' && <Upload className="h-4 w-4 shrink-0"/>}
-                                                    {source.type === 'link' && <Link className="h-4 w-4 shrink-0"/>}
-                                                    {source.type === 'text' && <FileText className="h-4 w-4 shrink-0"/>}
-                                                    {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0"/>}
-                                                    <span className="flex-1 truncate" title={source.name}>{source.name}</span>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteSource(source.name)}>
+                                                <div key={index} className="relative p-2 rounded-md border text-sm group">
+                                                    <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteSource(source.name)}>
                                                         <Trash2 className="h-4 w-4 text-destructive" />
                                                         <span className="sr-only">Delete source</span>
                                                     </Button>
+                                                    <div className="flex items-start gap-2 pr-8">
+                                                        {source.type === 'file' && <Upload className="h-4 w-4 shrink-0 mt-0.5"/>}
+                                                        {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
+                                                        {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
+                                                        {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
+                                                        <span className="flex-1 break-words" title={source.name}>{source.name}</span>
+                                                    </div>
                                                 </div>
                                             ))
                                         )}
