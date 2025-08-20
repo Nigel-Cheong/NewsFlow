@@ -29,6 +29,7 @@ export const ContentBlockSchema = z.object({
   eventLocation: z.string().optional(),
   tableData: z.array(z.array(z.string())).optional(),
   headerColor: z.string().optional(),
+  headerTextColor: z.string().optional(),
 });
 
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
@@ -57,3 +58,5 @@ export interface FlaggedIssue {
 }
 
 export type ApprovalStatus = 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
+
+    

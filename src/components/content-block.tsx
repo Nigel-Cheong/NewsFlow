@@ -156,6 +156,10 @@ export function ContentBlockView({
                     <Label htmlFor={`headerColor-${block.id}`}>Header Overlay Color</Label>
                     <Input id={`headerColor-${block.id}`} type="color" value={editState.headerColor || '#000000'} onChange={(e) => handleInputChange('headerColor', e.target.value)} className="h-10" />
                 </div>
+                <div>
+                    <Label htmlFor={`headerTextColor-${block.id}`}>Header Text Color</Label>
+                    <Input id={`headerTextColor-${block.id}`} type="color" value={editState.headerTextColor || '#FFFFFF'} onChange={(e) => handleInputChange('headerTextColor', e.target.value)} className="h-10" />
+                </div>
                 <div className='flex items-center gap-2'>
                     <Separator className='flex-1'/>
                     <span className='text-xs text-muted-foreground'>OR</span>
@@ -328,8 +332,9 @@ export function ContentBlockView({
     switch (block.type) {
     case 'header':
         const headerStyle = block.headerColor ? { backgroundColor: `${block.headerColor}80` } : {}; // Add 80 for 50% opacity in hex
+        const textStyle = { color: block.headerTextColor || '#FFFFFF' };
         return (
-        <div className="relative text-white">
+        <div className="relative">
             {block.imageUrl && (
             <Image
                 src={block.imageUrl}
@@ -341,8 +346,8 @@ export function ContentBlockView({
             />
             )}
             <div className="absolute inset-0 bg-black/50 rounded-md flex flex-col justify-center items-center text-center p-4" style={headerStyle}>
-            <h1 className="text-4xl font-bold">{highlightText(block.content)}</h1>
-            {block.subtitle && <p className="text-xl mt-2">{highlightText(block.subtitle)}</p>}
+            <h1 className="text-4xl font-bold" style={textStyle}>{highlightText(block.content)}</h1>
+            {block.subtitle && <p className="text-xl mt-2" style={textStyle}>{highlightText(block.subtitle)}</p>}
             </div>
         </div>
         )
@@ -536,3 +541,5 @@ export function ContentBlockView({
       </Card>
   );
 }
+
+    
