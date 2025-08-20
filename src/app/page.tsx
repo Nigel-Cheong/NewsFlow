@@ -88,8 +88,8 @@ export default function Home() {
                         // The AI was prompted to use the image name in the caption.
                         // We find the original image source by matching its name in the generated content.
                         const imageSource = imageSources.find(s => 
-                            block.content.toLowerCase().includes(s.name.split('.')[0].toLowerCase()) ||
-                            s.name.toLowerCase().includes(block.content.toLowerCase())
+                            newBlock.content.toLowerCase().includes(s.name.split('.')[0].toLowerCase()) ||
+                            s.name.toLowerCase().includes(newBlock.content.toLowerCase())
                         );
 
                         if (imageSource) {
@@ -185,7 +185,16 @@ export default function Home() {
         <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
           <div className="flex items-center gap-4">
             <Newspaper className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold">Newsflow</h1>
+            <h1 className="text-xl font-semibold">
+              <span style={{ color: '#d9432f' }}>N</span>
+              <span style={{ color: '#176ced' }}>e</span>
+              <span style={{ color: '#ffb700' }}>w</span>
+              <span style={{ color: '#009a57' }}>s</span>
+              <span style={{ color: '#d9432f' }}>F</span>
+              <span style={{ color: '#176ced' }}>l</span>
+              <span style={{ color: '#ffb700' }}>o</span>
+              <span style={{ color: '#009a57' }}>w</span>
+            </h1>
           </div>
           <Button onClick={() => setIsNewNewsletterDialogOpen(true)}>
             <PlusCircle />
@@ -249,5 +258,3 @@ export default function Home() {
     </>
   );
 }
-
-    
