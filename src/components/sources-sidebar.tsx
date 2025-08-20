@@ -210,208 +210,210 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
 
 
   return (
-    <aside className="h-full border-r flex flex-col">
-        <ResizablePanelGroup direction="vertical" className="flex-1">
-            <ResizablePanel defaultSize={50} minSize={30}>
-                <div className="flex flex-col h-full p-2">
-                     <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
-                        <CardHeader className="p-4">
-                        <CardTitle className="flex items-center gap-2 text-base">
-                            <BookText />
-                            Content Sources
-                        </CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1 flex flex-col p-2 pt-0 overflow-hidden">
-                          <Tabs defaultValue="list" className="w-full flex-1 flex flex-col overflow-hidden">
-                            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
-                              <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
-                              <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
-                              <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
-                              <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
-                              <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1 overflow-auto">
+    <>
+      <aside className="h-full border-r flex flex-col">
+          <ResizablePanelGroup direction="vertical" className="flex-1">
+              <ResizablePanel defaultSize={50} minSize={30}>
+                  <div className="flex flex-col h-full p-2">
+                       <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
+                          <CardHeader className="p-4">
+                          <CardTitle className="flex items-center gap-2 text-base">
+                              <BookText />
+                              Content Sources
+                          </CardTitle>
+                          </CardHeader>
+                          <CardContent className="flex-1 flex flex-col p-2 pt-0 overflow-hidden">
+                            <Tabs defaultValue="list" className="w-full flex-1 flex flex-col overflow-hidden">
+                              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+                                <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
+                                <TabsTrigger value="file" className="text-xs p-1 h-auto"><Upload className="mr-1 h-3 w-3"/>File</TabsTrigger>
+                                <TabsTrigger value="link" className="text-xs p-1 h-auto"><Link className="mr-1 h-3 w-3"/>Link</TabsTrigger>
+                                <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
+                                <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
+                              </TabsList>
+                              <TabsContent value="list" className="mt-4 flex-1 overflow-hidden">
+                                  <ScrollArea className="h-full pr-2">
+                                      <div className="space-y-2">
+                                          {sources.length === 0 ? (
+                                              <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
+                                          ) : (
+                                              sources.map((source, index) => (
+                                                  <SourceItem 
+                                                      key={`${source.name}-${index}`}
+                                                      source={source}
+                                                      onDelete={() => {
+                                                          onDeleteSource(source.name);
+                                                          toast({
+                                                              title: "Source Removed",
+                                                              description: `"${source.name}" has been removed.`,
+                                                          });
+                                                      }}
+                                                      onUpdate={(newName) => {
+                                                          onUpdateSource(source.name, newName);
+                                                           toast({
+                                                              title: "Source Renamed",
+                                                              description: `Source renamed to "${newName}".`,
+                                                          });
+                                                      }}
+                                                  />
+                                              ))
+                                          )}
+                                      </div>
+                                  </ScrollArea>
+                              </TabsContent>
+                              <TabsContent value="file" className="mt-4 flex-1 overflow-hidden">
                                 <ScrollArea className="h-full pr-2">
-                                    <div className="space-y-2">
-                                        {sources.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
-                                        ) : (
-                                            sources.map((source, index) => (
-                                                <SourceItem 
-                                                    key={`${source.name}-${index}`}
-                                                    source={source}
-                                                    onDelete={() => {
-                                                        onDeleteSource(source.name);
-                                                        toast({
-                                                            title: "Source Removed",
-                                                            description: `"${source.name}" has been removed.`,
-                                                        });
-                                                    }}
-                                                    onUpdate={(newName) => {
-                                                        onUpdateSource(source.name, newName);
-                                                         toast({
-                                                            title: "Source Renamed",
-                                                            description: `Source renamed to "${newName}".`,
-                                                        });
-                                                    }}
-                                                />
-                                            ))
-                                        )}
+                                  <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
+                                    <Upload className="h-10 w-10 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
+                                    <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, PNG, JPG, GIF</p>
+                                    <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
+                                  </div>
+                                </ScrollArea>
+                              </TabsContent>
+                              <TabsContent value="link" className="mt-4 flex-1 overflow-hidden">
+                                 <ScrollArea className="h-full pr-2">
+                                  <div className="space-y-3">
+                                    <Label htmlFor="link-url">Add a web link</Label>
+                                    <div className="flex gap-2">
+                                      <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink}/>
+                                      <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
+                                          {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add'}
+                                      </Button>
                                     </div>
-                                </ScrollArea>
-                            </TabsContent>
-                            <TabsContent value="file" className="mt-4 flex-1 overflow-auto">
-                              <ScrollArea className="h-full pr-2">
-                                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
-                                  <Upload className="h-10 w-10 text-muted-foreground" />
-                                  <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                                  <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, PNG, JPG, GIF</p>
-                                  <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
-                                </div>
-                              </ScrollArea>
-                            </TabsContent>
-                            <TabsContent value="link" className="mt-4 flex-1 overflow-auto">
-                               <ScrollArea className="h-full pr-2">
-                                <div className="space-y-3">
-                                  <Label htmlFor="link-url">Add a web link</Label>
-                                  <div className="flex gap-2">
-                                    <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink}/>
-                                    <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
-                                        {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add'}
-                                    </Button>
-                                  </div>
-                                </div>
-                              </ScrollArea>
-                            </TabsContent>
-                            <TabsContent value="text" className="mt-4 flex-1 overflow-auto">
-                               <ScrollArea className="h-full pr-2">
-                                <div className="space-y-3">
-                                  <Label htmlFor="text-input">Paste your text</Label>
-                                  <div className="flex flex-col gap-2">
-                                    <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
-                                    <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
-                                  </div>
-                                </div>
-                              </ScrollArea>
-                            </TabsContent>
-                            <TabsContent value="gdrive" className="mt-4 flex-1 overflow-auto">
-                                <ScrollArea className="h-full pr-2">
-                                  <div className="flex flex-col items-center justify-center rounded-lg border border-muted/50 p-8 text-center">
-                                      <Bot className="h-10 w-10 text-muted-foreground"/>
-                                      <p className="mt-2 font-semibold">Sync with Google Drive</p>
-                                      <p className="mt-1 text-sm text-muted-foreground">Import documents directly.</p>
-                                      <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
                                   </div>
                                 </ScrollArea>
-                            </TabsContent>
-                          </Tabs>
-                        </CardContent>
-                    </Card>
-                </div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50} minSize={25}>
-                 <div className="flex flex-col h-full p-2">
-                     <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
-                        <CardHeader className="p-4 flex flex-row items-center justify-between">
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <AlertTriangle className="text-destructive" />
-                                Issues
-                            </CardTitle>
-                            {issues.length > 0 && (
-                                <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllConfirm(true)}>Delete all?</Button>
-                            )}
-                        </CardHeader>
-                        <CardContent className="flex-1 space-y-2 overflow-y-auto p-2 pt-0">
-                          <ScrollArea className="h-full">
-                            <div className="space-y-2 pr-4">
-                              {isConfidential && (
-                                  <Alert variant="destructive">
-                                      <AlertTriangle className="h-4 w-4" />
-                                      <AlertTitle>Confidential Content Detected!</AlertTitle>
-                                      <AlertDescription>
-                                      This document contains sensitive information. Please review the flagged issues.
-                                      </AlertDescription>
-                                  </Alert>
-                                  )}
-
-                                  {issues.length > 0 ? (
-                                  <div className="space-y-2">
-                                      {issues.map((issue, index) => (
-                                      <Alert key={index} className="flex items-start justify-between">
-                                          <div>
-                                              <AlertTriangle className="h-4 w-4" />
-                                              <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
-                                              <AlertDescription>
-                                                  Found in block: "{issue.blockTitle || 'Untitled'}"
-                                                  <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-xs italic">
-                                                    {issue.sentence}
-                                                  </blockquote>
-                                              </AlertDescription>
-                                          </div>
-                                           <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-7 w-7 flex-shrink-0 text-destructive hover:bg-destructive/10"
-                                            onClick={() => confirmDeleteSentence(issue)}
-                                           >
-                                                <Trash2 className="h-4 w-4" />
-                                                <span className="sr-only">Delete sentence</span>
-                                           </Button>
-                                      </Alert>
-                                      ))}
+                              </TabsContent>
+                              <TabsContent value="text" className="mt-4 flex-1 overflow-hidden">
+                                 <ScrollArea className="h-full pr-2">
+                                  <div className="space-y-3">
+                                    <Label htmlFor="text-input">Paste your text</Label>
+                                    <div className="flex flex-col gap-2">
+                                      <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
+                                      <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
+                                    </div>
                                   </div>
-                                  ) : (
-                                      <Alert>
-                                          <AlertTitle>No issues found</AlertTitle>
-                                          <AlertDescription>
-                                              The content seems to be clear of any sensitive keywords.
-                                          </AlertDescription>
-                                      </Aler>
-                                  )}
-                              </div>
-                            </ScrollArea>
-                        </CardContent>
-                    </Card>
-                </div>
-            </ResizablePanel>
-        </ResizablePanelGroup>
+                                </ScrollArea>
+                              </TabsContent>
+                              <TabsContent value="gdrive" className="mt-4 flex-1 overflow-hidden">
+                                  <ScrollArea className="h-full pr-2">
+                                    <div className="flex flex-col items-center justify-center rounded-lg border border-muted/50 p-8 text-center">
+                                        <Bot className="h-10 w-10 text-muted-foreground"/>
+                                        <p className="mt-2 font-semibold">Sync with Google Drive</p>
+                                        <p className="mt-1 text-sm text-muted-foreground">Import documents directly.</p>
+                                        <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
+                                    </div>
+                                  </ScrollArea>
+                              </TabsContent>
+                            </Tabs>
+                          </CardContent>
+                      </Card>
+                  </div>
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={50} minSize={25}>
+                   <div className="flex flex-col h-full p-2">
+                       <Card className="flex-1 flex flex-col rounded-none border-0 overflow-hidden">
+                          <CardHeader className="p-4 flex flex-row items-center justify-between">
+                              <CardTitle className="flex items-center gap-2 text-base">
+                                  <AlertTriangle className="text-destructive" />
+                                  Issues
+                              </CardTitle>
+                              {issues.length > 0 && (
+                                  <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllConfirm(true)}>Delete all?</Button>
+                              )}
+                          </CardHeader>
+                          <CardContent className="flex-1 space-y-2 overflow-y-auto p-2 pt-0">
+                            <ScrollArea className="h-full">
+                              <div className="space-y-2 pr-4">
+                                {isConfidential && (
+                                    <Alert variant="destructive">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <AlertTitle>Confidential Content Detected!</AlertTitle>
+                                        <AlertDescription>
+                                        This document contains sensitive information. Please review the flagged issues.
+                                        </AlertDescription>
+                                    </Alert>
+                                    )}
 
-        <AlertDialog open={!!issueToDelete} onOpenChange={(isOpen) => !isOpen && setIssueToDelete(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the following sentence from your newsletter:
-                   <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-sm italic bg-muted p-2 rounded-md">
-                     {issueToDelete?.sentence}
-                   </blockquote>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setIssueToDelete(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={executeDelete}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-        <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure you want to delete all flagged sentences?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all {issues.length} sentences containing confidential keywords from your newsletter.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={executeDeleteAll}>
-                  Delete All
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    </aside>
+                                    {issues.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {issues.map((issue, index) => (
+                                        <Alert key={index} className="flex items-start justify-between">
+                                            <div>
+                                                <AlertTriangle className="h-4 w-4" />
+                                                <AlertTitle>Keyword: "{issue.keyword}"</AlertTitle>
+                                                <AlertDescription>
+                                                    Found in block: "{issue.blockTitle || 'Untitled'}"
+                                                    <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-xs italic">
+                                                      {issue.sentence}
+                                                    </blockquote>
+                                                </AlertDescription>
+                                            </div>
+                                             <Button 
+                                              variant="ghost" 
+                                              size="icon" 
+                                              className="h-7 w-7 flex-shrink-0 text-destructive hover:bg-destructive/10"
+                                              onClick={() => confirmDeleteSentence(issue)}
+                                             >
+                                                  <Trash2 className="h-4 w-4" />
+                                                  <span className="sr-only">Delete sentence</span>
+                                             </Button>
+                                        </Alert>
+                                        ))}
+                                    </div>
+                                    ) : (
+                                        <Alert>
+                                            <AlertTitle>No issues found</AlertTitle>
+                                            <AlertDescription>
+                                                The content seems to be clear of any sensitive keywords.
+                                            </AlertDescription>
+                                        </Aler>
+                                    )}
+                                </div>
+                              </ScrollArea>
+                          </CardContent>
+                      </Card>
+                  </div>
+              </ResizablePanel>
+          </ResizablePanelGroup>
+      </aside>
+
+      <AlertDialog open={!!issueToDelete} onOpenChange={(isOpen) => !isOpen && setIssueToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the following sentence from your newsletter:
+                 <blockquote className="mt-2 pl-2 border-l-2 border-muted-foreground text-sm italic bg-muted p-2 rounded-md">
+                   {issueToDelete?.sentence}
+                 </blockquote>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIssueToDelete(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={executeDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to delete all flagged sentences?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete all {issues.length} sentences containing confidential keywords from your newsletter.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={executeDeleteAll}>
+                Delete All
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
