@@ -71,15 +71,15 @@ export function AppHeader({
         </Badge>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={onUndo} disabled={!canUndo}>
+        <Button variant="outline" size="icon" onClick={onUndo} disabled={!canUndo} className="h-9 w-9">
           <Undo />
           <span className="sr-only">Undo</span>
         </Button>
-        <Button variant="outline" size="icon" onClick={onRedo} disabled={!canRedo}>
+        <Button variant="outline" size="icon" onClick={onRedo} disabled={!canRedo} className="h-9 w-9">
           <Redo />
           <span className="sr-only">Redo</span>
         </Button>
-        <Button variant="outline" onClick={onSuggestLayout} disabled={isSuggestingLayout}>
+        <Button variant="outline" onClick={onSuggestLayout} disabled={isSuggestingLayout} size="sm">
           {isSuggestingLayout ? (
             <Loader2 className="animate-spin" />
           ) : (
@@ -87,32 +87,39 @@ export function AppHeader({
           )}
           Suggest Layout
         </Button>
-        <Button onClick={onSave}>
+        <Button onClick={onSave} size="sm">
             <Save />
             Save
         </Button>
         
         <Link href={`/newsletters/${newsletterId}/preview`} target="_blank">
-          <Button>
+          <Button size="sm">
             <Eye />
             Preview
           </Button>
         </Link>
+        
+        {status === 'Draft' && (
+            <Button onClick={() => onStatusChange('Pending Approval')} size="sm">
+              <Send />
+              Submit for Approval
+            </Button>
+        )}
 
         {status === 'Pending Approval' && (
           <>
-            <Button onClick={() => onStatusChange('Approved')} variant="default">
+            <Button onClick={() => onStatusChange('Approved')} variant="default" size="sm">
               <Check />
               Approve
             </Button>
-            <Button onClick={() => onStatusChange('Rejected')} variant="destructive">
+            <Button onClick={() => onStatusChange('Rejected')} variant="destructive" size="sm">
               <X />
               Reject
             </Button>
           </>
         )}
         {(status === 'Approved' || status === 'Rejected') && (
-           <Button onClick={() => onStatusChange('Draft')} variant="outline">
+           <Button onClick={() => onStatusChange('Draft')} variant="outline" size="sm">
             Revert to Draft
           </Button>
         )}
