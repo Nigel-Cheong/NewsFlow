@@ -80,7 +80,7 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                             Content Sources
                         </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col overflow-y-auto p-2 pt-0">
+                        <CardContent className="flex-1 flex flex-col p-2 pt-0 min-h-0">
                           <Tabs defaultValue="list" className="w-full flex-1 flex flex-col">
                             <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                               <TabsTrigger value="list" className="text-xs p-1 h-auto"><List className="mr-1 h-3 w-3"/>Sources</TabsTrigger>
@@ -89,9 +89,9 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                               <TabsTrigger value="text" className="text-xs p-1 h-auto"><FileText className="mr-1 h-3 w-3"/>Text</TabsTrigger>
                               <TabsTrigger value="gdrive" className="text-xs p-1 h-auto"><Bot className="mr-1 h-3 w-3"/>Drive</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="list" className="mt-4 flex-1">
+                            <TabsContent value="list" className="mt-4 flex-1 overflow-y-auto">
                                 <ScrollArea className="h-full">
-                                    <div className="space-y-2 pr-4">
+                                    <div className="space-y-2 pr-2">
                                         {sources.length === 0 ? (
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
