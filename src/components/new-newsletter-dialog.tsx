@@ -36,7 +36,14 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
   const { toast } = useToast();
 
   const handleCreate = () => {
-    onCreate(title, sources);
+    const numberedSources = sources.map((source) => {
+      if (source.type === 'text' && source.name === 'Pasted Text') {
+          const count = sources.filter(s => s.type === 'text').length;
+          return { ...source, name: `Pasted Text ${count}` };
+      }
+      return source;
+    });
+    onCreate(title, numberedSources);
     // Don't close the dialog immediately, let the parent handle it
     // Reset state for next time
     setTitle('');

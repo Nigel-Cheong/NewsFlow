@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List, Trash2 } from 'lucide-react';
+import { BookText, AlertTriangle, Upload, Link, FileText, Bot, List, Trash2, Edit, Check } from 'lucide-react';
 import type { FlaggedIssue, Source } from '@/lib/types';
 import {
   ResizableHandle,
@@ -24,20 +24,84 @@ interface SourcesSidebarProps {
   issues: FlaggedIssue[];
   isConfidential: boolean;
   onAddNewSource: (source: Source) => void;
+  onDeleteSource: (sourceName: string) => void;
+  onUpdateSource: (originalName: string, newName: string) => void;
 }
 
-export function SourcesSidebar({ sources: initialSources, issues, isConfidential, onAddNewSource }: SourcesSidebarProps) {
-  const [sources, setSources] = useState(initialSources);
+interface SourceItemProps {
+    source: Omit<Source, 'content'>;
+    onDelete: () => void;
+    onUpdate: (newName: string) => void;
+}
+
+function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [name, setName] = useState(source.name);
+
+    useEffect(() => {
+        setName(source.name);
+    }, [source.name]);
+
+    const handleSave = () => {
+        if (name.trim() && name.trim() !== source.name) {
+            onUpdate(name);
+        }
+        setIsEditing(false);
+    }
+    
+    return (
+         <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
+            <div className="flex items-start gap-2 flex-1 min-w-0">
+                {source.type === 'file' && <Upload className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {isEditing ? (
+                    <Input 
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        onBlur={handleSave}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                        className="h-7 text-sm"
+                        autoFocus
+                    />
+                ) : (
+                    <span className="flex-1 break-words py-1" title={source.name} onDoubleClick={() => setIsEditing(true)}>
+                        {source.name}
+                    </span>
+                )}
+            </div>
+            <div className="flex gap-1 shrink-0">
+                {isEditing ? (
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave}>
+                        <Check className="h-4 w-4" />
+                    </Button>
+                ) : (
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive/80" onClick={onDelete}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete source</span>
+                </Button>
+            </div>
+        </div>
+    )
+}
+
+
+export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource }: SourcesSidebarProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      toast({
-          title: "File Upload Not Implemented",
-          description: "This is a demo. File content processing happens at creation.",
-      });
+        toast({
+            title: "File Upload Not Implemented",
+            description: "This is a demo. File content processing happens at creation.",
+        });
     }
   };
 
@@ -59,13 +123,6 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
     }
   }
 
-  const handleDeleteSource = (sourceNameToDelete: string) => {
-    setSources(sources.filter(source => source.name !== sourceNameToDelete));
-    toast({
-        title: "Source Removed",
-        description: `"${sourceNameToDelete}" has been removed.`,
-    });
-  }
 
   return (
     <aside className="h-full border-r">
@@ -95,19 +152,24 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                                             <p className="text-sm text-muted-foreground text-center py-4">No sources for this newsletter.</p>
                                         ) : (
                                             sources.map((source, index) => (
-                                                <div key={index} className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
-                                                    <div className="flex items-start gap-2 flex-1 min-w-0">
-                                                        {source.type === 'file' && <Upload className="h-4 w-4 shrink-0 mt-0.5"/>}
-                                                        {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
-                                                        {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
-                                                        {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
-                                                        <span className="flex-1 break-words" title={source.name}>{source.name}</span>
-                                                    </div>
-                                                     <Button variant="destructive" size="icon" className="h-6 w-6 !bg-red-600 hover:!bg-gray-500 shrink-0" onClick={() => handleDeleteSource(source.name)}>
-                                                        <Trash2 className="h-4 w-4 text-white" />
-                                                        <span className="sr-only">Delete source</span>
-                                                    </Button>
-                                                </div>
+                                                <SourceItem 
+                                                    key={`${source.name}-${index}`}
+                                                    source={source}
+                                                    onDelete={() => {
+                                                        onDeleteSource(source.name);
+                                                        toast({
+                                                            title: "Source Removed",
+                                                            description: `"${source.name}" has been removed.`,
+                                                        });
+                                                    }}
+                                                    onUpdate={(newName) => {
+                                                        onUpdateSource(source.name, newName);
+                                                         toast({
+                                                            title: "Source Renamed",
+                                                            description: `Source renamed to "${newName}".`,
+                                                        });
+                                                    }}
+                                                />
                                             ))
                                         )}
                                     </div>

@@ -198,7 +198,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         if (result.blocks && result.blocks.length > 0) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`, colspan: 2}));
             
-            // Exclude header/footer when adding new content in the middle
             const footerIndex = newsletter.blocks.findIndex(b => b.type === 'footer');
             const insertionPoint = footerIndex !== -1 ? footerIndex : newsletter.blocks.length;
 
@@ -207,12 +206,18 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             
             updateBlocks(newBlocks);
 
-            const newSources = [...(newsletter.sources || []), { name: source.name, type: source.type }];
+            let sourceName = source.name;
+            if (source.type === 'text' && source.name === 'Pasted Text') {
+                const textSourceCount = (newsletter.sources?.filter(s => s.type === 'text').length || 0) + 1;
+                sourceName = `Pasted Text ${textSourceCount}`;
+            }
+
+            const newSources = [...(newsletter.sources || []), { name: sourceName, type: source.type }];
             setNewsletter({...newsletter, blocks: newBlocks, sources: newSources });
 
             toast({
                 title: "Content Added!",
-                description: `New content from "${source.name}" has been added to your newsletter.`,
+                description: `New content from "${sourceName}" has been added to your newsletter.`,
             });
 
         } else {
@@ -230,6 +235,20 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             variant: "destructive"
         });
       }
+  }
+
+  const handleDeleteSource = (sourceNameToDelete: string) => {
+      if (!newsletter) return;
+      const newSources = (newsletter.sources || []).filter(s => s.name !== sourceNameToDelete);
+      setNewsletter({...newsletter, sources: newSources});
+  }
+
+  const handleUpdateSource = (originalName: string, newName: string) => {
+      if (!newsletter) return;
+      const newSources = (newsletter.sources || []).map(s => 
+          s.name === originalName ? {...s, name: newName } : s
+      );
+      setNewsletter({...newsletter, sources: newSources});
   }
 
   const flaggedIssues: FlaggedIssue[] = newsletter?.blocks.flatMap(block => 
@@ -277,6 +296,8 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                     issues={flaggedIssues}
                     isConfidential={isConfidential}
                     onAddNewSource={handleAddNewSource}
+                    onDeleteSource={handleDeleteSource}
+                    onUpdateSource={handleUpdateSource}
                 />
             </ResizablePanel>
             <ResizableHandle withHandle />
