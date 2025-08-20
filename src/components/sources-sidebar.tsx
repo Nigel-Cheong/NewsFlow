@@ -97,8 +97,8 @@ export function SourcesSidebar({ sources: initialSources, issues, isConfidential
                                         ) : (
                                             sources.map((source, index) => (
                                                 <div key={index} className="relative p-2 rounded-md border text-sm group">
-                                                    <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => handleDeleteSource(source.name)}>
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                    <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-muted/80" onClick={() => handleDeleteSource(source.name)}>
+                                                        <Trash2 className="h-4 w-4" />
                                                         <span className="sr-only">Delete source</span>
                                                     </Button>
                                                     <div className="flex items-start gap-2 pr-8">
