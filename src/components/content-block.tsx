@@ -98,12 +98,6 @@ export function ContentBlockView({
     handleInputChange('tableData', newTableData);
   }
 
-  const handleToggleColspan = () => {
-    const newColspan = block.colspan === 1 ? 2 : 1;
-    onUpdate(block.id, { colspan: newColspan });
-  };
-
-
   const highlightText = (text: string) => {
     if (!flaggedSentences.length || !text) return text;
     // Create a regex that matches any of the flagged sentences.
@@ -527,10 +521,6 @@ export function ContentBlockView({
               <Button {...dragHandleProps} variant="ghost" size="icon" className="h-8 w-8 cursor-grab">
                 <GripVertical className="h-4 w-4" />
                 <span className="sr-only">Drag to reorder</span>
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggleColspan}>
-              {block.colspan === 1 ? <Maximize2 /> : <Minimize2 />}
-              <span className="sr-only">Toggle Width</span>
               </Button>
               {!isEditing && !['spacer'].includes(block.type) && (
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>

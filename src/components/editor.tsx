@@ -23,7 +23,7 @@ import {
 import {
   SortableContext,
   useSortable,
-  rectSortingStrategy,
+  verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -111,33 +111,29 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToWindowEdges]}
+        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
       >
         <SortableContext
           items={blocks.map(b => b.id)}
-          strategy={rectSortingStrategy}
+          strategy={verticalListSortingStrategy}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             {blocks.map((block, index) => (
-              <div
+              <DraggableContentBlock
                 key={block.id}
-                className={block.colspan === 2 ? 'md:col-span-2' : 'md:col-span-1'}
-              >
-                <DraggableContentBlock
-                  block={block}
-                  flaggedSentences={flaggedSentences}
-                  onUpdate={handleUpdateBlock}
-                  onDelete={handleDeleteBlock}
-                  isFirst={index === 0}
-                  isLast={index === blocks.length - 1}
-                />
-              </div>
+                block={block}
+                flaggedSentences={flaggedSentences}
+                onUpdate={handleUpdateBlock}
+                onDelete={handleDeleteBlock}
+                isFirst={index === 0}
+                isLast={index === blocks.length - 1}
+              />
             ))}
           </div>
         </SortableContext>
       </DndContext>
 
-      <div className="flex justify-center col-span-1 md:col-span-2">
+      <div className="flex justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="mt-4">
