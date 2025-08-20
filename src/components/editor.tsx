@@ -23,11 +23,12 @@ import {
 import {
   SortableContext,
   useSortable,
-  verticalListSortingStrategy,
   arrayMove,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { cn } from '@/lib/utils';
 
 interface EditorProps {
   blocks: ContentBlock[];
@@ -58,7 +59,15 @@ function DraggableContentBlock({ block, flaggedSentences, onUpdate, onDelete, is
     };
     
     return (
-      <div ref={setNodeRef} style={style} {...attributes}>
+      <div 
+        ref={setNodeRef} 
+        style={style} 
+        {...attributes}
+        className={cn('w-full', {
+            'md:col-span-2': !block.colspan || block.colspan === 2,
+            'md:col-span-1': block.colspan === 1,
+        })}
+      >
         <ContentBlockView
           block={block}
           flaggedSentences={flaggedSentences}
@@ -106,18 +115,18 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
   }
 
   return (
-    <div className="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
+    <div className="flex-1 p-4 md:p-6 overflow-y-auto">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+        modifiers={[restrictToWindowEdges]}
       >
         <SortableContext
           items={blocks.map(b => b.id)}
-          strategy={verticalListSortingStrategy}
+          strategy={rectSortingStrategy}
         >
-          <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
             {blocks.map((block, index) => (
               <DraggableContentBlock
                 key={block.id}
