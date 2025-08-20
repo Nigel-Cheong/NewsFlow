@@ -17,7 +17,7 @@ import { Separator } from './ui/separator';
 
 interface ContentBlockProps {
   block: ContentBlock;
-  blocks: ContentBlock[]; // Pass the entire list of blocks
+  blocks: ContentBlock[]; 
   setBlocks: (blocks: ContentBlock[]) => void;
   flaggedSentences: string[];
 }
@@ -552,3 +552,4 @@ export function ContentBlockView({
       </Card>
   );
 }
+
