@@ -20,7 +20,6 @@ import type { Source } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUrlContent } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
-import { Badge } from './ui/badge';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
@@ -120,13 +119,12 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
 
   const handleAddText = () => {
     if (textInput.trim()) {
-        const textSourceCount = sources.filter(s => s.type === 'text').length + 1;
-        const newSource: Source = { name: `Pasted Text ${textSourceCount}`, type: 'text', content: textInput };
+        const newSource: Source = { name: 'Pasted Text', type: 'text', content: textInput };
         setSources(prev => [...prev, newSource]);
         setTextInput('');
         toast({
             title: "Text Added!",
-            description: `Pasted Text ${textSourceCount} added as a source.`
+            description: `Pasted Text added as a source.`
         });
     }
   }
@@ -187,7 +185,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
                <Label htmlFor="text-input">Paste your text</Label>
                <div className="flex flex-col gap-2">
                  <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
-                 <Button onClick={handleAddText} className="self-end">Add Text</Button>
+                 <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
                </div>
             </TabsContent>
             <TabsContent value="gdrive" className="mt-4">
@@ -195,7 +193,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
                     <Bot className="h-10 w-10 text-muted-foreground"/>
                     <p className="mt-2 font-semibold">Sync with Google Drive</p>
                     <p className="mt-1 text-sm text-muted-foreground">Import documents directly from your Google Drive account.</p>
-                    <Button className="mt-4">Connect Google Drive</Button>
+                    <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
                 </div>
             </TabsContent>
           </Tabs>
@@ -227,7 +225,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isCreating}>Cancel</Button>
           <Button type="submit" onClick={handleCreate} disabled={!title || sources.length === 0 || isCreating}>
-            {isCreating && <Loader2 className='animate-spin' />}
+            {isCreating && <Loader2 className='animate-spin mr-2' />}
             Create Newsletter
           </Button>
         </DialogFooter>

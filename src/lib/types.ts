@@ -35,7 +35,7 @@ export type ContentBlock = z.infer<typeof ContentBlockSchema>;
 export const SourceSchema = z.object({
     name: z.string(),
     type: z.enum(['file', 'link', 'text', 'gdrive', 'image']),
-    content: z.string().optional(), // Raw content for processing
+    content: z.string(), // Raw content for processing
 });
 
 export type Source = z.infer<typeof SourceSchema>;

@@ -81,7 +81,7 @@ export default function Home() {
                 generatedBlocks = result.blocks.map((block, index) => {
                     const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                     if (newBlock.type === 'image-with-text') {
-                        const imageSource = sources.find(s => s.type === 'image' && block.content.includes(s.name));
+                        const imageSource = sources.find(s => s.type === 'image' && newBlock.content.toLowerCase().includes(s.name.split('.')[0].toLowerCase()));
                         newBlock.imageUrl = imageSource?.content || 'https://placehold.co/600x400';
                     }
                     return newBlock;
@@ -96,12 +96,20 @@ export default function Home() {
             });
         }
     }
+    
+    let textSourceCounter = 1;
+    const finalSources = sources.map(s => {
+      if (s.type === 'text' && s.name === 'Pasted Text') {
+        return { name: `Pasted Text ${textSourceCounter++}`, type: s.type };
+      }
+      return { name: s.name, type: s.type };
+    });
 
     const newNewsletter: Newsletter = {
       id: newId,
       title: title || 'Untitled Newsletter',
       lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
-      sources: sources.map(({ name, type }) => ({ name, type })),
+      sources: finalSources,
       blocks: [
         {
           id: `block-header-${Date.now()}`,

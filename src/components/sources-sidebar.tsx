@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/resizable"
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { fetchUrlContent } from '@/app/actions';
+import { Loader2 } from 'lucide-react';
+
 
 interface SourcesSidebarProps {
   sources: Omit<Source, 'content'>[];
@@ -50,13 +53,13 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
     }
     
     return (
-         <div className="p-2 rounded-md border text-sm flex items-center justify-between gap-2">
+        <div className="group p-2 rounded-md border text-sm flex items-center justify-between gap-2">
             <div className="flex items-start gap-2 flex-1 min-w-0">
-                {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
-                {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-0.5"/>}
-                {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-0.5"/>}
-                {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-0.5"/>}
-                {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-0.5"/>}
+                {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
+                {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-1"/>}
+                {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-1"/>}
+                {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
+                {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-1"/>}
                 {isEditing ? (
                     <Input 
                         value={name} 
@@ -72,17 +75,17 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
                     </span>
                 )}
             </div>
-            <div className="flex gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
                 {isEditing ? (
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave}>
                         <Check className="h-4 w-4" />
                     </Button>
                 ) : (
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsEditing(true)}>
+                     <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100" onClick={() => setIsEditing(true)}>
                         <Edit className="h-4 w-4" />
                     </Button>
                 )}
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive/80" onClick={onDelete}>
+                <Button variant="destructive" size="icon" className="h-6 w-6" onClick={onDelete}>
                     <Trash2 className="h-4 w-4" />
                     <span className="sr-only">Delete source</span>
                 </Button>
@@ -94,6 +97,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
 
 export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource }: SourcesSidebarProps) {
   const [linkUrl, setLinkUrl] = useState('');
+  const [isFetchingLink, setIsFetchingLink] = useState(false);
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
 
@@ -129,14 +133,41 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
     }
   };
 
-  const handleAddLink = () => {
-    if (linkUrl.trim()) {
-      toast({
-          title: "Link Adding Not Implemented",
-          description: "This is a demo. Link processing happens at creation.",
-      });
-      setLinkUrl('');
-    }
+  const handleAddLink = async () => {
+    if (linkUrl.trim() && !isFetchingLink) {
+        setIsFetchingLink(true);
+        toast({
+            title: "Parsing URL...",
+            description: "The AI is reading the content from the provided link."
+        });
+  
+        try {
+          const result = await fetchUrlContent(linkUrl);
+          if (result.content) {
+              const newSource: Source = {
+                  name: result.title || linkUrl,
+                  type: 'link',
+                  content: `Source: ${result.title || linkUrl}\n${result.content}`
+              }
+              onAddNewSource(newSource);
+          } else {
+              toast({
+                  title: "Failed to Parse URL",
+                  description: "Could not extract content from the link. Please try another URL.",
+                  variant: 'destructive'
+              });
+          }
+        } catch (error) {
+           toast({
+              title: "Error Fetching Link",
+              description: "An unexpected error occurred while fetching the link.",
+              variant: 'destructive'
+          });
+        } finally {
+          setIsFetchingLink(false);
+          setLinkUrl('');
+        }
+      }
   }
 
   const handleAddText = () => {
@@ -210,15 +241,17 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                             <TabsContent value="link" className="mt-4 space-y-3">
                               <Label htmlFor="link-url">Add a web link</Label>
                               <div className="flex gap-2">
-                                <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
-                                <Button onClick={handleAddLink}>Add</Button>
+                                <Input id="link-url" placeholder="https://example.com" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} disabled={isFetchingLink}/>
+                                <Button onClick={handleAddLink} disabled={isFetchingLink || !linkUrl.trim()}>
+                                    {isFetchingLink ? <Loader2 className="animate-spin" /> : 'Add'}
+                                </Button>
                               </div>
                             </TabsContent>
                             <TabsContent value="text" className="mt-4 space-y-3">
                               <Label htmlFor="text-input">Paste your text</Label>
                               <div className="flex flex-col gap-2">
                                 <Textarea id="text-input" placeholder="Paste any text content here..." rows={6} value={textInput} onChange={(e) => setTextInput(e.target.value)} />
-                                <Button onClick={handleAddText} className="self-end">Add Text</Button>
+                                <Button onClick={handleAddText} className="self-end" disabled={!textInput.trim()}>Add Text</Button>
                               </div>
                             </TabsContent>
                             <TabsContent value="gdrive" className="mt-4">
@@ -226,7 +259,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                                     <Bot className="h-10 w-10 text-muted-foreground"/>
                                     <p className="mt-2 font-semibold">Sync with Google Drive</p>
                                     <p className="mt-1 text-sm text-muted-foreground">Import documents directly.</p>
-                                    <Button className="mt-4">Connect Google Drive</Button>
+                                    <Button className="mt-4" onClick={() => toast({ title: 'Coming Soon!', description: 'Google Drive integration is not yet available.'})}>Connect Google Drive</Button>
                                 </div>
                             </TabsContent>
                           </Tabs>

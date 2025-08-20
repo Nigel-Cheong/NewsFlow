@@ -192,11 +192,23 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         title: "Generating Content...",
         description: "The AI is processing the new source. Please wait."
       });
+      
+      let textToProcess = source.content;
+      if (source.type === 'image') {
+          textToProcess = `[IMAGE: A placeholder for the image named ${source.name}]`;
+      }
+
 
       try {
-        const result = await runGenerateBlocks(source.content);
+        const result = await runGenerateBlocks(textToProcess);
         if (result.blocks && result.blocks.length > 0) {
-            const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`, colspan: 2}));
+            const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
+                const newBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
+                if (newBlock.type === 'image-with-text') {
+                    newBlock.imageUrl = source.content;
+                }
+                return newBlock;
+            });
             
             const footerIndex = newsletter.blocks.findIndex(b => b.type === 'footer');
             const insertionPoint = footerIndex !== -1 ? footerIndex : newsletter.blocks.length;
