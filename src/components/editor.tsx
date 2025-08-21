@@ -53,42 +53,42 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onSelect={() => onAddBlock('header')}>
+            <DropdownMenuItem onClick={() => onAddBlock('header')}>
               Header
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAddBlock('text')}>
+            <DropdownMenuItem onClick={() => onAddBlock('text')}>
               Text
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => onAddBlock('image-with-text')}>
+             <DropdownMenuItem onClick={() => onAddBlock('image-with-text')}>
               Image with Text
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAddBlock('video-with-text')}>
+            <DropdownMenuItem onClick={() => onAddBlock('video-with-text')}>
               Video with Text
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAddBlock('link-with-text')}>
+            <DropdownMenuItem onClick={() => onAddBlock('link-with-text')}>
               Link with Text
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => onAddBlock('announcement')}>
+            <DropdownMenuItem onClick={() => onAddBlock('announcement')}>
               Announcement
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => onAddBlock('event')}>
+             <DropdownMenuItem onClick={() => onAddBlock('event')}>
               Event
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => onAddBlock('table')}>
+             <DropdownMenuItem onClick={() => onAddBlock('table')}>
               Table
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAddBlock('carousel')}>
+            <DropdownMenuItem onClick={() => onAddBlock('carousel')}>
               Carousel
             </DropdownMenuItem>
              <DropdownMenuSeparator />
-             <DropdownMenuItem onSelect={() => onAddBlock('form')}>
+             <DropdownMenuItem onClick={() => onAddBlock('form')}>
               Form
             </DropdownMenuItem>
-             <DropdownMenuItem onSelect={() => onAddBlock('spacer')}>
+             <DropdownMenuItem onClick={() => onAddBlock('spacer')}>
               Spacer
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAddBlock('footer')}>
+            <DropdownMenuItem onClick={() => onAddBlock('footer')}>
               Footer
             </DropdownMenuItem>
           </DropdownMenuContent>
