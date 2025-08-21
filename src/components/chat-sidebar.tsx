@@ -126,7 +126,7 @@ export function ChatSidebar({ newsletterContent, onApplySuggestion, onApplyLayou
              {message.layoutSuggestion && (
                 <div className="mt-4">
                     <blockquote className="border-l-4 border-primary pl-4 my-2">
-                        <p className="font-semibold">Suggested layout change applied.</p>
+                        <p className="font-semibold">Here's a new layout suggestion:</p>
                     </blockquote>
                     <Button 
                         size="sm" 
