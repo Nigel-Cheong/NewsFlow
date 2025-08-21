@@ -14,7 +14,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Label } from './ui/label';
 import { Separator } from './ui/separator';
-import { runUploadFile } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 
 interface ContentBlockProps {
@@ -70,16 +69,12 @@ export function ContentBlockView({
     reader.onloadend = async () => {
       try {
         const fileDataUri = reader.result as string;
-        const { url } = await runUploadFile(fileDataUri, file.name);
-        if (url) {
-            handleInputChange(field, url);
-            toast({ title: "Upload successful", description: `${file.name} has been uploaded.`});
-        } else {
-            throw new Error("Upload failed to return a URL.");
-        }
+        // In JSON file DB mode, we just use the data URI directly.
+        handleInputChange(field, fileDataUri);
+        toast({ title: "Upload successful", description: `${file.name} has been embedded.`});
       } catch (error) {
           console.error("Upload error", error);
-          toast({ title: "Upload Failed", description: "Could not upload the file.", variant: "destructive"});
+          toast({ title: "Upload Failed", description: "Could not process the file.", variant: "destructive"});
       } finally {
         setIsUploading(false);
       }

@@ -1,0 +1,14 @@
+{
+  "id": "newsletter-3",
+  "title": "Monthly Engineering Report",
+  "lastUpdated": "1 week ago",
+  "status": "Pending Approval",
+  "blocks": [
+    {
+      "id": "block-3-1",
+      "title": "Engineering Progress",
+      "type": "text",
+      "content": "This month's engineering report highlights our progress on the core platform. We've closed over 50 tickets and improved performance by 10%."
+    }
+  ]
+}

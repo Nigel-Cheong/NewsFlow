@@ -1,0 +1,14 @@
+{
+  "id": "newsletter-2",
+  "title": "New Product Launch Announcement",
+  "lastUpdated": "5 days ago",
+  "status": "Approved",
+  "blocks": [
+    {
+      "id": "block-2-1",
+      "title": "InnovateX Launch",
+      "type": "text",
+      "content": "We are thrilled to announce the launch of our new product, 'InnovateX'. This product will revolutionize the market with its cutting-edge features and user-friendly design."
+    }
+  ]
+}

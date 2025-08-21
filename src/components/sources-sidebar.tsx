@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/resizable"
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { fetchUrlContent, runUploadFile } from '@/app/actions';
+import { fetchUrlContent } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -121,25 +121,21 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
     if (e.target.files) {
       setIsUploading(true);
       const uploadPromises = Array.from(e.target.files).map(file => {
-        return new Promise<Source | null>((resolve, reject) => {
+        return new Promise<Source | null>((resolve) => {
           const reader = new FileReader();
 
           reader.onload = async (event) => {
             try {
               const fileDataUri = event.target?.result as string;
               
-              const { url } = await runUploadFile(fileDataUri, file.name);
-              if (url) {
-                  const isImage = file.type.startsWith('image/');
-                  const isVideo = file.type.startsWith('video/');
-                  resolve({
-                    name: file.name,
-                    type: isImage ? 'image' : isVideo ? 'video' : 'file',
-                    content: url, // For all files, we now just pass the "URL" (data URI in this mock)
-                  });
-              } else {
-                throw new Error('Upload failed, URL not returned.');
-              }
+              const isImage = file.type.startsWith('image/');
+              const isVideo = file.type.startsWith('video/');
+              resolve({
+                name: file.name,
+                type: isImage ? 'image' : isVideo ? 'video' : 'file',
+                content: fileDataUri,
+              });
+
             } catch (error) {
               console.error('File processing error:', error);
               toast({
