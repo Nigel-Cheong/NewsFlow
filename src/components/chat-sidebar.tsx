@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bot, User, Send, Loader2, Wand } from 'lucide-react';
+import { Bot, User, Send, Loader2, Wand, LayoutTemplate } from 'lucide-react';
 import { marked } from 'marked';
 import type { ContentBlock } from '@/lib/types';
 import type { ChatOutput } from '@/ai/flows/chat-flow';
@@ -15,14 +15,16 @@ interface Message {
   role: 'user' | 'bot';
   content: string;
   replacement?: ChatOutput['replacement'];
+  layoutSuggestion?: ChatOutput['layoutSuggestion'];
 }
 
 interface ChatSidebarProps {
     newsletterContent: ContentBlock[];
     onApplySuggestion: (blockId: string, newContent: string) => void;
+    onApplyLayoutSuggestion: (suggestions: ChatOutput['layoutSuggestion']) => void;
 }
 
-export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSidebarProps) {
+export function ChatSidebar({ newsletterContent, onApplySuggestion, onApplyLayoutSuggestion }: ChatSidebarProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +43,7 @@ export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSideba
     setInput('');
     setIsLoading(true);
 
-    const context = newsletterContent.map(block => `blockId: ${block.id}\nBlock Type: ${block.type}\nTitle: ${block.title || 'N/A'}\nContent: ${block.content}`).join('\n\n---\n\n');
+    const context = newsletterContent.map(block => `blockId: ${block.id}\nBlock Type: ${block.type}\nTitle: ${block.title || 'N/A'}\nColspan: ${block.colspan || 2}\nContent: ${block.content}`).join('\n\n---\n\n');
 
     try {
       const response = await fetch('/api/chat', {
@@ -61,7 +63,8 @@ export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSideba
       const botMessage: Message = {
         role: 'bot',
         content: result.response,
-        replacement: result.replacement
+        replacement: result.replacement,
+        layoutSuggestion: result.layoutSuggestion,
       };
       
       setMessages((prev) => [...prev, botMessage]);
@@ -88,9 +91,15 @@ export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSideba
     }
   }, [messages]);
   
-  const handleApplySuggestion = (blockId?: string, newContent?: string) => {
+  const handleApplyContentSuggestion = (blockId?: string, newContent?: string) => {
     if (blockId && newContent) {
         onApplySuggestion(blockId, newContent);
+    }
+  }
+  
+  const handleApplyLayoutSuggestion = (suggestions?: ChatOutput['layoutSuggestion']) => {
+    if (suggestions) {
+        onApplyLayoutSuggestion(suggestions);
     }
   }
 
@@ -108,9 +117,23 @@ export function ChatSidebar({ newsletterContent, onApplySuggestion }: ChatSideba
                     <Button 
                         size="sm" 
                         variant="outline" 
-                        onClick={() => handleApplySuggestion(message.replacement?.blockId, message.replacement?.newContent)}
+                        onClick={() => handleApplyContentSuggestion(message.replacement?.blockId, message.replacement?.newContent)}
                     >
                         <Wand /> Replace text with suggestion
+                    </Button>
+                </div>
+            )}
+             {message.layoutSuggestion && (
+                <div className="mt-4">
+                    <blockquote className="border-l-4 border-primary pl-4 my-2">
+                        <p className="font-semibold">Suggested layout change applied.</p>
+                    </blockquote>
+                    <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => handleApplyLayoutSuggestion(message.layoutSuggestion)}
+                    >
+                        <LayoutTemplate /> Apply Layout
                     </Button>
                 </div>
             )}

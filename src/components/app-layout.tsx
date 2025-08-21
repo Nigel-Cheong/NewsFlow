@@ -17,6 +17,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import type { ChatOutput } from '@/ai/flows/chat-flow';
 
 interface AppLayoutProps {
   initialNewsletter: Newsletter;
@@ -54,17 +55,15 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     }, 1000); // Debounce for 1 second
   };
   
-  const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
+  const updateBlocks = (newBlocks: ContentBlock[]) => {
     const updatedNewsletter = { ...newsletter, blocks: newBlocks };
     setNewsletter(updatedNewsletter);
     
-    if (!fromHistory) {
-      const newHistory = history.slice(0, historyIndex + 1);
-      newHistory.push(newBlocks);
-      setHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1);
-      triggerSave(updatedNewsletter);
-    }
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(newBlocks);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    triggerSave(updatedNewsletter);
   };
 
   const handleUpdateBlockContent = (blockId: string, newContent: string) => {
@@ -73,12 +72,33 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     );
     updateBlocks(newBlocks);
   };
+
+  const handleApplyLayoutSuggestion = (suggestions: ChatOutput['layoutSuggestion']) => {
+    if (!suggestions) return;
+    
+    const blockMap = new Map(suggestions.map(s => [s.blockId, s.colspan]));
+    
+    const newBlocks = newsletter.blocks.map(block => {
+        if (blockMap.has(block.id)) {
+            return { ...block, colspan: blockMap.get(block.id) as (1 | 2) };
+        }
+        return block;
+    });
+    
+    updateBlocks(newBlocks);
+    toast({
+        title: "Layout Updated",
+        description: "The layout has been updated based on the chat suggestion."
+    });
+  };
   
   const handleUndo = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      setNewsletter(current => ({ ...current, blocks: history[newIndex] }));
+      const newBlocks = history[newIndex];
+      setNewsletter(current => ({ ...current, blocks: newBlocks }));
+      triggerSave({ ...newsletter, blocks: newBlocks });
     }
   };
   
@@ -86,7 +106,9 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      setNewsletter(current => ({ ...current, blocks: history[newIndex] }));
+      const newBlocks = history[newIndex];
+      setNewsletter(current => ({ ...current, blocks: newBlocks }));
+      triggerSave({ ...newsletter, blocks: newBlocks });
     }
   };
 
@@ -229,14 +251,8 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
             const newSources = [...(newsletter.sources || []), { name: sourceName, type: source.type }];
             
             const updatedNewsletter = {...newsletter, blocks: newBlocks, sources: newSources};
-            updateBlocks(newBlocks); // This will also trigger a save
-            setNewsletter(current => ({...current, sources: newSources}));
-
-
-            toast({
-                title: "Content Added!",
-                description: `New content from "${sourceName}" has been added and saved.`,
-            });
+            setNewsletter(updatedNewsletter); // Update full newsletter state
+            updateBlocks(newBlocks); // Update blocks and trigger save/history
 
         } else {
              toast({
@@ -438,6 +454,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
                 <ChatSidebar 
                     newsletterContent={newsletter.blocks} 
                     onApplySuggestion={handleUpdateBlockContent}
+                    onApplyLayoutSuggestion={handleApplyLayoutSuggestion}
                 />
             </ResizablePanel>
         </ResizablePanelGroup>
@@ -445,5 +462,3 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     </div>
   );
 }
-
-    

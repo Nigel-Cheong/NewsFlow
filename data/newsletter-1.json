@@ -1,7 +1,7 @@
 {
   "id": "newsletter-1",
   "title": "Q3 Company Updates",
-  "lastUpdated": "2 days ago",
+  "lastUpdated": "August 21, 2025",
   "status": "Draft",
   "blocks": [
     {
@@ -14,14 +14,59 @@
       "id": "block-1-2",
       "title": "Team Offsite Update",
       "type": "image-with-text",
-      "content": "Our team came together for a successful offsite event. The event was focused on brainstorming for our next big project, codenamed 'Project Phoenix'. It's still confidential, so please don't share details externally.",
+      "content": "The team had an amazing offsite dedicated to blue-sky thinking for our next big project, 'Project Phoenix'! It's super hush-hush for now, so keep it under your hats!",
       "imageUrl": "https://placehold.co/600x400"
     },
     {
       "id": "block-1-3",
       "title": "Q3 Key Takeaways",
       "type": "text",
-      "content": "Key takeaways from Q3:\n- Successful launch of our new feature.\n- Exceeded our sales target by 15%.\n- Key financial data shows strong performance, but this is proprietary information."
+      "content": "Key takeaways from Q3:\n- Successful launch of our new feature.\n- Exceeded our sales target by 15%.\n- Key financial data shows strong performance, but this is proprietary information.\n- Improved customer satisfaction scores by 10%.\n- Successfully completed employee training programs.\n- Reduced operational costs by 5% through process optimization."
+    },
+    {
+      "id": "block-1755763769171",
+      "type": "table",
+      "title": "Data Table",
+      "content": "Data Table",
+      "colspan": 2,
+      "tableData": [
+        [
+          "Header 1",
+          "Header 2",
+          "Header 3"
+        ],
+        [
+          "Row 1, Cell 1",
+          "Row 1, Cell 2",
+          "Row 1, Cell 3"
+        ],
+        [
+          "Row 2, Cell 1",
+          "Row 2, Cell 2",
+          "Row 2, Cell 3"
+        ]
+      ]
+    },
+    {
+      "id": "block-1755763935235",
+      "type": "carousel",
+      "title": "Image Carousel",
+      "content": "",
+      "colspan": 2
+    },
+    {
+      "id": "block-1755764903728",
+      "type": "footer",
+      "title": "Footer",
+      "content": "Contact us at contact@newsgenius.com",
+      "colspan": 1
+    },
+    {
+      "id": "block-1755764921270",
+      "type": "form",
+      "title": "Signup Form",
+      "content": "Sign up for our newsletter",
+      "colspan": 1
     }
   ]
 }

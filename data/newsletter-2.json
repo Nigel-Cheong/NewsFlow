@@ -9,6 +9,13 @@
       "title": "InnovateX Launch",
       "type": "text",
       "content": "We are thrilled to announce the launch of our new product, 'InnovateX'. This product will revolutionize the market with its cutting-edge features and user-friendly design."
+    },
+    {
+      "id": "block-1755763905119",
+      "type": "text",
+      "title": "Text",
+      "content": "This is a new text block. You can edit this content.",
+      "colspan": 2
     }
   ]
 }
