@@ -7,13 +7,15 @@ import type { ContentBlock } from '@/lib/types';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Textarea } from './ui/textarea';
-import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Edit, Save, Ban, Calendar, MapPin, Clock, Link, Upload, PlusCircle, MinusCircle, Maximize2, Minimize2, Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Label } from './ui/label';
 import { Separator } from './ui/separator';
+import { runUploadFile } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 interface ContentBlockProps {
   block: ContentBlock;
@@ -30,6 +32,8 @@ export function ContentBlockView({
 }: ContentBlockProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editState, setEditState] = useState(block);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
 
   const onUpdate = (id: string, newContent: Partial<ContentBlock>) => {
     setBlocks(
@@ -61,9 +65,24 @@ export function ContentBlockView({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsUploading(true);
     const reader = new FileReader();
-    reader.onloadend = () => {
-      handleInputChange(field, reader.result as string);
+    reader.onloadend = async () => {
+      try {
+        const fileDataUri = reader.result as string;
+        const { url } = await runUploadFile(fileDataUri, file.name);
+        if (url) {
+            handleInputChange(field, url);
+            toast({ title: "Upload successful", description: `${file.name} has been uploaded.`});
+        } else {
+            throw new Error("Upload failed to return a URL.");
+        }
+      } catch (error) {
+          console.error("Upload error", error);
+          toast({ title: "Upload Failed", description: "Could not upload the file.", variant: "destructive"});
+      } finally {
+        setIsUploading(false);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -139,8 +158,8 @@ export function ContentBlockView({
               <Button variant="ghost" size="sm" onClick={handleCancel}>
                 <Ban /> Cancel
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                <Save /> Save
+              <Button size="sm" onClick={handleSave} disabled={isUploading}>
+                {isUploading ? <Loader2 className="animate-spin" /> : <Save />} Save
               </Button>
             </div>
         </>
@@ -178,7 +197,7 @@ export function ContentBlockView({
                 </div>
                 <div>
                     <Label htmlFor={`imageUpload-${block.id}`}>Upload Image</Label>
-                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} />
+                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} disabled={isUploading}/>
                 </div>
                 {commonEditFields}
              </div>
@@ -198,7 +217,7 @@ export function ContentBlockView({
                 </div>
                 <div>
                     <Label htmlFor={`imageUpload-${block.id}`}>Upload Image</Label>
-                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} />
+                    <Input id={`imageUpload-${block.id}`} type="file" accept="image/*" onChange={handleFileChange('imageUrl')} disabled={isUploading} />
                 </div>
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Text</Label>
@@ -222,7 +241,7 @@ export function ContentBlockView({
                 </div>
                 <div>
                     <Label htmlFor={`videoUpload-${block.id}`}>Upload Video</Label>
-                    <Input id={`videoUpload-${block.id}`} type="file" accept="video/*" onChange={handleFileChange('videoUrl')} />
+                    <Input id={`videoUpload-${block.id}`} type="file" accept="video/*" onChange={handleFileChange('videoUrl')} disabled={isUploading} />
                 </div>
                 <div>
                   <Label htmlFor={`content-${block.id}`}>Text</Label>

@@ -74,8 +74,8 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
     
-    // This function primarily manages the history stack for undo/redo
-    setNewsletter({ ...newsletter, blocks: newBlocks });
+    const updatedNewsletter = { ...newsletter, blocks: newBlocks };
+    setNewsletter(updatedNewsletter);
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -97,7 +97,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      setNewsletter(current => current ? { ...current, blocks: history[newIndex] } : null);
+      updateBlocks(history[newIndex], true);
     }
   };
   
@@ -105,7 +105,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      setNewsletter(current => current ? { ...current, blocks: history[newIndex] } : null);
+      updateBlocks(history[newIndex], true);
     }
   };
 
@@ -219,8 +219,17 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       });
       
       let textToProcess = source.content;
-      if (source.type === 'image') {
-          textToProcess = `[IMAGE: ${source.name}]`;
+      if (source.type === 'image' || source.type === 'video') {
+          // For GCS-uploaded files, content is the URL. We create a marker for the AI.
+          textToProcess = `[${source.type.toUpperCase()}: ${source.name}]`;
+      } else if (source.type === 'file') {
+        try {
+          const base64Content = source.content.split(',')[1];
+          textToProcess = atob(base64Content);
+        } catch (e) {
+          toast({ title: "Content Error", description: `Could not decode file content for ${source.name}`, variant: 'destructive'});
+          textToProcess = '';
+        }
       }
 
 
@@ -229,8 +238,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         if (result.blocks && result.blocks.length > 0) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
                 const newBlock: ContentBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
-                if (newBlock.type === 'image-with-text') {
-                    newBlock.imageUrl = source.content; 
+                if (newBlock.type === 'image-with-text' && source.type === 'image') {
+                    newBlock.imageUrl = source.content; // The content is the GCS URL
+                } else if (newBlock.type === 'video-with-text' && source.type === 'video') {
+                    newBlock.videoUrl = source.content; // The content is the GCS URL
                 }
                 return newBlock;
             });
@@ -397,7 +408,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             newBlock.content = 'This is a new text block. You can edit this content.';
             break;
     }
-
+    
     const newBlocks = [...newsletter.blocks, newBlock];
     updateBlocks(newBlocks);
   };
@@ -465,7 +476,3 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     </div>
   );
 }
-
-    
-
-    

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/resizable"
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { fetchUrlContent } from '@/app/actions';
+import { fetchUrlContent, runUploadFile } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -110,6 +110,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
 export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource, onDeleteSource, onUpdateSource, onDeleteSentence, onDeleteAllSentences }: SourcesSidebarProps) {
   const [linkUrl, setLinkUrl] = useState('');
   const [isFetchingLink, setIsFetchingLink] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [textInput, setTextInput] = useState('');
   const { toast } = useToast();
   const [issueToDelete, setIssueToDelete] = useState<FlaggedIssue | null>(null);
@@ -117,33 +118,64 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-        Array.from(e.target.files).forEach(file => {
-            const reader = new FileReader();
-            const isImage = file.type.startsWith('image/');
+      setIsUploading(true);
+      const uploadPromises = Array.from(e.target.files).map(file => {
+        return new Promise<Source | null>((resolve, reject) => {
+          const reader = new FileReader();
+          const isImage = file.type.startsWith('image/');
+          const isVideo = file.type.startsWith('video/');
 
-            reader.onload = (event) => {
-                const content = event.target?.result as string;
-                const newSource: Source = { 
-                    name: file.name, 
-                    type: isImage ? 'image' : 'file', 
-                    content 
-                };
-                onAddNewSource(newSource);
-            };
-            reader.onerror = () => {
-                toast({
-                    title: "File Read Error",
-                    description: `Could not read the file: ${file.name}`,
-                    variant: 'destructive'
-                });
-            };
-            
-            if(isImage) {
-              reader.readAsDataURL(file);
-            } else {
-              reader.readAsText(file);
+          reader.onload = async (event) => {
+            try {
+              const fileDataUri = event.target?.result as string;
+              
+              if (isImage || isVideo) {
+                const { url } = await runUploadFile(fileDataUri, file.name);
+                if (url) {
+                  resolve({
+                    name: file.name,
+                    type: isImage ? 'image' : 'video',
+                    content: url
+                  });
+                } else {
+                  throw new Error('Upload failed, URL not returned.');
+                }
+              } else {
+                // For text-based files
+                 resolve({
+                    name: file.name,
+                    type: 'file',
+                    content: fileDataUri,
+                 });
+              }
+            } catch (error) {
+              console.error('File processing error:', error);
+              toast({
+                  title: "File Upload Error",
+                  description: `Could not process the file: ${file.name}`,
+                  variant: 'destructive'
+              });
+              resolve(null);
             }
+          };
+
+          reader.onerror = () => {
+              toast({
+                  title: "File Read Error",
+                  description: `Could not read the file: ${file.name}`,
+                  variant: 'destructive'
+              });
+              resolve(null);
+          };
+
+          reader.readAsDataURL(file);
         });
+      });
+
+      Promise.all(uploadPromises).then(newSources => {
+        newSources.filter(Boolean).forEach(s => onAddNewSource(s as Source));
+        setIsUploading(false);
+      });
     }
   };
 
@@ -264,10 +296,19 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
                               <TabsContent value="file" className="mt-4 flex-1 overflow-hidden">
                                 <ScrollArea className="h-full pr-2">
                                   <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
-                                    <Upload className="h-10 w-10 text-muted-foreground" />
-                                    <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
-                                    <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, PNG, JPG, GIF</p>
-                                    <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif" />
+                                    {isUploading ? (
+                                        <div className='flex flex-col items-center gap-2'>
+                                            <Loader2 className="h-10 w-10 text-muted-foreground animate-spin" />
+                                            <p className="mt-2 text-sm text-muted-foreground">Uploading files...</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Upload className="h-10 w-10 text-muted-foreground" />
+                                            <p className="mt-2 text-sm text-muted-foreground">Drag & drop or click to upload</p>
+                                            <p className="mt-1 text-xs text-muted-foreground/80">PDF, TXT, MD, PNG, JPG, GIF</p>
+                                            <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,video/*" />
+                                        </>
+                                    )}
                                   </div>
                                 </ScrollArea>
                               </TabsContent>

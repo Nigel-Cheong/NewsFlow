@@ -8,3 +8,4 @@ import '@/ai/flows/confidentiality-check.ts';
 import '@/ai/flows/chat-flow.ts';
 import '@/ai/flows/generate-blocks-from-text.ts';
 import '@/ai/flows/extract-content-from-url.ts';
+import '@/ai/flows/upload-file-flow.ts';

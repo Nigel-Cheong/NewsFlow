@@ -36,8 +36,8 @@ export type ContentBlock = z.infer<typeof ContentBlockSchema>;
 
 export const SourceSchema = z.object({
     name: z.string(),
-    type: z.enum(['file', 'link', 'text', 'gdrive', 'image']),
-    content: z.string(), // Raw content for processing
+    type: z.enum(['file', 'link', 'text', 'gdrive', 'image', 'video']),
+    content: z.string(), // Raw content for processing, or URL for uploaded files
 });
 
 export type Source = z.infer<typeof SourceSchema>;
@@ -59,4 +59,3 @@ export interface FlaggedIssue {
   blockId: string;
   blockTitle?: string;
 }
-

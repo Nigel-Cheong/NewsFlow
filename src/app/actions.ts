@@ -6,6 +6,7 @@ import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
 import { extractContentFromUrl } from '@/ai/flows/extract-content-from-url';
+import { uploadFile } from '@/ai/flows/upload-file-flow';
 import type { ContentBlock, Newsletter } from '@/lib/types';
 
 export async function runConfidentialityCheck(
@@ -110,4 +111,14 @@ export async function sendApprovalEmail(email: string, newsletter: Newsletter) {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     return { success: true };
+}
+
+export async function runUploadFile(fileDataUri: string, fileName: string) {
+    try {
+      const result = await uploadFile({ fileDataUri, fileName });
+      return result;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      return { url: '' };
+    }
 }

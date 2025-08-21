@@ -74,6 +74,17 @@ export default function Home() {
         // Create a marker for the AI to understand where an image goes.
         return `Source: ${s.name}\n[IMAGE: ${s.name}]`
       }
+      if (s.type === 'file') {
+        // For files, we need to extract text from data URI
+        try {
+          const base64Content = s.content.split(',')[1];
+          const textContent = atob(base64Content);
+          return `Source: ${s.name}\n${textContent}`;
+        } catch (e) {
+          console.error(`Could not decode file content for ${s.name}`, e);
+          return `Source: ${s.name}\n[CONTENT COULD NOT BE EXTRACTED]`;
+        }
+      }
       return `Source: ${s.name}\n${s.content}`
     }).join('\n\n---\n\n');
     
@@ -93,7 +104,7 @@ export default function Home() {
                         );
 
                         if (imageSource) {
-                            newBlock.imageUrl = imageSource.content;
+                            newBlock.imageUrl = imageSource.content; // content is the URL from GCS
                         } else {
                             // Fallback in case the AI doesn't include the name or it can't be matched
                             const firstImage = imageSources.shift();
@@ -115,16 +126,10 @@ export default function Home() {
     
     let textSourceCounter = 1;
     const finalSources = sources.map(s => {
-      // Don't store the large data URI content in the final newsletter object
-      if (s.type === 'image' || s.type === 'file' || s.type === 'link') {
-          if (s.type === 'text' && s.name === 'Pasted Text') {
-            return { name: `Pasted Text ${textSourceCounter++}`, type: s.type };
-          }
-          return { name: s.name, type: s.type };
-      }
       if (s.type === 'text' && s.name === 'Pasted Text') {
         return { name: `Pasted Text ${textSourceCounter++}`, type: s.type };
       }
+      // Don't store the large data URI content in the final newsletter object, just the source name and type
       return { name: s.name, type: s.type };
     });
 
