@@ -44,7 +44,7 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
         ))}
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center py-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="mt-4">
@@ -97,3 +97,5 @@ export function Editor({ blocks, flaggedSentences, setBlocks, onAddBlock }: Edit
     </div>
   );
 }
+
+    

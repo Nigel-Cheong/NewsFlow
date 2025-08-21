@@ -74,6 +74,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
     if (!newsletter) return;
     
+    // This function primarily manages the history stack for undo/redo
     setNewsletter(current => current ? { ...current, blocks: newBlocks } : null);
     
     if (!fromHistory) {
@@ -342,13 +343,16 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             newBlock.colspan = 2;
             break;
         case 'image-with-text':
+            newBlock.title = 'Image with Text';
             newBlock.imageUrl = 'https://placehold.co/600x400';
             break;
         case 'video-with-text':
+            newBlock.title = 'Video with Text';
             newBlock.videoUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
             newBlock.content = 'A short video with text.'
             break;
         case 'link-with-text':
+            newBlock.title = 'Link with Text';
             newBlock.linkUrl = 'https://google.com';
             newBlock.content = 'Click here to learn more';
             newBlock.colspan = 2;
@@ -396,9 +400,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             newBlock.content = 'Contact us at contact@newsgenius.com';
             newBlock.colspan = 2;
             break;
+        case 'text':
+            newBlock.title = 'Text';
+            newBlock.content = 'This is a new text block. You can edit this content.';
+            break;
     }
 
-    updateBlocks([...newsletter.blocks, newBlock]);
+    const newBlocks = [...newsletter.blocks, newBlock];
+    updateBlocks(newBlocks);
   };
 
 
@@ -446,7 +455,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
                 <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out h-full">
                   <Editor
                     blocks={newsletter.blocks}
-                    setBlocks={(newBlocks) => updateBlocks(newBlocks)}
+                    setBlocks={updateBlocks}
                     onAddBlock={handleAddBlock}
                     flaggedSentences={flaggedIssues.map(issue => issue.sentence)}
                   />
@@ -464,3 +473,5 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     </div>
   );
 }
+
+    
