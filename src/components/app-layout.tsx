@@ -12,7 +12,6 @@ import { runConfidentialityCheck, runSuggestLayout, runGenerateBlocks, saveNewsl
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from './ui/button';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -33,7 +32,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const { toast } = useToast();
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const autosaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // When the initial newsletter changes (e.g., from navigating between pages), reset the state
@@ -42,14 +41,29 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     setHistoryIndex(0);
   }, [initialNewsletter]);
   
+  const triggerSave = (updatedNewsletter: Newsletter) => {
+    if (autosaveTimeout.current) {
+        clearTimeout(autosaveTimeout.current);
+    }
+    autosaveTimeout.current = setTimeout(async () => {
+        await saveNewsletter(updatedNewsletter);
+        toast({
+          title: "Auto-saved!",
+          description: "Your changes have been automatically saved.",
+        });
+    }, 1000); // Debounce for 1 second
+  };
+  
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
-    setNewsletter(current => ({ ...current, blocks: newBlocks }));
+    const updatedNewsletter = { ...newsletter, blocks: newBlocks };
+    setNewsletter(updatedNewsletter);
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
       newHistory.push(newBlocks);
       setHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
+      triggerSave(updatedNewsletter);
     }
   };
 
@@ -64,7 +78,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+      setNewsletter(current => ({ ...current, blocks: history[newIndex] }));
     }
   };
   
@@ -72,7 +86,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+      setNewsletter(current => ({ ...current, blocks: history[newIndex] }));
     }
   };
 
@@ -88,18 +102,8 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
 
   useEffect(() => {
     if (newsletter?.blocks) {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-      debounceTimeout.current = setTimeout(() => {
-        checkConfidentiality(newsletter.blocks);
-      }, 500);
+      checkConfidentiality(newsletter.blocks);
     }
-    return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-    };
   }, [newsletter?.blocks, checkConfidentiality]);
 
   const handleSuggestLayout = async () => {
@@ -111,7 +115,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
         updateBlocks(result.layout.map((block, index) => ({...block, id: `block-${Date.now()}-${index}`})));
         toast({
           title: 'Layout Updated',
-          description: 'The content has been automatically arranged into a new layout.',
+          description: 'The content has been automatically arranged and saved.',
         });
       } else {
         toast({
@@ -133,7 +137,9 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
   };
   
   const handleStatusChange = (newStatus: ApprovalStatus) => {
-    setNewsletter(current => ({...current, status: newStatus}));
+    const updatedNewsletter = {...newsletter, status: newStatus};
+    setNewsletter(updatedNewsletter);
+    triggerSave(updatedNewsletter);
     toast({
         title: "Status Updated",
         description: `Newsletter status changed to "${newStatus}".`
@@ -145,15 +151,19 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
       toast({ title: "Save Failed", description: "No newsletter data to save.", variant: "destructive" });
       return;
     }
+
+    if (autosaveTimeout.current) {
+        clearTimeout(autosaveTimeout.current);
+    }
     
     try {
-      const updatedNewsletter = {
+      const updatedNewsletterWithDate = {
         ...newsletter,
         lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
       };
       
-      await saveNewsletter(updatedNewsletter);
-      setNewsletter(updatedNewsletter);
+      await saveNewsletter(updatedNewsletterWithDate);
+      setNewsletter(updatedNewsletterWithDate);
 
       toast({
           title: "Changes Saved!",
@@ -218,12 +228,14 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
 
             const newSources = [...(newsletter.sources || []), { name: sourceName, type: source.type }];
             
-            updateBlocks(newBlocks);
+            const updatedNewsletter = {...newsletter, blocks: newBlocks, sources: newSources};
+            updateBlocks(newBlocks); // This will also trigger a save
             setNewsletter(current => ({...current, sources: newSources}));
+
 
             toast({
                 title: "Content Added!",
-                description: `New content from "${sourceName}" has been added to your newsletter.`,
+                description: `New content from "${sourceName}" has been added and saved.`,
             });
 
         } else {
@@ -245,14 +257,18 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
 
   const handleDeleteSource = (sourceNameToDelete: string) => {
       const newSources = (newsletter.sources || []).filter(s => s.name !== sourceNameToDelete);
-      setNewsletter(current => ({...current, sources: newSources}));
+      const updatedNewsletter = {...newsletter, sources: newSources};
+      setNewsletter(updatedNewsletter);
+      triggerSave(updatedNewsletter);
   }
 
   const handleUpdateSource = (originalName: string, newName: string) => {
       const newSources = (newsletter.sources || []).map(s => 
           s.name === originalName ? {...s, name: newName } : s
       );
-      setNewsletter(current => ({...current, sources: newSources}));
+      const updatedNewsletter = {...newsletter, sources: newSources};
+      setNewsletter(updatedNewsletter);
+      triggerSave(updatedNewsletter);
   }
 
   const handleDeleteSentence = (blockId: string, sentenceToDelete: string) => {
@@ -265,7 +281,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
       updateBlocks(newBlocks);
       toast({
         title: "Sentence Removed",
-        description: "The selected sentence has been deleted from the content block."
+        description: "The selected sentence has been deleted and changes have been saved."
       });
   };
 
@@ -286,7 +302,7 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     updateBlocks(blocksToUpdate);
     toast({
         title: "All Flagged Sentences Removed",
-        description: `${flaggedIssues.length} sentences have been deleted from the newsletter.`
+        description: `${flaggedIssues.length} sentences have been deleted and changes saved.`
     });
   };
 
@@ -429,3 +445,5 @@ export function AppLayout({ initialNewsletter }: AppLayoutProps) {
     </div>
   );
 }
+
+    
