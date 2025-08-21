@@ -6,6 +6,7 @@ import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
 import { extractContentFromUrl } from '@/ai/flows/extract-content-from-url';
+import { extractTextFromImage } from '@/ai/flows/extract-text-from-image';
 import type { ContentBlock, Newsletter } from '@/lib/types';
 import { 
   getAllNewsletters as dbGetAllNewsletters, 
@@ -142,4 +143,14 @@ export async function runUploadFile(fileDataUri: string, fileName: string) {
     // This is not efficient for large files but works for a local-only demo.
     await new Promise(resolve => setTimeout(resolve, 500)); // fake network delay
     return { url: fileDataUri };
+}
+
+export async function runExtractTextFromImage(imageDataUri: string) {
+  try {
+    const result = await extractTextFromImage({ imageDataUri });
+    return result;
+  } catch (error) {
+    console.error('Error extracting text from image:', error);
+    return { extractedText: '' };
+  }
 }

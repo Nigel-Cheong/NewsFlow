@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/resizable"
 import { ScrollArea } from './ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { fetchUrlContent } from '@/app/actions';
+import { fetchUrlContent, runExtractTextFromImage } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 import {
   AlertDialog,
@@ -121,7 +121,7 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
     if (e.target.files) {
       setIsUploading(true);
       const uploadPromises = Array.from(e.target.files).map(file => {
-        return new Promise<Source | null>((resolve) => {
+        return new Promise<Source[] | null>((resolve) => {
           const reader = new FileReader();
 
           reader.onload = async (event) => {
@@ -130,11 +130,32 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
               
               const isImage = file.type.startsWith('image/');
               const isVideo = file.type.startsWith('video/');
-              resolve({
+              
+              const newSources: Source[] = [];
+
+              newSources.push({
                 name: file.name,
                 type: isImage ? 'image' : isVideo ? 'video' : 'file',
                 content: fileDataUri,
               });
+
+              // If it's an image, also run OCR
+              if (isImage) {
+                toast({
+                  title: "Extracting Text from Image...",
+                  description: `AI is performing OCR on ${file.name}.`
+                });
+                const ocrResult = await runExtractTextFromImage(fileDataUri);
+                if (ocrResult.extractedText) {
+                  newSources.push({
+                    name: `${file.name} (extracted text)`,
+                    type: 'text',
+                    content: ocrResult.extractedText,
+                  });
+                }
+              }
+
+              resolve(newSources);
 
             } catch (error) {
               console.error('File processing error:', error);
@@ -160,8 +181,9 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
         });
       });
 
-      Promise.all(uploadPromises).then(newSources => {
-        newSources.filter(Boolean).forEach(s => onAddNewSource(s as Source));
+      Promise.all(uploadPromises).then(newSourcesArrays => {
+        const flattenedSources = newSourcesArrays.flat().filter(Boolean) as Source[];
+        flattenedSources.forEach(s => onAddNewSource(s));
         setIsUploading(false);
       });
     }

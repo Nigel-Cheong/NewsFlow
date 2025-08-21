@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, Link, FileText, Bot, Loader2, Image as ImageIcon, Trash2 } from 'lucide-react';
 import type { Source } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { fetchUrlContent } from '@/app/actions';
+import { fetchUrlContent, runExtractTextFromImage } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
 
@@ -50,7 +50,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
     if (e.target.files) {
       setIsUploading(true);
       const uploadPromises = Array.from(e.target.files).map(file => {
-        return new Promise<Source | null>((resolve) => {
+        return new Promise<Source[] | null>((resolve) => {
           const reader = new FileReader();
 
           reader.onload = async (event) => {
@@ -58,12 +58,32 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
               const fileDataUri = event.target?.result as string;
               const isImage = file.type.startsWith('image/');
               const isVideo = file.type.startsWith('video/');
+              
+              const newSources: Source[] = [];
 
-              resolve({
+              newSources.push({
                 name: file.name,
                 type: isImage ? 'image' : isVideo ? 'video' : 'file',
                 content: fileDataUri,
               });
+
+              // If it's an image, also run OCR
+              if (isImage) {
+                toast({
+                  title: "Extracting Text from Image...",
+                  description: `AI is performing OCR on ${file.name}.`
+                });
+                const ocrResult = await runExtractTextFromImage(fileDataUri);
+                if (ocrResult.extractedText) {
+                  newSources.push({
+                    name: `${file.name} (extracted text)`,
+                    type: 'text',
+                    content: ocrResult.extractedText,
+                  });
+                }
+              }
+
+              resolve(newSources);
 
             } catch (error) {
               console.error('File processing error:', error);
@@ -89,12 +109,13 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
         });
       });
 
-      Promise.all(uploadPromises).then(newSources => {
-        setSources(prev => [...prev, ...newSources.filter(Boolean) as Source[]]);
+      Promise.all(uploadPromises).then(newSourcesArrays => {
+        const flattenedSources = newSourcesArrays.flat().filter(Boolean) as Source[];
+        setSources(prev => [...prev, ...flattenedSources]);
         setIsUploading(false);
         toast({
           title: "Files Processed",
-          description: `${newSources.filter(Boolean).length} file(s) have been added as sources.`
+          description: `${newSourcesArrays.filter(Boolean).length} file(s) have been added as sources.`
         });
       });
     }

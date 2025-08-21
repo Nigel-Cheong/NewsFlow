@@ -1,0 +1,30 @@
+{
+  "id": "newsletter-1755767563621",
+  "title": "Fish",
+  "status": "Draft",
+  "lastUpdated": "August 21, 2025",
+  "sources": [
+    {
+      "name": "Fish - Wikipedia.pdf",
+      "type": "file"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "block-header-1755767574398",
+      "type": "header",
+      "title": "Header",
+      "content": "Fish",
+      "subtitle": "A great start!",
+      "colspan": 2,
+      "imageUrl": "https://placehold.co/1200x400"
+    },
+    {
+      "id": "block-footer-1755767574398",
+      "type": "footer",
+      "title": "Footer",
+      "content": "© 2024 Newsflow. All rights reserved. | Contact us at contact@newsflow.com",
+      "colspan": 2
+    }
+  ]
+}
