@@ -13,8 +13,41 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
-const storage = new Storage();
+// This function securely initializes the Storage client.
+// It uses credentials from an environment variable if provided,
+// otherwise it falls back to default application credentials.
+const initializeStorage = () => {
+    const keyJson = process.env.GCS_SERVICE_ACCOUNT_KEY_JSON;
+    if (keyJson) {
+        try {
+            // We write the key to a temporary file to be used by the Storage client.
+            // This is a secure way to handle credentials passed as environment variables.
+            const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gcs-keys-'));
+            const keyFilePath = path.join(tempDir, 'key.json');
+            fs.writeFileSync(keyFilePath, keyJson);
+            
+            console.log("Authenticating to Google Cloud Storage using service account key.");
+            return new Storage({
+                keyFilename: keyFilePath,
+            });
+
+        } catch (error) {
+            console.error("Failed to parse GCS service account key. Falling back to default credentials.", error);
+            // Fallback to default credentials if the key is invalid
+            return new Storage();
+        }
+    } else {
+        console.log("Authenticating to Google Cloud Storage using default credentials.");
+        return new Storage();
+    }
+};
+
+const storage = initializeStorage();
+
 // This should be unique in your GCP project.
 // You can change it to something more specific to your app.
 const bucketName = process.env.GCS_BUCKET_NAME || 'newsflow-files-bucket'; 
@@ -32,17 +65,21 @@ export type UploadFileOutput = z.infer<typeof UploadFileOutputSchema>;
 
 
 async function ensureBucketExists() {
-    const [exists] = await storage.bucket(bucketName).exists();
-    if (!exists) {
-        // Creates the new bucket
-        await storage.createBucket(bucketName, {
-            location: 'US', // You can change this to your preferred location
-            storageClass: 'STANDARD',
-        });
-        console.log(`Bucket ${bucketName} created.`);
-        // Make the bucket public-to-read by default.
-        // For production apps, you should use signed URLs for more granular access control.
-        await storage.bucket(bucketName).makePublic();
+    try {
+        const [exists] = await storage.bucket(bucketName).exists();
+        if (!exists) {
+            // Creates the new bucket
+            await storage.createBucket(bucketName, {
+                location: 'US', // You can change this to your preferred location
+                storageClass: 'STANDARD',
+            });
+            console.log(`Bucket ${bucketName} created.`);
+            // Make the bucket public-to-read by default.
+            // For production apps, you should use signed URLs for more granular access control.
+            await storage.bucket(bucketName).makePublic();
+        }
+    } catch(e) {
+        console.error("Could not create or access bucket. Please check credentials and permissions.", e);
     }
 }
 
