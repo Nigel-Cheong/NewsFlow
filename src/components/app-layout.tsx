@@ -75,7 +75,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (!newsletter) return;
     
     // This function primarily manages the history stack for undo/redo
-    setNewsletter(current => current ? { ...current, blocks: newBlocks } : null);
+    setNewsletter({ ...newsletter, blocks: newBlocks });
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -97,7 +97,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+      setNewsletter(current => current ? { ...current, blocks: history[newIndex] } : null);
     }
   };
   
@@ -105,7 +105,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
       setHistoryIndex(newIndex);
-      updateBlocks(history[newIndex], true);
+      setNewsletter(current => current ? { ...current, blocks: history[newIndex] } : null);
     }
   };
 
@@ -240,8 +240,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
 
             const newBlocks = [...newsletter.blocks];
             newBlocks.splice(insertionPoint, 0, ...newContentBlocks);
-            
-            updateBlocks(newBlocks);
 
             let sourceName = source.name;
             if (source.type === 'text' && source.name === 'Pasted Text') {
@@ -250,7 +248,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             }
 
             const newSources = [...(newsletter.sources || []), { name: sourceName, type: source.type }];
-            setNewsletter({...newsletter, blocks: newBlocks, sources: newSources });
+            const updatedNewsletter = {...newsletter, blocks: newBlocks, sources: newSources };
+            
+            setNewsletter(updatedNewsletter);
+            updateBlocks(updatedNewsletter.blocks);
 
             toast({
                 title: "Content Added!",
@@ -340,7 +341,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             newBlock.content = 'Newsletter Title';
             newBlock.subtitle = 'A catchy subtitle for your newsletter';
             newBlock.imageUrl = 'https://placehold.co/1200x400';
-            newBlock.colspan = 2;
             break;
         case 'image-with-text':
             newBlock.title = 'Image with Text';
@@ -355,17 +355,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             newBlock.title = 'Link with Text';
             newBlock.linkUrl = 'https://google.com';
             newBlock.content = 'Click here to learn more';
-            newBlock.colspan = 2;
             break;
         case 'spacer':
             newBlock.title = 'Spacer';
             newBlock.content = '';
-            newBlock.colspan = 2;
             break;
         case 'table':
             newBlock.title = 'Data Table';
             newBlock.content = 'Data Table';
-            newBlock.colspan = 2;
             newBlock.tableData = [
                 ['Header 1', 'Header 2', 'Header 3'],
                 ['Row 1, Cell 1', 'Row 1, Cell 2', 'Row 1, Cell 3'],
@@ -375,12 +372,10 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         case 'carousel':
             newBlock.title = 'Image Carousel';
             newBlock.content = '';
-            newBlock.colspan = 2;
             break;
         case 'event':
             newBlock.title = 'Upcoming Event';
             newBlock.content = 'Company Offsite';
-            newBlock.colspan = 1;
             newBlock.eventDate = 'October 26, 2023';
             newBlock.eventTime = '10:00 AM - 4:00 PM';
             newBlock.eventLocation = 'Virtual Event';
@@ -388,17 +383,14 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         case 'form':
             newBlock.title = 'Signup Form';
             newBlock.content = 'Sign up for our newsletter';
-            newBlock.colspan = 1;
             break;
         case 'announcement':
             newBlock.title = 'Announcement';
             newBlock.content = 'A new feature is launching next week!';
-            newBlock.colspan = 2;
             break;
          case 'footer':
             newBlock.title = 'Footer';
             newBlock.content = 'Contact us at contact@newsgenius.com';
-            newBlock.colspan = 2;
             break;
         case 'text':
             newBlock.title = 'Text';
