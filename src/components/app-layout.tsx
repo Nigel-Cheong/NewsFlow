@@ -7,8 +7,8 @@ import { Editor } from './editor';
 import { SourcesSidebar } from './sources-sidebar';
 import { ChatSidebar } from './chat-sidebar';
 import type { ApprovalStatus, ContentBlock, FlaggedIssue, Newsletter, Source } from '@/lib/types';
-import { mockNewsletters, SENSITIVE_KEYWORDS } from '@/lib/mock-data';
-import { runConfidentialityCheck, runSuggestLayout, runGenerateBlocks } from '@/app/actions';
+import { SENSITIVE_KEYWORDS } from '@/lib/mock-data';
+import { runConfidentialityCheck, runSuggestLayout, runGenerateBlocks, saveNewsletter } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -20,62 +20,30 @@ import {
 } from "@/components/ui/resizable";
 
 interface AppLayoutProps {
-  newsletterId: string;
+  initialNewsletter: Newsletter;
 }
 
-export function AppLayout({ newsletterId }: AppLayoutProps) {
-  const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
+export function AppLayout({ initialNewsletter }: AppLayoutProps) {
+  const [newsletter, setNewsletter] = useState<Newsletter>(initialNewsletter);
   const [flaggedIssues, setFlaggedIssues] = useState<FlaggedIssue[]>([]);
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSuggestingLayout, setIsSuggestingLayout] = useState(false);
   
-  const [history, setHistory] = useState<ContentBlock[][]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [history, setHistory] = useState<ContentBlock[][]>([initialNewsletter.blocks]);
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   const { toast } = useToast();
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const loadNewsletter = useCallback(() => {
-    const savedNewsletterJSON = localStorage.getItem(newsletterId);
-    let initialNewsletter: Newsletter | undefined;
-
-    if (savedNewsletterJSON) {
-      initialNewsletter = JSON.parse(savedNewsletterJSON);
-    } else {
-      initialNewsletter = mockNewsletters.find(n => n.id === newsletterId);
-    }
-
-    if (initialNewsletter) {
-      setNewsletter(initialNewsletter);
-      if(history.length === 0) { // Only set initial history
-        setHistory([initialNewsletter.blocks]);
-        setHistoryIndex(0);
-      }
-    }
-  }, [newsletterId, history.length]);
-
-
   useEffect(() => {
-    loadNewsletter();
-
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === newsletterId) {
-        loadNewsletter();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-    }
-
-  }, [newsletterId, loadNewsletter]);
+    // When the initial newsletter changes (e.g., from navigating between pages), reset the state
+    setNewsletter(initialNewsletter);
+    setHistory([initialNewsletter.blocks]);
+    setHistoryIndex(0);
+  }, [initialNewsletter]);
   
   const updateBlocks = (newBlocks: ContentBlock[], fromHistory = false) => {
-    if (!newsletter) return;
-    
-    const updatedNewsletter = { ...newsletter, blocks: newBlocks };
-    setNewsletter(updatedNewsletter);
+    setNewsletter(current => ({ ...current, blocks: newBlocks }));
     
     if (!fromHistory) {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -86,7 +54,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   };
 
   const handleUpdateBlockContent = (blockId: string, newContent: string) => {
-    if (!newsletter) return;
     const newBlocks = newsletter.blocks.map(block =>
         block.id === blockId ? { ...block, content: newContent } : block
     );
@@ -166,23 +133,16 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   };
   
   const handleStatusChange = (newStatus: ApprovalStatus) => {
-    if (!newsletter) return;
-    const updatedNewsletter = { ...newsletter, status: newStatus };
-    setNewsletter(updatedNewsletter);
-    localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
+    setNewsletter(current => ({...current, status: newStatus}));
     toast({
         title: "Status Updated",
         description: `Newsletter status changed to "${newStatus}".`
     });
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newsletter) {
-      toast({
-        title: "Save Failed",
-        description: "No newsletter data to save.",
-        variant: "destructive"
-      });
+      toast({ title: "Save Failed", description: "No newsletter data to save.", variant: "destructive" });
       return;
     }
     
@@ -192,26 +152,25 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         lastUpdated: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
       };
       
-      localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
-      
+      await saveNewsletter(updatedNewsletter);
       setNewsletter(updatedNewsletter);
 
       toast({
           title: "Changes Saved!",
-          description: "Your newsletter has been successfully saved to your browser.",
+          description: "Your newsletter has been successfully saved.",
       });
     } catch (error) {
-      console.error("Failed to save to localStorage:", error);
+      console.error("Failed to save newsletter:", error);
       toast({
         title: "Save Failed",
-        description: "Could not save changes. Your browser might not support localStorage or it's full.",
+        description: "Could not save changes. Please check the server logs.",
         variant: "destructive"
       });
     }
   }
   
   const handleAddNewSource = async (source: Source) => {
-      if (!newsletter || !source.content) return;
+      if (!source.content) return;
       
       toast({
         title: "Generating Content...",
@@ -220,7 +179,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
       
       let textToProcess = source.content;
       if (source.type === 'image' || source.type === 'video') {
-          // For GCS-uploaded files, content is the URL. We create a marker for the AI.
+          // For uploaded files, content is the URL. We create a marker for the AI.
           textToProcess = `[${source.type.toUpperCase()}: ${source.name}]`;
       } else if (source.type === 'file') {
         try {
@@ -232,16 +191,15 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
         }
       }
 
-
       try {
         const result = await runGenerateBlocks(textToProcess);
         if (result.blocks && result.blocks.length > 0) {
             const newContentBlocks: ContentBlock[] = result.blocks.map((block, index) => {
                 const newBlock: ContentBlock = {...block, id: `block-${Date.now()}-${index}`, colspan: 2};
                 if (newBlock.type === 'image-with-text' && source.type === 'image') {
-                    newBlock.imageUrl = source.content; // The content is the GCS URL
+                    newBlock.imageUrl = source.content; // The content is the URL
                 } else if (newBlock.type === 'video-with-text' && source.type === 'video') {
-                    newBlock.videoUrl = source.content; // The content is the GCS URL
+                    newBlock.videoUrl = source.content; // The content is the URL
                 }
                 return newBlock;
             });
@@ -259,10 +217,9 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             }
 
             const newSources = [...(newsletter.sources || []), { name: sourceName, type: source.type }];
-            const updatedNewsletter = {...newsletter, blocks: newBlocks, sources: newSources };
             
-            setNewsletter(updatedNewsletter);
-            updateBlocks(updatedNewsletter.blocks);
+            updateBlocks(newBlocks);
+            setNewsletter(current => ({...current, sources: newSources}));
 
             toast({
                 title: "Content Added!",
@@ -287,21 +244,18 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   }
 
   const handleDeleteSource = (sourceNameToDelete: string) => {
-      if (!newsletter) return;
       const newSources = (newsletter.sources || []).filter(s => s.name !== sourceNameToDelete);
-      setNewsletter({...newsletter, sources: newSources});
+      setNewsletter(current => ({...current, sources: newSources}));
   }
 
   const handleUpdateSource = (originalName: string, newName: string) => {
-      if (!newsletter) return;
       const newSources = (newsletter.sources || []).map(s => 
           s.name === originalName ? {...s, name: newName } : s
       );
-      setNewsletter({...newsletter, sources: newSources});
+      setNewsletter(current => ({...current, sources: newSources}));
   }
 
   const handleDeleteSentence = (blockId: string, sentenceToDelete: string) => {
-      if (!newsletter) return;
       const newBlocks = newsletter.blocks.map(block => {
           if (block.id === blockId) {
               return { ...block, content: block.content.replace(sentenceToDelete, '') };
@@ -316,7 +270,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   };
 
   const handleDeleteAllSentences = () => {
-    if (!newsletter || flaggedIssues.length === 0) return;
+    if (flaggedIssues.length === 0) return;
 
     let blocksToUpdate = [...newsletter.blocks];
     
@@ -337,7 +291,6 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
   };
 
   const handleAddBlock = (type: ContentBlock['type']) => {
-    if (!newsletter) return;
     const newBlock: ContentBlock = {
       id: `block-${Date.now()}`,
       type,

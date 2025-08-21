@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getNewsletter, saveNewsletter } from '@/app/actions';
 
 function PreviewHeader({ newsletter, onStatusChange }: { newsletter: Newsletter, onStatusChange: (status: ApprovalStatus) => void }) {
 
@@ -81,26 +82,21 @@ export default function NewsletterPreviewPage() {
 
   useEffect(() => {
     if (id) {
-      const savedNewsletterJSON = localStorage.getItem(id);
-      if (savedNewsletterJSON) {
-        setNewsletter(JSON.parse(savedNewsletterJSON));
-      }
+      getNewsletter(id).then(data => {
+        if (data) {
+          setNewsletter(data);
+        }
+      });
     }
   }, [id]);
 
-  const handleStatusChange = (newStatus: ApprovalStatus) => {
+  const handleStatusChange = async (newStatus: ApprovalStatus) => {
     if (!newsletter) return;
 
     const updatedNewsletter = { ...newsletter, status: newStatus };
     setNewsletter(updatedNewsletter);
-    localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
+    await saveNewsletter(updatedNewsletter);
     
-    // Dispatch a storage event to notify the editor page of the change
-    window.dispatchEvent(new StorageEvent('storage', {
-        key: newsletter.id,
-        newValue: JSON.stringify(updatedNewsletter),
-    }));
-
     toast({
         title: "Status Updated",
         description: `Newsletter status changed to "${newStatus}".`
@@ -110,6 +106,13 @@ export default function NewsletterPreviewPage() {
         setTimeout(() => router.push(`/newsletters/${id}`), 1000);
     }
   }
+
+  const handleBlocksUpdate = async (newBlocks: Newsletter['blocks']) => {
+    if (!newsletter) return;
+    const updatedNewsletter = { ...newsletter, blocks: newBlocks };
+    setNewsletter(updatedNewsletter);
+    await saveNewsletter(updatedNewsletter);
+  };
 
   if (!newsletter) {
     return (
@@ -136,11 +139,7 @@ export default function NewsletterPreviewPage() {
                 <ContentBlockView
                     block={block}
                     blocks={newsletter.blocks}
-                    setBlocks={(newBlocks) => {
-                        const updatedNewsletter = {...newsletter, blocks: newBlocks};
-                        setNewsletter(updatedNewsletter);
-                        localStorage.setItem(newsletter.id, JSON.stringify(updatedNewsletter));
-                    }}
+                    setBlocks={handleBlocksUpdate}
                     flaggedSentences={[]}
                 />
             </div>

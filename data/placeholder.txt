@@ -1,0 +1,1 @@
+This directory is for storing newsletter JSON files. This placeholder file can be deleted.

@@ -6,8 +6,29 @@ import { suggestLayout } from '@/ai/flows/layout-auto-selection';
 import { chat } from '@/ai/flows/chat-flow';
 import { generateBlocksFromText } from '@/ai/flows/generate-blocks-from-text';
 import { extractContentFromUrl } from '@/ai/flows/extract-content-from-url';
-import { uploadFile } from '@/ai/flows/upload-file-flow';
 import type { ContentBlock, Newsletter } from '@/lib/types';
+import { 
+  getAllNewsletters as dbGetAllNewsletters, 
+  getNewsletter as dbGetNewsletter,
+  saveNewsletter as dbSaveNewsletter,
+  deleteNewsletter as dbDeleteNewsletter
+} from '@/lib/db';
+
+export async function getAllNewsletters() {
+  return dbGetAllNewsletters();
+}
+
+export async function getNewsletter(id: string) {
+  return dbGetNewsletter(id);
+}
+
+export async function saveNewsletter(newsletter: Newsletter) {
+  return dbSaveNewsletter(newsletter);
+}
+
+export async function deleteNewsletter(id: string) {
+  return dbDeleteNewsletter(id);
+}
 
 export async function runConfidentialityCheck(
   content: ContentBlock[],
@@ -113,12 +134,12 @@ export async function sendApprovalEmail(email: string, newsletter: Newsletter) {
     return { success: true };
 }
 
+// This is a placeholder for a real file upload implementation.
+// In a real app, this would upload to a service like Google Cloud Storage.
 export async function runUploadFile(fileDataUri: string, fileName: string) {
-    try {
-      const result = await uploadFile({ fileDataUri, fileName });
-      return result;
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      return { url: '' };
-    }
+    console.log(`Faking upload for ${fileName}`);
+    // In this JSON-file DB mode, we just return the data URI itself.
+    // This is not efficient for large files but works for a local-only demo.
+    await new Promise(resolve => setTimeout(resolve, 500)); // fake network delay
+    return { url: fileDataUri };
 }

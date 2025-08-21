@@ -69,6 +69,7 @@ function SourceItem({ source, onDelete, onUpdate }: SourceItemProps) {
             <div className="flex items-start gap-2 flex-1 min-w-0">
                 {source.type === 'file' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'image' && <ImageIcon className="h-4 w-4 shrink-0 mt-1"/>}
+                {source.type === 'video' && <ImageIcon className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'link' && <Link className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'text' && <FileText className="h-4 w-4 shrink-0 mt-1"/>}
                 {source.type === 'gdrive' && <Bot className="h-4 w-4 shrink-0 mt-1"/>}
@@ -122,31 +123,22 @@ export function SourcesSidebar({ sources, issues, isConfidential, onAddNewSource
       const uploadPromises = Array.from(e.target.files).map(file => {
         return new Promise<Source | null>((resolve, reject) => {
           const reader = new FileReader();
-          const isImage = file.type.startsWith('image/');
-          const isVideo = file.type.startsWith('video/');
 
           reader.onload = async (event) => {
             try {
               const fileDataUri = event.target?.result as string;
               
-              if (isImage || isVideo) {
-                const { url } = await runUploadFile(fileDataUri, file.name);
-                if (url) {
+              const { url } = await runUploadFile(fileDataUri, file.name);
+              if (url) {
+                  const isImage = file.type.startsWith('image/');
+                  const isVideo = file.type.startsWith('video/');
                   resolve({
                     name: file.name,
-                    type: isImage ? 'image' : 'video',
-                    content: url
+                    type: isImage ? 'image' : isVideo ? 'video' : 'file',
+                    content: url, // For all files, we now just pass the "URL" (data URI in this mock)
                   });
-                } else {
-                  throw new Error('Upload failed, URL not returned.');
-                }
               } else {
-                // For text-based files
-                 resolve({
-                    name: file.name,
-                    type: 'file',
-                    content: fileDataUri,
-                 });
+                throw new Error('Upload failed, URL not returned.');
               }
             } catch (error) {
               console.error('File processing error:', error);

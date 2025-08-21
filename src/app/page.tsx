@@ -16,11 +16,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { NewNewsletterDialog } from '@/components/new-newsletter-dialog';
-import { mockNewsletters as defaultNewsletters } from '@/lib/mock-data';
 import type { Newsletter, Source } from '@/lib/types';
 import { Newspaper, PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { runGenerateBlocks } from './actions';
+import { runGenerateBlocks, saveNewsletter, getAllNewsletters, deleteNewsletter } from './actions';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
@@ -33,29 +32,7 @@ export default function Home() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const allKeys = Object.keys(window.localStorage);
-    const newsletterKeys = allKeys.filter(key => key.startsWith('newsletter-'));
-    
-    let loadedNewsletters: Newsletter[] = [...defaultNewsletters];
-
-    if (newsletterKeys.length > 0) {
-      const storedNewsletters = newsletterKeys.map(key => {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
-      }).filter(Boolean) as Newsletter[];
-      
-      const storedMap = new Map(storedNewsletters.map(n => [n.id, n]));
-      
-      // Update default newsletters with any stored versions
-      loadedNewsletters = defaultNewsletters.map(n => storedMap.get(n.id) || n);
-      // Remove the ones we just updated from the map
-      defaultNewsletters.forEach(n => storedMap.delete(n.id));
-      // Add any remaining stored newsletters that weren't in the defaults
-      loadedNewsletters.push(...Array.from(storedMap.values()));
-
-    }
-    
-    setNewsletters(loadedNewsletters);
+    getAllNewsletters().then(setNewsletters);
   }, []);
 
   const handleNewNewsletter = async (title: string, sources: Source[]) => {
@@ -104,7 +81,7 @@ export default function Home() {
                         );
 
                         if (imageSource) {
-                            newBlock.imageUrl = imageSource.content; // content is the URL from GCS
+                            newBlock.imageUrl = imageSource.content;
                         } else {
                             // Fallback in case the AI doesn't include the name or it can't be matched
                             const firstImage = imageSources.shift();
@@ -160,7 +137,7 @@ export default function Home() {
       ]
     };
 
-    localStorage.setItem(newId, JSON.stringify(newNewsletter));
+    await saveNewsletter(newNewsletter);
     setIsCreating(false);
     toast({
         title: "Newsletter Created!",
@@ -176,9 +153,9 @@ export default function Home() {
     setShowDeleteConfirm(true);
   };
 
-  const executeDelete = () => {
+  const executeDelete = async () => {
     if (newsletterToDelete) {
-      localStorage.removeItem(newsletterToDelete);
+      await deleteNewsletter(newsletterToDelete);
       setNewsletters(newsletters.filter(n => n.id !== newsletterToDelete));
       setNewsletterToDelete(null);
     }
@@ -250,7 +227,7 @@ export default function Home() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your
-              newsletter from your browser's storage.
+              newsletter.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

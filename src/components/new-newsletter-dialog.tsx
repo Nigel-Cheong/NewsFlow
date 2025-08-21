@@ -52,31 +52,23 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
       const uploadPromises = Array.from(e.target.files).map(file => {
         return new Promise<Source | null>((resolve, reject) => {
           const reader = new FileReader();
-          const isImage = file.type.startsWith('image/');
-          const isVideo = file.type.startsWith('video/');
 
           reader.onload = async (event) => {
             try {
               const fileDataUri = event.target?.result as string;
               
-              if (isImage || isVideo) {
-                const { url } = await runUploadFile(fileDataUri, file.name);
-                if (url) {
-                  resolve({
-                    name: file.name,
-                    type: isImage ? 'image' : 'video',
-                    content: url
-                  });
-                } else {
-                  throw new Error('Upload failed, URL not returned.');
-                }
+              const { url } = await runUploadFile(fileDataUri, file.name);
+              if (url) {
+                const isImage = file.type.startsWith('image/');
+                const isVideo = file.type.startsWith('video/');
+
+                resolve({
+                  name: file.name,
+                  type: isImage ? 'image' : isVideo ? 'video' : 'file',
+                  content: url
+                });
               } else {
-                // For text-based files
-                 resolve({
-                    name: file.name,
-                    type: 'file',
-                    content: fileDataUri,
-                 });
+                throw new Error('Upload failed, URL not returned.');
               }
             } catch (error) {
               console.error('File processing error:', error);
