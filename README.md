@@ -4,7 +4,7 @@ This document provides a detailed technical overview of the NewsGenius POC appli
 
 ## 1. Project Overview
 
-NewsGenius is an AI-powered newsletter creation tool designed to streamline the editorial workflow. It leverages Google's Gemini 2.5 Pro Flash via the Genkit framework to provide intelligent features like content scanning, layout suggestions, and interactive chat-based editing. The application is built as a full-stack Next.js application with a serverless backend and a local file-based database for data persistence.
+NewsGenius is an AI-powered newsletter creation tool designed to streamline the editorial workflow. It leverages Google's Gemini 2.5 Pro Flash via the Genkit framework to provide intelligent features like content scanning, layout suggestions, and interactive chat-based editing. The application is built as a full-stack Next.js application with a serverless backend and a cloud-based persistence layer.
 
 ## 2. Technology Stack
 
@@ -13,7 +13,7 @@ NewsGenius is an AI-powered newsletter creation tool designed to streamline the 
 - **UI Library**: React & ShadCN UI
 - **Styling**: Tailwind CSS
 - **AI Integration**: Google Genkit
-- **Database**: Local JSON files (server-side)
+- **Database**: Google Cloud Storage & Firestore
 
 ---
 
@@ -43,9 +43,9 @@ The backend logic is implemented using Next.js Server Actions, which allows the 
     - **CRUD Operations**: `getAllNewsletters`, `getNewsletter`, `saveNewsletter`, `deleteNewsletter`.
     - **AI Triggers**: Functions like `runConfidentialityCheck` and `runSuggestLayout` that act as a bridge between the frontend and the AI Core.
 
-- **Data Persistence (`src/lib/db.ts`)**: Instead of a traditional database, this POC uses a simple but effective file-based persistence layer.
-    - Each newsletter is stored as a separate JSON file (e.g., `newsletter-1.json`) in the `/data` directory on the server.
-    - The `db.ts` service uses Node.js's `fs/promises` module to perform asynchronous read, write, and delete operations on these files, effectively acting as a lightweight NoSQL document database. This makes the project self-contained and easy to run without external database setup.
+- **Data Persistence (Google Cloud Storage & Firestore)**: For robust and scalable data storage, this POC is designed to use a combination of Google Cloud services.
+    - **Cloud Firestore**: The primary database for storing structured newsletter data, including the content blocks, titles, and statuses. Each newsletter is a single document in a `newsletters` collection, allowing for flexible and fast querying.
+    - **Google Cloud Storage**: Used for storing all user-uploaded binary files, such as images and PDFs. The application uploads these files to a secure Cloud Storage bucket and stores the resulting URL in the corresponding Firestore document. This is the standard, efficient practice for handling file uploads.
 
 ### 3.3. AI Core (Genkit Flows)
 
