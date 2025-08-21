@@ -444,7 +444,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={55} minSize={30}>
-                <main className="flex-1 flex flex-col transition-all duration-300 ease-in-out h-full">
+                <main className="flex-1 flex flex-col h-full">
                   <Editor
                     blocks={newsletter.blocks}
                     setBlocks={updateBlocks}
@@ -465,5 +465,7 @@ export function AppLayout({ newsletterId }: AppLayoutProps) {
     </div>
   );
 }
+
+    
 
     
