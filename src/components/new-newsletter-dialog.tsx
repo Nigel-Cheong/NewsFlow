@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchUrlContent, runExtractTextFromImage } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './ui/resizable';
+import { marked } from 'marked';
 
 interface NewNewsletterDialogProps {
   isOpen: boolean;
@@ -51,21 +52,49 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
       setIsUploading(true);
       const uploadPromises = Array.from(e.target.files).map(file => {
         return new Promise<Source[] | null>((resolve) => {
+          const isTextFile = file.type.startsWith('text/') || file.type === 'application/pdf' || file.type === 'text/markdown';
+          const isImage = file.type.startsWith('image/');
+          const isVideo = file.type.startsWith('video/');
+          
           const reader = new FileReader();
 
           reader.onload = async (event) => {
             try {
-              const fileDataUri = event.target?.result as string;
-              const isImage = file.type.startsWith('image/');
-              const isVideo = file.type.startsWith('video/');
-              
+              const fileContent = event.target?.result as string;
               const newSources: Source[] = [];
 
-              newSources.push({
-                name: file.name,
-                type: isImage ? 'image' : isVideo ? 'video' : 'file',
-                content: fileDataUri,
-              });
+              if (isTextFile) {
+                 if (file.type === 'application/pdf' || file.type === 'text/plain') {
+                    // For PDFs and plain text, we try to extract text.
+                    // Note: This only works for text-based PDFs. Image-based PDFs would need a library for PDF-to-Image conversion first.
+                    const text = file.type === 'application/pdf' ? atob(fileContent.split(',')[1]) : fileContent;
+                    newSources.push({
+                      name: file.name,
+                      type: 'file',
+                      content: text,
+                    });
+                  } else if (file.type === 'text/markdown') {
+                    const htmlContent = marked.parse(fileContent);
+                    newSources.push({
+                      name: file.name,
+                      type: 'file',
+                      content: htmlContent as string,
+                    });
+                  } else {
+                     newSources.push({
+                        name: file.name,
+                        type: 'file',
+                        content: fileContent,
+                      });
+                  }
+              } else {
+                 newSources.push({
+                    name: file.name,
+                    type: isImage ? 'image' : isVideo ? 'video' : 'file',
+                    content: fileContent,
+                  });
+              }
+              
 
               // If it's an image, also run OCR
               if (isImage) {
@@ -73,7 +102,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
                   title: "Extracting Text from Image...",
                   description: `AI is performing OCR on ${file.name}.`
                 });
-                const ocrResult = await runExtractTextFromImage(fileDataUri);
+                const ocrResult = await runExtractTextFromImage(fileContent);
                 if (ocrResult.extractedText) {
                   newSources.push({
                     name: `${file.name} (extracted text)`,
@@ -105,7 +134,11 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
               resolve(null);
           };
 
-          reader.readAsDataURL(file);
+          if (isTextFile) {
+            reader.readAsText(file);
+          } else {
+            reader.readAsDataURL(file);
+          }
         });
       });
 
@@ -223,7 +256,7 @@ export function NewNewsletterDialog({ isOpen, onOpenChange, onCreate, isCreating
                                 <Upload className="h-10 w-10 text-muted-foreground" />
                                 <p className="mt-2 text-sm text-muted-foreground">Drag & drop files or click to upload</p>
                                 <p className="mt-1 text-xs text-muted-foreground/80">Supports PDF, TXT, MD, PNG, JPG, GIF</p>
-                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.gif,video/*" />
+                                <Input type="file" multiple className="mt-4" onChange={handleFileChange} accept=".pdf,.txt,.md,image/*,video/*" />
                               </>
                             )}
                         </div>

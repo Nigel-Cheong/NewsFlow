@@ -21,6 +21,7 @@ import { Newspaper, PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { runGenerateBlocks, saveNewsletter, getAllNewsletters, deleteNewsletter } from './actions';
 import { useToast } from '@/hooks/use-toast';
+import { marked } from 'marked';
 
 export default function Home() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
@@ -50,17 +51,6 @@ export default function Home() {
       if (s.type === 'image') {
         // Create a marker for the AI to understand where an image goes.
         return `Source: ${s.name}\n[IMAGE: ${s.name}]`
-      }
-      if (s.type === 'file') {
-        // For files, we need to extract text from data URI
-        try {
-          const base64Content = s.content.split(',')[1];
-          const textContent = atob(base64Content);
-          return `Source: ${s.name}\n${textContent}`;
-        } catch (e) {
-          console.error(`Could not decode file content for ${s.name}`, e);
-          return `Source: ${s.name}\n[CONTENT COULD NOT BE EXTRACTED]`;
-        }
       }
       return `Source: ${s.name}\n${s.content}`
     }).join('\n\n---\n\n');
