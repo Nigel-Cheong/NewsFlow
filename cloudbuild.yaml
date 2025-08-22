@@ -11,6 +11,8 @@ steps:
       - '--builder=gcr.io/buildpacks/builder:v1'
       - '--publish'
     id: 'Build'
+    env:
+      - 'GOOGLE_NODEJS_VERSION=20'
 
   # Step 2: Deploy the container image to Cloud Run
   # This step takes the image built in the previous step and deploys it.
