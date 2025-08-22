@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy package.json and yarn.lock first.
 # This allows Docker to cache these layers, speeding up builds if dependencies haven't changed.
-COPY package.json yarn.lock ./
+COPY package.json ./
 
 # Install project dependencies using Yarn.
 RUN yarn install --frozen-lockfile
