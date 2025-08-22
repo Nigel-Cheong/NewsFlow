@@ -1,8 +1,8 @@
 {
   "id": "newsletter-1755767563621",
-  "title": "Fish",
+  "title": "Types of fishes",
   "status": "Draft",
-  "lastUpdated": "August 21, 2025",
+  "lastUpdated": "August 22, 2025",
   "sources": [
     {
       "name": "Fish - Wikipedia.pdf",
@@ -14,8 +14,8 @@
       "id": "block-header-1755767574398",
       "type": "header",
       "title": "Header",
-      "content": "Fish",
-      "subtitle": "A great start!",
+      "content": "Research on fishes",
+      "subtitle": "Different kinds of fishes",
       "colspan": 2,
       "imageUrl": "https://placehold.co/1200x400"
     },
@@ -24,6 +24,13 @@
       "type": "footer",
       "title": "Footer",
       "content": "© 2024 Newsflow. All rights reserved. | Contact us at contact@newsflow.com",
+      "colspan": 2
+    },
+    {
+      "id": "block-1755839878584",
+      "type": "text",
+      "title": "Text",
+      "content": "Here is some research on fish",
       "colspan": 2
     }
   ]
