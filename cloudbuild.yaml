@@ -10,9 +10,9 @@ steps:
       - 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/newsflow:$COMMIT_SHA'
       - '--builder=gcr.io/buildpacks/builder:v1'
       - '--publish'
-    id: 'Build'
-    env:
+      - '--env'
       - 'GOOGLE_NODEJS_VERSION=20'
+    id: 'Build'
 
   # Step 2: Deploy the container image to Cloud Run
   # This step takes the image built in the previous step and deploys it.
