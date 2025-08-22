@@ -5,12 +5,11 @@ steps:
   # Step 1: Build the container image using Cloud Buildpacks
   # The 'pack' command detects your Next.js app, builds it, and prepares it for deployment.
   - name: 'gcr.io/buildpacks/builder:v1'
-    entrypoint: 'pack'
     args:
       - 'build'
+      - 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/newsflow:$COMMIT_SHA'
       - '--builder=gcr.io/buildpacks/builder:v1'
       - '--publish'
-      - 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/newsflow:$COMMIT_SHA'
     id: 'Build'
 
   # Step 2: Deploy the container image to Cloud Run
